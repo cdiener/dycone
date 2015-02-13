@@ -1,0 +1,14 @@
+Package: dycone
+Title: dycone - create the dynamic landscape from metabolome data
+Version: 0.0.0.9000
+Authors@R: person("Christian", "Diener", , "ch.diener@gmail.com", role = c("aut", "cre"))
+Description: Dycone allows you to analyze the dynamic landscape of a metabolic system 
+	without knowing its kinetic parameters. It uses steady state and dynamic metabolome data 
+	(for instance by ion trap experiments) for that.
+Depends: R (>= 3.1.2)
+URL: https://github.com/cdiener/dycone
+BugReports: https://github.com/cdiener/dycone/issues
+License: MIT
+LazyData: true
+Imports: deSolve, rcdd, MASS, reshape2, ggplot2, XML
+Suggests: igraph, sybilSBML, testthat

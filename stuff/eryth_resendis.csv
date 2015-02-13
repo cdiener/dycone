@@ -1,0 +1,46 @@
+Reaction,k,abbreviation,name
+glc + atp -> adp + g6p,0.5167691763,HEX1,Glucokinase
+g6p  ->  f6p,0.7905122645,PGI,Glucose-6-phosphate isomerase
+atp + f6p  ->  adp + fdp,0.4626282696,PFK,Phosphofructokinase
+dhap <=> g3p,0.2966804351,TPI,triosephosphate isomerase
+g3p + pi +nad <=> 13dpg + nadh + h,0.8331397944,GAPD,Glyceraldehyde3 phosphate dehydrogenase
+3pg + atp <=>  13dpg + adp,0.9363681735,PGK,phosphoglycerate kinase
+13dpg -> 23dpg,0.5696192426,DPGM,Phosphoglycerate mutase
+23dpg -> 3pg + pi,0.9230527987,DPGase,Diphosphoglycerate phosphatase
+2pg  <=>  3pg,0.2660219218,PGM,Phosphoglycerate mutase
+2pg <=>  pep,0.7668908567,ENO,enolase
+adp + pep -> atp + pyr,0.8507178519,PYK,pyruvate kinase
+lac-D + nad  <=>  nadh + pyr,0.1837584474,LDHD,Lactate dehydrogenase
+g3p + s7p < = > e4p + f6p,0.3377580284,TALA,Transaldolase
+fdp < = >dhap + g3p,0.0608845111,FBA,fructose biphosphate aldolase
+atp -> adp,0.4728695259,ATPase,ATPase
+g6p  ->  6pgl + nadph,0.2065969424,G6PDH2,glucose-6-phosphate dehydrogenase
+6pgl - >  6pgc,0.6978577548,PGL,6-phosphoglyconolactonate
+6pgc  ->  nadph + ru5p-D,0.6906185327,GND,6-phosphoglycononate dehydrogenase
+r5p  < = >  ru5p-D,0.4412165959,RPI,Ribulose 5-phosphate isomerase
+ru5p-D < = >  xu5p-D,0.3616313457,RPE,Ribulose 5-phosphate 3-epimerase
+r5p + xu5p-D <=>  g3p + s7p,0.4231955886,TKT1,Transketolase
+e4p + xu5p-D <=> f6p + g3p,0.0475676265,TKT2,Transketolase
+adn  ->  ins,0.7596472695,ADA,Adenosine deaminase
+adn + atp  ->  adp + amp,0.9477943003,ADNK1,Adenosine kinase
+2*adp < = > atp + amp,0.1158705116,ADK1,Adenylate kinase
+amp  ->  imp,0.5998460606,AMPDA,Adenosine monophosphate phosphohydrolase
+ade + prpp -> amp,0.5897367899,ADPT,Adenine phosphoribosyl transferase
+imp  ->  ins,0.0842414766,NTD11,inosine monophosphatase
+ins < = >  hxan + r1p,0.1851873617,PUNP5,purine nucleoside phosphorylase
+r1p  < = >   r5p,0.3159559427,PPM,phosphoribomutase
+atp +  r5p  - > amp + prpp,0.13060337,PRPPS,phosphoribosyl pyrophosphate synthetase
+hxan + prpp  - >  imp +2*p,0.5996124151,HXPRT,Hypoxanthine guanine phosphoryl transferase
+atp < = > adp + pi,0.7887069257,ATPM,ATPase/ATP maintenance requirement
+atp + 3*na1  - >adp + 2*k,0.1841644726,NaKt,Na+/k+ exchange ATPase
+pyr  < = >,0.3688320268,PYRt2r,pyruvate exchange
+lac-D  < = >,0.9748271895,D-LACt2,lactate exchange
+hxan - >,0.7395629364,HXANt,Hypoxanthine exchange
+ins < = >,0.6567619692,INSt,Inosine exchange
+ade < = >,0.1580265926,ADEt,Adenosine exchange
+ -> adn,0.783792472,ADNt,Demand reaction
+nadh < = >,0.5701277761,NADH,NADH exchange
+nadph - >,0.9682099556,NADPH,nadph exchange
+23dpg - >,0.6553745125,DPG23,23dpg exchange
+na1 < = >,0.6976971766,NAt,Sodium exchange
+k < = >,0.5260031617,Kt1,Potasium exchange
