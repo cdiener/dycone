@@ -6,6 +6,10 @@
 
 # Helper functions in order to extract the model and construct basic data
 
+str_trim = function(str) {
+	return( gsub("^\\s+|\\s+$", "", str) )
+}
+
 #' Calculates the mass-action reaction rate
 #'
 #' @param substrates Stochiometry of the substrates
@@ -85,11 +89,35 @@ read_reactions = function(react_file) {
 		stop("At least one of the lines has no reaction arrows!")
 	}
 	
-	res = apply( reacts, 1, function(x) c( get_reaction_elems(x[1]), x[-1] ) )
+	res = apply( reacts, 1, function(x) c( get_reaction_elems(x[1]), str_trim(x[-1]) ) )
 	
 	class(res) = append(class(res), "reactions")
 	
 	return( res )
+}
+
+build_reactions = function(s_matrix) {
+	reacts = list()
+	specs = rownames(s_matrix)
+	for(i in 1:ncol(s_matrix)) {
+		S = specs[ s_matrix[,i]<0 ]
+		P = specs[ s_matrix[,i]>0 ]
+		N_S = s_matrix[ s_matrix[,i]<0 , i ]
+		N_P = s_matrix[ s_matrix[,i]>0 , i ]
+		if (length(S) == 0) {
+			S = NA
+			N_S = 1
+		}
+		if (length(P) == 0) {
+			P = NA
+			N_P = 1
+		}
+		reacts[[i]] = list(S=S, P=P, N_S=abs(N_S), N_P=N_P, rev=FALSE, abbreviation=i)
+	}
+	
+	class(reacts) = append(class(reacts), "reactions")
+	
+	return(reacts)
 }
 
 format.reactions = function(x) {
@@ -160,6 +188,21 @@ plot.reactions = function(x) {
 		A = N%*%t(N)
 		diag(A) = 0
 		image(A!=0, col=c("white","black"))
+	}
+}
+
+to_graph = function(reacts) {
+	if ( !("reactions" %in% class(reacts)) ) stop("Argument has wrong type!")
+	
+	N = get_stochiometry(reacts, reversible=TRUE)
+	adj = abs(N%*%t(N))
+	
+	if (requireNamespace("igraph", quietly = TRUE)) {
+		return( igraph::graph.adjacency(adj, mode="max", 
+				weighted=TRUE, diag=FALSE) )	
+	} else {
+		warning("igraph is not installed. Returning adjacency matrix...")
+		return(adj)
 	}
 }
 
