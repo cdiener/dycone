@@ -6,15 +6,15 @@
 
 # Functions to analyze the k-cone
 
-get_kcone_basis = function(s_matrix, concs) {	
-	mat = get_ma_terms(s_matrix, concs)
+get_kcone_basis = function(s_matrix, v_terms) {	
+	mat = v_terms
 	SM = s_matrix %*% diag(mat)
 	
 	return( MASS::Null( t(SM) ) )
 }
 
-get_polytope_basis = function(s_matrix, concs) {
-	mat = get_ma_terms(s_matrix, concs)
+get_polytope_basis = function(s_matrix, v_terms) {
+	mat = v_terms
 	const_matrix = rcdd::d2q( -diag(ncol(s_matrix)) )
 	const_b = rcdd::d2q(rep(0,ncol(s_matrix)))
 	NC = rcdd::d2q( as.matrix( s_matrix%*%diag(mat) ) )
@@ -79,11 +79,11 @@ plot_basis = function(b_matrix) {
 	names(bdf) = c("reaction", "idx", "value")
 	
 	pl = ggplot2::ggplot(bdf, ggplot2::aes(x=idx, y=reaction, fill=value)) + 
-			ggplot2::geom_raster() + ggplot2::theme_bw() +
-			ggplot2::scale_x_continuous(expand=c(0,0)) + 
-			ggplot2::scale_y_continuous(expand=c(0,0))
-	pl = pl + if (min(b_matrix)>=0) ggplot2::scale_fill_continuous(low="white", high="darkred")
-				else ggplot2::scale_fill_gradient2()
-	
+		ggplot2::geom_raster() + ggplot2::theme_bw() +
+		ggplot2::scale_x_continuous(expand=c(0,0)) + 
+		ggplot2::scale_y_continuous(expand=c(0,0)) +
+		if (min(b_matrix)>=0) ggplot2::scale_fill_continuous(low="white", high="darkred")
+		else ggplot2::scale_fill_gradient2()
+
 	return(pl)
 }

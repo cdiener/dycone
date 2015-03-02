@@ -44,7 +44,7 @@ timecourse = function(x0, t, k, s_matrix) {
 	return(sol)
 }
 
-plot_tc = function(tc) {
+plot.tc = function(tc) {
 	melted = reshape2::melt(tc[,-1])
 	melted = cbind(tc[,1], melted)
 	names(melted) = c("t", "tid", "species", "conc")

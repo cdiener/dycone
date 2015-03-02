@@ -21,8 +21,8 @@ ss_concs = ss_concs[species[!no_c]]
 
 S = get_stochiometry(eryth, const=constants)
 
-linB = get_kcone_basis(S, ss_concs)
-polB = get_polytope_basis(S, ss_concs)
+linB = get_kcone_basis(S, get_ma_terms(S, ss_concs))
+polB = get_polytope_basis(S, get_ma_terms(S, ss_concs))
 
 # plot basis vectors
 plin = plot_basis(linB)
