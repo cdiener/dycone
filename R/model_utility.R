@@ -177,6 +177,14 @@ get_stochiometry = function(reacts, reversible=FALSE, const="none") {
 	return(N)
 }
 
+#' Returns the number of different substrates a reaction has
+#'
+#' @param reacts A reactions object as returned by \code{\link{read_reactions}}
+#' @return A numeric vector containing the number of substrates for each reaction
+r_order = function(reacts) {
+	return( sapply(reacts, function(x) length(x$S)) )
+}
+
 plot.reactions = function(x) {
 	N = get_stochiometry(x, reversible=TRUE)
 	if (requireNamespace("igraph", quietly = TRUE)) {
