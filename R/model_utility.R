@@ -185,6 +185,10 @@ r_order = function(reacts) {
 	return( sapply(reacts, function(x) length(x$S)) )
 }
 
+constant_flux = function(reacts) {
+	return( sapply(reacts, function(x) any(is.na(x$S))) )
+}
+
 plot.reactions = function(x) {
 	N = get_stochiometry(x, reversible=TRUE)
 	if (requireNamespace("igraph", quietly = TRUE)) {

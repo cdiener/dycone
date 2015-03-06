@@ -5,6 +5,19 @@
 #  MIT license. See LICENSE for more information.
 
 
+split_react = function(r, n)
+{
+	res = list()
+	for(i in 1:n) {
+		new_r = r
+		new_r$S = sapply(new_r$S, function(x) paste0(x, "_", i))
+		names(new_r$S) = NULL
+		res = append(res, list(new_r))
+	}
+	
+	return(res)
+}
+
 #' Approximates the kinetics of low order reactions with splines allowing the
 #' mimicry of arbitrary non-linear kinetics.
 #'
@@ -25,27 +38,41 @@
 #'		\item{approx}{Boolean vector indicating for each of the original reactions whether
 #'				it has been approximated.}
 #'}
-approx_kinetics = function(reacts, concs, max_subs=1, degree=3, reversible=FALSE) {
-	approx_ids = r_order(reacts) <= max_subs
+approx_kinetics = function(reacts, concs, max_subs=1, degree=3, 
+					reversible=FALSE, const="none") {
+	approx_ids = r_order(reacts) <= max_subs & !constant_flux(reacts)
 	new_reacts = NULL
+	concs_idx = rep(FALSE, length(concs))
+	names(concs_idx) = names(concs)
 	new_concs = NULL
 	
 	for( i in 1:length(reacts) ) {
 		if( approx_ids[i] ) {
-			new_r = rep(reacts[[i]], degree+1)
+			new_r = split_react(reacts[[i]], degree+1)
 			new_reacts = append( new_reacts, new_r )
-			new_c = Ispline(concs[i], knots=c(0,concs[i],2*concs[i]), degree=degree)
-			new_c = append(new_concs, new_c)
+			concs_idx[reacts[[i]]$S] = TRUE
 		}
 		else
 		{
-			new_reacts = append( new_reacts, reacts[[i]] )
-			new_concs = append( new_concs, concs[i] )
+			new_reacts = append( new_reacts, list(reacts[[i]]) )
 		}
 	}
+	class(new_reacts) = append(class(new_reacts), "reactions")
 	
-	S = get_stochiometry(new_reacts, reversible=reversible)
+	for( i in 1:length(concs) ) {
+		if( concs_idx[i] ) {
+			new_c = Ispline(concs[i], degree, c(0,concs[i],2*concs[i]) )
+			names(new_c) = paste0(names(concs)[i],"_",1:(degree+1))
+			new_concs = c(new_concs, concs[i], new_c)
+		}
+		else new_concs = c(new_concs, concs[i])
+	}
+	print(new_reacts)
 	
-	res = list(S=S, concs=new_concs, degree=degree, approx=approx_ids)
+	S = get_stochiometry(new_reacts, reversible=reversible, const=const)
+	
+	res = list(S=S, concs=new_concs, degree=degree, r_idx=approx_ids, s_idx=concs_idx)
 	class(res) = append(class(res), "am")
+	
+	return(res)
 }
