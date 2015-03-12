@@ -61,17 +61,17 @@ approx_kinetics = function(reacts, concs, max_subs=1, degree=3,
 	
 	for( i in 1:length(concs) ) {
 		if( concs_idx[i] ) {
-			new_c = Ispline(concs[i], degree, c(0,concs[i],2*concs[i]) )
+			new_c = Ispline(concs[i], degree, c(0,concs[i]/2,concs[i]) )
 			names(new_c) = paste0(names(concs)[i],"_",1:(degree+1))
 			new_concs = c(new_concs, concs[i], new_c)
 		}
 		else new_concs = c(new_concs, concs[i])
 	}
-	print(new_reacts)
 	
 	S = get_stochiometry(new_reacts, reversible=reversible, const=const)
 	
-	res = list(S=S, concs=new_concs, degree=degree, r_idx=approx_ids, s_idx=concs_idx)
+	res = list(S=S, concs=new_concs, degree=degree, r=new_reacts,
+				r_idx=approx_ids, s_idx=concs_idx)
 	class(res) = append(class(res), "am")
 	
 	return(res)

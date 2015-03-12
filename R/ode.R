@@ -40,6 +40,7 @@ timecourse = function(x0, t, k, s_matrix) {
 	}
 	
 	sol = deSolve::lsoda(x0, t, f, k)
+	class(sol) = append("tc", class(sol))
 	
 	return(sol)
 }

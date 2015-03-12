@@ -177,6 +177,28 @@ get_stochiometry = function(reacts, reversible=FALSE, const="none") {
 	return(N)
 }
 
+make_irreversible = function(reacts) {
+	r = list()
+	for( i in 1:length(reacts) ) {
+		rv = reacts[[i]]$rev
+		reacts[[i]]$rev = FALSE
+		
+		r = append(r, list(reacts[[i]]))
+		if ( rv ) {
+			nr = reacts[[i]]
+			nr$S = reacts[[i]]$P
+			nr$P = reacts[[i]]$S
+			nr$N_S = reacts[[i]]$N_P
+			nr$N_P = reacts[[i]]$N_S
+			r = append(r, list(nr)) 
+		}
+	}
+	
+	class(r) = append(class(r), "reactions")
+	
+	return(r)
+}
+
 #' Returns the number of different substrates a reaction has
 #'
 #' @param reacts A reactions object as returned by \code{\link{read_reactions}}

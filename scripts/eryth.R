@@ -19,7 +19,7 @@ no_c = !(species %in% ss_ids)
 constants = species[no_c]
 ss_concs = ss_concs[species[!no_c]]
 
-S = get_stochiometry(eryth, const=constants)
+S = get_stochiometry(eryth, const=constants) 
 
 linB = get_kcone_basis(S, get_ma_terms(S, ss_concs))
 polB = get_polytope_basis(S, get_ma_terms(S, ss_concs))
@@ -39,7 +39,7 @@ print( head(f_pol,10) )
 
 # Calculate basis dynamics for first vector
 tc = timecourse( ss_concs+0.5, seq(0,10,0.1), 2e4*polB[,1],S )
-pl = plot_tc(tc) + xlab("Time")
+pl = plot(tc) + xlab("Time")
 
 # Save plots
 ggsave("linB.pdf", plin, width=8, height=6)
