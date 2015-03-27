@@ -120,17 +120,19 @@ build_reactions = function(s_matrix) {
 	return(reacts)
 }
 
+to_string = function(r, name=T) {
+	id = paste0(r$abbreviation,": ")
+	left = if (is.na(r$S[1])) "\u2205" 
+			else paste(r$N_S, r$S, sep="*", collapse=" + ")
+	right = if (is.na(r$P[1])) "\u2205" 
+			else paste(r$N_P, r$P, sep="*", collapse=" + ")
+	join = if (r$rev) "<=>" else "->"
+	out = if(name) paste(id, left, join, right) else paste(left, join, right)
+	return( out )
+}
+
 format.reactions = function(x) {
-	r_str = sapply(x, function(el) {
-		id = paste0(el$abbreviation,": ")
-		left = if (is.na(el$S[1])) "\u2205" 
-				else paste(el$N_S, el$S, sep="*", collapse=" + ")
-		right = if (is.na(el$P[1])) "\u2205" 
-				else paste(el$N_P, el$P, sep="*", collapse=" + ")
-		join = if (el$rev) "<=>" else "->"
-		out = paste(id, left, join, right)
-		return( out )
-		})
+	r_str = sapply(x, to_string)
 	
 	return( paste(r_str, collapse="\n") ) 
 }
@@ -175,6 +177,36 @@ get_stochiometry = function(reacts, reversible=FALSE, const="none") {
 	N = N[!eliminate,]
 	
 	return(N)
+}
+
+as.reactions = function(s_matrix, reversible=F, r_names=NA) {
+	if( class(rownames(s_matrix)) != "character" ) 
+		stop("Not a valid stochiometric matrix (no rownames)!")
+	
+	if( length(r_names) == 1 && is.na(r_names) ) 
+		r_names = paste0("r",1:ncol(s_matrix))
+		
+	species = rownames(s_matrix)
+	reacts = vector("list", ncol(s_matrix))
+	for( i in 1:ncol(s_matrix) ) {
+		reacts[[i]]$S = species[s_matrix[,i]<0]
+		if( length(reacts[[i]]$S) == 0 ) reacts[[i]]$S = NA
+		reacts[[i]]$P = species[s_matrix[,i]>0]
+		if( length(reacts[[i]]$P) == 0 ) reacts[[i]]$P = NA
+		reacts[[i]]$N_S = -s_matrix[s_matrix[,i]<0,i]
+		if( length(reacts[[i]]$N_S) == 0 ) reacts[[i]]$N_S = 1
+		reacts[[i]]$N_P = s_matrix[s_matrix[,i]>0,i]
+		if( length(reacts[[i]]$N_P) == 0 ) reacts[[i]]$N_P = 1
+		
+		if( length(reversible)==1 ) reacts[[i]]$rev = reversible
+		else reacts[[i]]$rev = reversible[i]
+		
+		reacts[[i]]$name = reacts[[i]]$abbreviation = r_names[i]
+	}
+	
+	class(reacts) = append("reactions", class(reacts))
+	
+	return(reacts)
 }
 
 make_irreversible = function(reacts) {
@@ -225,7 +257,7 @@ plot.reactions = function(x) {
 	}
 }
 
-to_graph = function(reacts) {
+as.graph = function(reacts) {
 	if ( !("reactions" %in% class(reacts)) ) stop("Argument has wrong type!")
 	
 	N = get_stochiometry(reacts, reversible=TRUE)

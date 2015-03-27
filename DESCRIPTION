@@ -10,5 +10,5 @@ URL: https://github.com/cdiener/dycone
 BugReports: https://github.com/cdiener/dycone/issues
 License: MIT
 LazyData: true
-Imports: deSolve, rcdd, MASS, reshape2, ggplot2, XML
+Imports: deSolve, rcdd, MASS, reshape2, ggplot2, XML, gplots
 Suggests: igraph, sybilSBML, testthat

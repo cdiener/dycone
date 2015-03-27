@@ -25,8 +25,8 @@ linB = get_kcone_basis(S, get_ma_terms(S, ss_concs))
 polB = get_polytope_basis(S, get_ma_terms(S, ss_concs))
 
 # plot basis vectors
-plin = plot_basis(linB)
-ppol = plot_basis(polB)
+plin = plot(linB)
+ppol = plot(polB)
 
 stab_lin = stability_analysis(linB, S, ss_concs)
 stab_pol = stability_analysis(polB, S, ss_concs)

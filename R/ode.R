@@ -9,28 +9,38 @@ ion = function(x,idx) {
 }
 
 get_sbml_params = function(sbml_file) {
+	attrs = c("id", "name", "value")
 	xml = XML::xmlParse(sbml_file)
 	p_list = XML::xmlChildren(xml)[["sbml"]][["model"]][["listOfParameters"]]
 	params = XML::xmlSApply(p_list, function(n) { 
 		x = XML::xmlAttrs(n)
-		return( c(ion(x,"id"), as.numeric(ion(x,"value"))) )
+		vals = sapply(attrs, function(a) ion(x,a))
+		return(vals)
 	})
 	
 	out = as.data.frame(t(params), row.names=FALSE)
+	names(out) = attrs
 	out$value = as.numeric(as.character(out$value))
-	return( as.data.frame(t(params), row.names=FALSE) )
+	return( out )
 }
 
 get_sbml_species = function(sbml_file) {
+	attrs = c("id", "name", "initialAmount", "initialConcentration")
 	xml = XML::xmlParse(sbml_file)
 	s_list = XML::xmlChildren(xml)[["sbml"]][["model"]][["listOfSpecies"]]
 	species = XML::xmlSApply(s_list, function(n) { 
 		x = XML::xmlAttrs(n)
-		return( c(ion(x,"id"), ion(x,"name"), ion(x, "initialConcentration")) )
+		vals = sapply(attrs, function(a) ion(x,a))
+		return( vals )
 	})
 	
 	out = as.data.frame(t(species), row.names=FALSE)
-	out$initialConcentration = as.numeric(as.character(out$initialConcentration))
+	names(out) = attrs
+	num_cols = grep("initial", names(out))
+	
+	for( i in num_cols ) {
+		out[,i] = as.numeric(as.character(out[,i]))
+	}
 	return( out )
 }
 
@@ -40,12 +50,12 @@ timecourse = function(x0, t, k, s_matrix) {
 	}
 	
 	sol = deSolve::lsoda(x0, t, f, k)
-	class(sol) = append("tc", class(sol))
+	class(sol) = append("dyconetc", class(sol))
 	
 	return(sol)
 }
 
-plot.tc = function(tc) {
+plot.dyconetc = function(tc) {
 	melted = reshape2::melt(tc[,-1])
 	melted = cbind(tc[,1], melted)
 	names(melted) = c("t", "tid", "species", "conc")
