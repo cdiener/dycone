@@ -84,12 +84,12 @@ get_fluxes = function(basis, S, reactions, concs) {
 	return(imp)
 }
 
-plot.basis = function(b) {	
-	gplots::heatmap.2(b, trace="none", col=SINGLECOL(32), xlab="basis", ylab="reaction")
+plot.basis = function(b, ...) {	
+	gplots::heatmap.2(b, trace="none", col=SINGLECOL(32), xlab="basis", ylab="reaction", ...)
 }
 
-plot.basis_diff = function(bd) {
-	gplots::heatmap.2(bd, trace="none", col=DIVCOL(32), xlab="basis", ylab="reaction")
+plot.basis_diff = function(bd, ...) {
+	gplots::heatmap.2(bd, trace="none", col=DIVCOL(32), xlab="basis", ylab="reaction", ...)
 }
 
 plot_red = function(basis_list, col=c("seagreen", "yellow", "tomato")) {
@@ -159,7 +159,7 @@ eigenpathways = function(basis) {
 	return(eps)
 }
 
-hyp = function(b1, b2, reacts, tol=1e-3) {
+hyp = function(b1, b2, reacts, tol=5e-3) {
 	reacts = make_irreversible(reacts)
 	reg = rowMeans( d(b2,b1) ) 
 	b1 = rowMeans(b1)

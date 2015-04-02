@@ -1,0 +1,109 @@
+---
+title: "Dycone glycolysis example"
+author: "Christian Diener"
+output:
+  pdf_document:
+    highlight: zenburn
+    latex_engine: xelatex
+mainfont: "Bitstream Vera Serif"
+fontsize: 11pt
+---
+
+Glycolysis example
+==================
+
+In this example we will use dycone to analyze some perturbations in the 
+Glycolysis model of Nielsen et. al. First we will use dycone to get its stochiometric matrix and extract the steady state from the orginial SBML file.
+
+```{r}
+library(sybilSBML)
+devtools::load_all("..")
+data(glycolysis)
+print(glycolysis)
+
+S = get_stochiometry(reacts)  # to get the irreversible stochiometric matrix
+species_data = get_sbml_species("../stuff/BIOMD0000000042.xml") 
+concs = species_data$initialAmount
+names(concs) = species_data$id
+print(concs)
+```
+
+Extracting the k-cone
+---------------------
+
+Getting the consistent (all $k_i>0$) is simple with dycone and can be done straight
+forward. Let's also extract the eigenpathway at once.
+
+```{r fig.width=8, fig.height=6}
+kc = get_polytope_basis(S, get_ma_terms(S, concs))
+ep = eigenpathways(kc)[,1]
+plot(kc, key=F)
+```
+
+Some interesting structurs can be observed from the basis alone. For instance basis vectors with only two reactions indicate a constant relation of $k_i/k_j = const".
+
+Perturbance experiment
+----------------------
+
+Now, let's set up a small perturbation experiment in order to execute the differential k-cone analysis. We will use a faster version of the eigenpathways
+as reference parameters and perturb the reaction rate for ethanol production.
+
+```{r}
+k = 1e3*ep
+
+# Now we generate several new steady states coming from a disturbed ethanol 
+# production 
+
+scales = 10^c(-2,-4)
+d_concs = concs
+d_eps = ep 
+d_basis = list(kc)
+for( i in 1:length(scales) ) {
+	d_k = k
+	d_k[30] = d_k[30]*scales[i]
+	tc = timecourse(concs, c(0,1e5), d_k, S)
+	d_concs = rbind(d_concs, tc[2,-1])
+	basis = get_polytope_basis(S, get_ma_terms(S, tc[2,-1]))
+	d_basis[[i+1]] = basis
+	d_eps = rbind(d_eps, eigenpathways(basis)[,1])
+}
+``` 
+
+First we will have a look at the projection of the respective k-cones in a 2D space
+with colors from green to red indicating a diminishing ethanol production.
+
+```{r fig.width=6, fig.height=6}
+plot_red(d_basis)
+```
+
+So we can already observe that only a small portion of the k-cone is influenced.
+In order to see which parts of the basis are changed we will compare the reference
+k-cone to the one obtained from the largest perturbation. We can use the dycone function `d()` to get the differnce between two basis, even if they have different numbers of basis vectors.
+
+```{r fig.width=8, fig.height=6}
+plot( d(d_basis[[3]], kc) )
+```
+We see that the most prominent change is a lower rate in reaction 30 which is exactly
+the reaction for ethanol production we perturbed. However, there are also some other
+changes which represent alternative hypothesis what might have caused the change in
+steady states. In order to investigate them in more detail there are two strategies.
+
+First, we can evaluate the k-cones by its eigenpathways alone. This gives us some
+comparative analysis over the most representative k-vector in the space.
+
+```{r fig.width=16, fig.height=8}
+barplot( d_eps, col=TRANSCOL(3), names=1:ncol(d_eps), xlab="reactions", beside=T )
+```
+
+Here we also see some other reactions popping up.
+Alternatively, we can also generate hypothesis from the entire space by seeing which
+reactions are chnaged at least by 1% across all k-cone basis vectors. This is done
+with the function `hyp()`.
+
+```{r}
+h = hyp(kc, d_basis[[3]], reacts, tol=1e-2)
+print(h)
+```
+
+As we can see the steady state could also be explained by up-regulating the reverse
+reaction by increasing the efflux of EtOH.
