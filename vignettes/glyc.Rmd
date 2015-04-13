@@ -3,11 +3,8 @@ title: "Dycone glycolysis example"
 author: "Christian Diener"
 date: "`r Sys.Date()`"
 output:
-  pdf_document:
-    highlight: zenburn
-    latex_engine: xelatex
-mainfont: "Bitstream Vera Serif"
-fontsize: 11pt
+  html_document:
+    theme: default
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
@@ -21,11 +18,11 @@ In this example we will use dycone to analyze some perturbations in the
 Glycolysis model of Nielsen et. al. First we will use dycone to get its stochiometric matrix and extract the steady state from the orginial SBML file.
 
 ```{r}
-devtools::load_all("..")
+library(dycone)
 data(glycolysis)
 print(glycolysis)
 
-S = get_stochiometry(reacts)  # to get the irreversible stochiometric matrix
+S = get_stochiometry(glycolysis)  # to get the irreversible stochiometric matrix
 species_data = get_sbml_species("../stuff/BIOMD0000000042.xml") 
 concs = species_data$initialAmount
 names(concs) = species_data$id
@@ -105,7 +102,7 @@ reactions are chnaged at least by 1% across all k-cone basis vectors. This is do
 with the function `hyp()`.
 
 ```{r}
-h = hyp(kc, d_basis[[3]], reacts, tol=1e-2)
+h = hyp(kc, d_basis[[3]], glycolysis, tol=1e-2)
 print(h)
 ```
 
