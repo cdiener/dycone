@@ -10,6 +10,6 @@ URL: https://github.com/cdiener/dycone
 BugReports: https://github.com/cdiener/dycone/issues
 License: MIT
 LazyData: true
-Imports: deSolve, rcdd, MASS, gplots, magrittr, rvest
+Imports: deSolve, rcdd, MASS, gplots, magrittr, RCurl, rvest
 Suggests: igraph, sybilSBML, testthat, knitr
 VignetteBuilder: knitr
