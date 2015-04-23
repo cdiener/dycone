@@ -4,46 +4,6 @@
 #  
 #  MIT license. See LICENSE for more information.
 
-ion = function(x,idx) {
-	return( if (idx %in% names(x)) x[idx] else NA )
-}
-
-get_sbml_params = function(sbml_file) {
-	attrs = c("id", "name", "value")
-	xml = XML::xmlParse(sbml_file)
-	p_list = XML::xmlChildren(xml)[["sbml"]][["model"]][["listOfParameters"]]
-	params = XML::xmlSApply(p_list, function(n) { 
-		x = XML::xmlAttrs(n)
-		vals = sapply(attrs, function(a) ion(x,a))
-		return(vals)
-	})
-	
-	out = as.data.frame(t(params), row.names=FALSE)
-	names(out) = attrs
-	out$value = as.numeric(as.character(out$value))
-	return( out )
-}
-
-get_sbml_species = function(sbml_file) {
-	attrs = c("id", "name", "initialAmount", "initialConcentration")
-	xml = XML::xmlParse(sbml_file)
-	s_list = XML::xmlChildren(xml)[["sbml"]][["model"]][["listOfSpecies"]]
-	species = XML::xmlSApply(s_list, function(n) { 
-		x = XML::xmlAttrs(n)
-		vals = sapply(attrs, function(a) ion(x,a))
-		return( vals )
-	})
-	
-	out = as.data.frame(t(species), row.names=FALSE)
-	names(out) = attrs
-	num_cols = grep("initial", names(out))
-	
-	for( i in num_cols ) {
-		out[,i] = as.numeric(as.character(out[,i]))
-	}
-	return( out )
-}
-
 timecourse = function(x0, t, k, s_matrix) {
 	f = function(t, y, p) { 
 		list( s_matrix %*% diag(p) %*% get_ma_terms(s_matrix, y) )
