@@ -6,8 +6,14 @@
 
 # Helper functions in order to extract the model and construct basic data
 
-str_trim = function(str) {
-	return( gsub("^\\s+|\\s+$", "", str) )
+str_conv = function(str) {
+	val = tryCatch(as.numeric(str), warning = function(w) {
+		if( is.null(grep(",",str)) )
+			gsub("^\\s+|\\s+$", "", str)
+		gsub("^\\s+|\\s+$", "", strsplit(str,",[[:space:]]+")[[1]])
+	})
+
+	return(val)		
 }
 
 #' Calculates the mass-action reaction rate
@@ -61,7 +67,7 @@ get_reaction_elems = function(reaction_str) {
 	sides = strsplit(reaction_str, "\\s*<?\\s?=?-?\\s?>\\s*")[[1]]
 	sides = strsplit(sides, "\\s*\\+\\s*")
 	
-	sub_pattern = "((\\d*)\\*|^)([^[:space:]]+)"
+	sub_pattern = "((\\d*\\.*\\d*)\\*|^)([^[:space:]]+)"
 	subs = unlist( regmatches(sides[[1]], regexec(sub_pattern, sides[[1]])) )
 	if (is.null(subs)) subs = c(NA, NA, "1", NA) 
 	subs[subs==""] = "1"
@@ -89,7 +95,8 @@ read_reactions = function(react_file) {
 		stop("At least one of the lines has no reaction arrows!")
 	}
 	
-	res = apply( reacts, 1, function(x) c( get_reaction_elems(x[1]), str_trim(x[-1]) ) )
+	res = apply( reacts, 1, function(x) 
+		c( get_reaction_elems(x[1]), sapply(x[-1], str_conv) ))
 	
 	class(res) = append(class(res), "reactions")
 	
@@ -247,7 +254,7 @@ plot.reactions = function(x) {
 	N = get_stochiometry(x, reversible=TRUE)
 	if (requireNamespace("igraph", quietly = TRUE)) {
 		g = igraph::graph.adjacency(N%*%t(N), weighted=TRUE, diag=FALSE)
-		igraph::plot.igraph(g)
+		igraph::plot.igraph(g, layout=layout.circle, vertex.size=10, edge.arrow.size=0.5)
 		
 	} else {
 		warning("igraph is not installed, Just showing the connectivity...")
