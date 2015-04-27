@@ -85,11 +85,13 @@ get_fluxes = function(basis, S, reactions, concs) {
 }
 
 plot.basis = function(b, ...) {	
-	gplots::heatmap.2(b, trace="none", col=SINGLECOL(32), xlab="basis", ylab="reaction", ...)
+	pheatmap::pheatmap(b, border=NA, col=SINGLECOL(32), labels_row=1:nrow(b), 
+		labels_col=1:ncol(b), ...)
 }
 
 plot.basis_diff = function(bd, ...) {
-	gplots::heatmap.2(bd, trace="none", col=DIVCOL(32), xlab="basis", ylab="reaction", ...)
+	pheatmap::pheatmap(bd, border=NA, col=DIVCOL(32), labels_row=1:nrow(bd), 
+		labels_col=1:ncol(bd), ...)
 }
 
 plot_red = function(basis_list, col=c("seagreen", "yellow", "tomato")) {
