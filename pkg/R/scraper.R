@@ -52,7 +52,7 @@ sbml_species = function(sbml_file) {
 #' @param val The value as it appears in HMDB.
 #' @return The numeric concentration value.
 parse_conc = function(val) {
-	val = as.character(val)
+	val = gsub(",", ".", as.character(val))
 	val = strsplit(val, " ")[[1]][1]
 	if(length(grep("-",val))==1) {
 		vals = as.numeric(strsplit(val,"-")[[1]])
@@ -98,24 +98,27 @@ hmdb_parse = function(nodes) {
 
 #' Scrapes measured metabolite concentration values for a given HMDB ID.
 #'
-#' @param hmid The HMDB ID of the metabolite.
+#' @param hmid The HMDB ID or a vector of IDs for the metabolites.
 #' @return The scraped data set as a data frame or NULL if no concentrations were
 #'	found.
-hmdb_concentration = function(hmid) {
-	hm_xml = rvest::xml(sprintf(HMDB_XML,hmid))
+hmdb_concentration = function(hmids) {
+	out = NULL
 	
-	hm_entries = hm_xml %>% 
-		rvest::xml_nodes("normal_concentrations concentration") %>% hmdb_parse()
-	
-	kegg_id = hm_xml %>% rvest::xml_node("kegg_id") %>% rvest::xml_text()
-	name = hm_xml %>% rvest::xml_node("name") %>% rvest::xml_text()
-	
-	hm_entries = cbind(kegg_id, hmid, name, hm_entries)
-	
-	if(is.null(hm_entries)) return(NULL)
-	else {	
-		hm_entries = cbind(kegg_id, hmid, name, hm_entries)
-		names(hm_entries)[c(1:3,ncol(hm_entries))] = c("keggid", "hmdbid","name", "pmid")
-		return(hm_entries)
+	for(id in hmids) {
+		hm_xml = rvest::xml(sprintf(HMDB_XML,id))
+		
+		hm_entries = hm_xml %>% 
+			rvest::xml_nodes("normal_concentrations concentration") %>% hmdb_parse()
+		
+		kegg_id = hm_xml %>% rvest::xml_node("kegg_id") %>% rvest::xml_text()
+		name = hm_xml %>% rvest::xml_node("name") %>% rvest::xml_text()
+		
+		if(!is.null(hm_entries)) {	
+			hm_entries = cbind(kegg_id, id, name, hm_entries)
+			names(hm_entries)[c(1:3,ncol(hm_entries))] = c("keggid", "hmdbid","name", "pmid")
+			out = rbind(out, hm_entries)
+		}
 	}
+	
+	return(out)
 }
