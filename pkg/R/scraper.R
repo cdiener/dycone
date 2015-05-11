@@ -52,7 +52,7 @@ sbml_species = function(sbml_file) {
 #' @param val The value as it appears in HMDB.
 #' @return The numeric concentration value.
 parse_conc = function(val) {
-	val = gsub(",", ".", as.character(val))
+	val = gsub(",", "", as.character(val))
 	val = strsplit(val, " ")[[1]][1]
 	if(length(grep("-",val))==1) {
 		vals = as.numeric(strsplit(val,"-")[[1]])
@@ -103,8 +103,10 @@ hmdb_parse = function(nodes) {
 #'	found.
 hmdb_concentration = function(hmids) {
 	out = NULL
-	
-	for(id in hmids) {
+	cat("\n")
+	for(i in 1:length(hmids)) {
+		id = hmids[i]
+		cat(sprintf("\rScraping %d/%d...",i,length(hmids)))
 		hm_xml = rvest::xml(sprintf(HMDB_XML,id))
 		
 		hm_entries = hm_xml %>% 
@@ -122,3 +124,71 @@ hmdb_concentration = function(hmids) {
 	
 	return(out)
 }
+
+#' Primitive function for group patching missing data
+group_patch = function(x) {
+	miss = t(apply(x, 1, is.na))
+	
+	n_m = rowSums(miss)
+	fixable = which(n_m > 0 & n_m < ncol(x))
+	for(i in fixable) {
+		nas = is.na(x[i,])
+		x[i,nas] = mean(as.numeric(x[i,!nas]))
+	}
+	
+	return(x)
+}
+
+#' Primitive function for reference patching missing data
+ref_patch = function(x, ref) {
+	miss = t(apply(x[,-1], 1, is.na))
+	
+	need_fix = which(rowSums(miss) > 0)
+	for(i in need_fix) {
+		id = as.character(x[i,1])
+		nas = is.na(x[i,])
+		nas[1] = FALSE
+		ref_data = as.numeric(unlist(ref[ref[,1] == id, -1]))
+		x[i, nas] = mean(ref_data, na.rm=T)
+	} 
+	
+	return(x)
+}
+
+#' Patches holes in a data set by using group means and reference data.
+#'
+#' Biological data is only rarely complete this, however cone analysis requires
+#' fully populated steady state concentration data. This functions help to patch
+#' holes in your data. It assumes that your measurement data set is data frame
+#' where the id column uses a shared identifier as the reference data set and
+#' the data columns specifify control and treatment measurements.
+#' The optional reference data set is further used to fill up holes which cannot
+#' b patched by group means. 
+#'
+#' @param measurements A data frame with one id column, and at least one normal and one
+#'	treatment column
+#' @param id An index or column name specifying the ids
+#' @param normal A vector of indices or column names specifying the control group
+#' @param treatment A vector of indices or column names specifying the treatment group 
+#' @param ref_data An optional data frame of reference data 2 or 3 columns, where the first column
+#'	denotes the ids, the second the normal reference data and the (optional) third column
+#'	the treatment reference data.
+#' @return The original measurement data frame with a maximum number of missing data being
+#'	patched.
+patch = function(measurements, id, normal, treatment, ref_data=NULL) {
+	out = measurements
+	data_cols = c(normal,treatment)
+	
+	out[,normal] = group_patch(out[,normal])		# patch grouped by normal
+	out[,treatment] = group_patch(out[,treatment])	# patch grouped by treatment
+	
+	# patch normal group by reference
+	if(!is.null(ref_data)) {
+		out[,normal] = ref_patch(out[,c(id,normal)], ref_data)[,-1]
+	}
+	
+	out[,data_cols] = group_patch(out[,data_cols])	# patch between groups
+	
+	return(out)
+}
+
