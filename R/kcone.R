@@ -98,8 +98,7 @@ plot_red = function(basis_list, col=c("seagreen", "yellow", "tomato")) {
 	if( !("list" %in% class(basis_list)) ) stop("basis_list must be a list!")
 	
 	n = length(basis_list)
-	all_basis = NULL
-	for( b in basis_list ) all_basis = cbind(all_basis, b)
+	all_basis = do.call(cbind, basis_list)
 	pca = prcomp(t(all_basis))
 	plot(NULL, xlim=c(-1,1), ylim=c(-1,1), xlab="PC 1", ylab="PC 2")
 	pal = TRANSCOL(n)
@@ -114,8 +113,10 @@ plot_red = function(basis_list, col=c("seagreen", "yellow", "tomato")) {
 		polygon(p[-redundant_ids,], border=NA, col=adjustcolor(pal[i], alpha.f=0.3))
 		arrows(x0=0, y0=0, x1=red[,1], y1=red[,2], angle=15, length=0.05, col=pal[i])
 	}
+	energy = pca$sdev^2
+	
 	write(sprintf("Total standard deviation explained: %f%%.",
-				sum(pca$sdev[1:2])/sum(pca$sdev)*100), file="")
+				sum(energy[1:2])/sum(energy)*100), file="")
 }
 
 angle = function(x) {
@@ -126,10 +127,27 @@ angle = function(x) {
 }
 
 basis_map = function(b1, b2) {
+	n1 = ncol(b1)
+	n2 = ncol(b2)
+	progress = F
+	cur = 0
+	
+	if(n1*n2>1e5) {
+		write("Basis are pretty large. This might take a long time!", file="")
+		progress = T
+	}
 	closest = apply(b1, 2, function(x) {
 							d = apply(b2, 2, function(y) dist(rbind(x,y)))
 							i = which.min(d)
-							return( c(i,d[i]) ) })
+							if(progress) {
+								cur <<- cur+1
+								cat("\r") 
+								cat(sprintf("Finished %.2f%%...",cur/n1*100))
+							}
+							return( c(i,d[i]) )
+							
+							 })
+	cat("\n")
 	
 	return( data.frame(id1=1:ncol(b1), id2=closest[1,], d=closest[2,]) )
 }

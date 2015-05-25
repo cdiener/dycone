@@ -16,6 +16,11 @@ str_conv = function(str) {
 	return(val)		
 }
 
+order_by = function(x, y) {
+	o = sapply(x, function(x) which(x==y))
+	return(o)
+}
+
 #' Calculates the mass-action reaction rate
 #'
 #' @param substrates Stochiometry of the substrates
@@ -57,7 +62,26 @@ get_jacobian = function(s_matrix, concs)
 # gets the mass action terms \prod_j S_j^N(j,i)
 get_ma_terms = function(s_matrix, concs)
 {
-	prods = apply( s_matrix, 2, mass_action, concs=concs)
+	prods = NULL
+	
+	if(is.vector(concs)) {
+		if(is.null(names(concs))) stop("Concentration vector must have names!")
+		else {
+			concs = concs[rownames(s_matrix)]
+			prods = apply( s_matrix, 2, mass_action, concs=concs)
+		}
+	}
+	else if(is.data.frame(concs)) {
+		if("name" %in% names(concs)) {
+			o = order_by(concs$name, rownames(S))
+			concs = concs[o,]
+			name_idx = which(names(concs) == "name")
+			prods = apply(concs[,-name_idx], 2, function(co) 
+						apply( s_matrix, 2, mass_action, concs=co))
+		}
+		else stop("Concentration data frame must have a column named 'name'!")
+	}
+	
 	return( prods )
 }
 
