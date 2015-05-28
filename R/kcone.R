@@ -220,7 +220,6 @@ multi_hyp = function(ref_list, treat_list, reacts, correction_method="fdr") {
 	
 	# Create reference data
 	cref = combn(1:ncol(ref), 2)
-	print(cref)
 	res = hyp(ref[,1], ref[,1], reacts)
 	res = res[,-ncol(res)]
 	
@@ -243,7 +242,7 @@ multi_hyp = function(ref_list, treat_list, reacts, correction_method="fdr") {
 		ref_data = as.numeric(lfc_ref[i,])
 		treat_data = as.numeric(lfc_treat[i,])
 		test = wilcox.test(x=treat_data, y=ref_data, conf.int=T)
-		return(data.frame(mad_ref=mad(ref_data),
+		return(data.frame(sd_ref=sd(ref_data),
 				mean_log_fold=mean(treat_data), 
 				ci_low=test$conf.int[1], ci_high=test$conf.int[2],
 				pval=test$p.value))
