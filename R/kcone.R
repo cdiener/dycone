@@ -179,12 +179,17 @@ eigenpathways = function(basis) {
 	return(eps)
 }
 
-hyp = function(b1, b2, reacts, tol=5e-3) {
+hyp = function(b1, b2, reacts, log_fold_tol=0) {
 	reacts = make_irreversible(reacts)
-	reg = rowMeans( d(b2,b1) ) 
-	b1 = rowMeans(b1)
-	b2 = rowMeans(b2)
-	reg_id = which( abs(reg)>tol )
+	if(!is.null(dim(b1))) b1 = rowMeans(b1)
+	if(!is.null(dim(b2))) b2 = rowMeans(b2)
+	
+	zero_flux = b1==0 | b2==0
+	b1 = b1[!zero_flux]
+	b2 = b2[!zero_flux]
+	logfold = log(b2,2) - log(b1,2)
+	
+	reg_id = which( abs(logfold)>=log_fold_tol )
 	
 	idx = id = r_s = kind = fac = NULL
 	for( i in reg_id) {
@@ -192,13 +197,64 @@ hyp = function(b1, b2, reacts, tol=5e-3) {
 		idx = c(idx, i)
 		id = c(id, r$abbreviation)
 		r_s = c(r_s, to_string(r, name=F))
-		kind = c(kind, if(reg[i]>0) "up" else "down")
-		fac = c(fac,log(b2[i],2)-log(b1[i],2))
+		kind = c(kind, if(logfold[i]==0) "same" else if(logfold[i]>0) "up" else "down")
+		fac = c(fac,logfold[i])
 	}
 	
-	res = data.frame(idx=idx, name=id, reaction=r_s, type=kind, fold_change=fac)
-	res = res[order(res$fold_change),]
+	res = data.frame(idx=idx, name=id, reaction=r_s, type=kind, log2_fold=fac)
 	
 	return(res)
 }
 
+all_diff = function(a,b) {
+	combs = expand.grid(1:length(a), 1:length(b))
+	diffs = apply(combs, 1, function(idx) a[idx[1]] - b[idx[2]])
+	
+	return(diffs)
+}
+
+multi_hyp = function(ref_list, treat_list, reacts, correction_method="fdr") {
+	# Start by reducing the basis to row means
+	ref = sapply(ref_list, rowMeans)
+	treat = sapply(treat_list, rowMeans)
+	
+	# Create reference data
+	cref = combn(1:ncol(ref), 2)
+	print(cref)
+	res = hyp(ref[,1], ref[,1], reacts)
+	res = res[,-ncol(res)]
+	
+	lfc_ref = apply(cref, 2, function(idx) {
+		h = hyp(ref[,idx[1]], ref[,idx[2]], reacts)
+		return(h$log2_fold) })
+	lfc_ref = cbind(lfc_ref, -lfc_ref)
+	
+	# Create differential analysis
+	
+	ctreat = expand.grid(1:ncol(ref), 1:ncol(treat))
+	
+	lfc_treat = apply(ctreat, 1, function(idx) {
+		h = hyp(ref[,idx[1]], treat[,idx[2]], reacts)
+		return(h$log2_fold) })
+	
+	# Generate statistics
+	
+	stats = lapply(1:nrow(res), function(i) {
+		ref_data = as.numeric(lfc_ref[i,])
+		treat_data = as.numeric(lfc_treat[i,])
+		test = wilcox.test(x=treat_data, y=ref_data, conf.int=T)
+		return(data.frame(mad_ref=mad(ref_data),
+				mean_log_fold=mean(treat_data), 
+				ci_low=test$conf.int[1], ci_high=test$conf.int[2],
+				pval=test$p.value))
+	})
+	
+	res = cbind(res, do.call(rbind, stats))
+	reg = sapply(res$mean_log_fold, function(x) 
+		if(x==0) "same" else if(x>0) "up" else "down")
+	res$type = factor(reg)
+	res$pval = p.adjust(res$pval, method=correction_method)
+	res = res[order(res$pval),]
+	
+	return(res)
+}
