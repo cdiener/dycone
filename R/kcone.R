@@ -24,7 +24,7 @@ get_polytope_basis = function(s_matrix, v_terms) {
 	mat = v_terms
 	const_matrix = rcdd::d2q( -diag(ncol(s_matrix)) )
 	const_b = rcdd::d2q(rep(0,ncol(s_matrix)))
-	NC = rcdd::d2q( as.matrix( s_matrix%*%diag(mat) ) )
+	NC = rcdd::d2q( as.matrix( s_matrix%*%diag(mat)) )
 	b = rcdd::d2q(rep(0,nrow(s_matrix)))
 	
 	hp = rcdd::makeH(const_matrix, const_b, NC, b)
@@ -43,10 +43,9 @@ get_stability = function(evs) {
 	
 	r = evs
 	if ( all(Re(r)==0) && any(Im(r)!=0) ) return( "limit cycle" )
-	if ( all(Re(r)==0) ) return ("steady state")
+	if ( all(Re(r)==0) ) return ("zero jacobian")
 	if ( all(Re(r)<=0) ) return( "stable" )
-	if ( all(Re(r)>=0) ) return ("unstable")
-	else return ("undefined")
+	else return ("unstable")
 }
 
 stability_analysis = function(basis, s_matrix, concs) {
@@ -168,10 +167,11 @@ d = function(b1,b2) {
 inside = function(x, s_matrix, v_terms, tol=sqrt(.Machine$double.eps)) {
 	right = s_matrix%*%diag(v_terms)%*%x
 	
-	return( all(x>=0) & all(abs(right)<tol) )
+	if(is.null(dim(x))) return(all(right>=0) & all(abs(right)<tol))
+	return( apply(right, 2, function(r) all(r>=0) & all(abs(r)<tol)) )
 }
 
-eigenpathways = function(basis) {
+eigendynamics = function(basis) {
 	eps = svd(basis)$u
 	eps[ abs(eps)<.Machine$double.eps ] = 0
 	if( any(eps[,1]<0) ) eps = -eps
@@ -206,13 +206,6 @@ hyp = function(b1, b2, reacts, log_fold_tol=0) {
 	return(res)
 }
 
-all_diff = function(a,b) {
-	combs = expand.grid(1:length(a), 1:length(b))
-	diffs = apply(combs, 1, function(idx) a[idx[1]] - b[idx[2]])
-	
-	return(diffs)
-}
-
 multi_hyp = function(ref_list, treat_list, reacts, correction_method="fdr") {
 	# Start by reducing the basis to row means
 	ref = sapply(ref_list, rowMeans)
@@ -229,7 +222,6 @@ multi_hyp = function(ref_list, treat_list, reacts, correction_method="fdr") {
 	lfc_ref = cbind(lfc_ref, -lfc_ref)
 	
 	# Create differential analysis
-	
 	ctreat = expand.grid(1:ncol(ref), 1:ncol(treat))
 	
 	lfc_treat = apply(ctreat, 1, function(idx) {
@@ -237,7 +229,6 @@ multi_hyp = function(ref_list, treat_list, reacts, correction_method="fdr") {
 		return(h$log2_fold) })
 	
 	# Generate statistics
-	
 	stats = lapply(1:nrow(res), function(i) {
 		ref_data = as.numeric(lfc_ref[i,])
 		treat_data = as.numeric(lfc_treat[i,])

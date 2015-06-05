@@ -99,9 +99,11 @@ hmdb_parse = function(nodes) {
 #' Scrapes measured metabolite concentration values for a given HMDB ID.
 #'
 #' @param hmid The HMDB ID or a vector of IDs for the metabolites.
+#' @param add A data frame with as many rows as entries in hmid containing additional
+#'	information that will be added to the result (for instance names or ids).
 #' @return The scraped data set as a data frame or NULL if no concentrations were
 #'	found.
-hmdb_concentration = function(hmids) {
+hmdb_concentration = function(hmids, add=NULL) {
 	out = NULL
 	cat("\n")
 	for(i in 1:length(hmids)) {
@@ -118,6 +120,7 @@ hmdb_concentration = function(hmids) {
 		if(!is.null(hm_entries)) {	
 			hm_entries = cbind(kegg_id, id, name, hm_entries)
 			names(hm_entries)[c(1:3,ncol(hm_entries))] = c("keggid", "hmdbid","name", "pmid")
+			if(is.data.frame(add)) hm_entries = cbind(hm_entries, add[i,])
 			out = rbind(out, hm_entries)
 		}
 	}

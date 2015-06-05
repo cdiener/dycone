@@ -91,7 +91,8 @@ get_reaction_elems = function(reaction_str) {
 	sides = strsplit(reaction_str, "\\s*<?\\s?=?-?\\s?>\\s*")[[1]]
 	sides = strsplit(sides, "\\s*\\+\\s*")
 	
-	sub_pattern = "((\\d*\\.*\\d*)\\*|^)([^[:space:]]+)"
+	print(sides[[1]])
+	sub_pattern = "((\\d*\\.*\\d*)\\*|^\\s*)([^[:space:]]+)"
 	subs = unlist( regmatches(sides[[1]], regexec(sub_pattern, sides[[1]])) )
 	if (is.null(subs)) subs = c(NA, NA, "1", NA) 
 	subs[subs==""] = "1"
@@ -103,7 +104,9 @@ get_reaction_elems = function(reaction_str) {
 	}
 	prods[prods==""] = "1"
 	n_p = length(prods)
-	
+	print(reaction_str)
+	print(subs)
+	print(prods)
 	return( list(S=subs[seq(4,n_s,4)], P=prods[seq(4,n_p,4)],
 					N_S=as.numeric(subs[seq(3,n_s,4)]), 
 					N_P=as.numeric(prods[seq(3,n_p,4)]), rev=reversible ) )
