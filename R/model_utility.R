@@ -104,9 +104,7 @@ get_reaction_elems = function(reaction_str) {
 	}
 	prods[prods==""] = "1"
 	n_p = length(prods)
-	print(reaction_str)
-	print(subs)
-	print(prods)
+
 	return( list(S=subs[seq(4,n_s,4)], P=prods[seq(4,n_p,4)],
 					N_S=as.numeric(subs[seq(3,n_s,4)]), 
 					N_P=as.numeric(prods[seq(3,n_p,4)]), rev=reversible ) )
