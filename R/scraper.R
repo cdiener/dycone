@@ -6,6 +6,7 @@
 
 HMDB_SEARCH = "http://www.hmdb.ca/unearth/q?query=%s&searcher=metabolites"
 HMDB_XML = "http://www.hmdb.ca/metabolites/%s.xml"
+KEGG_REST = "http://rest.kegg.jp/link/hsa/ec:%s"
 
 #' Obtains the list of parameters from a SBML model
 #'
@@ -45,6 +46,30 @@ sbml_species = function(sbml_file) {
 		out[,i] = as.numeric(as.character(out[,i]))
 	}
 	return( out )
+}
+
+#' Obtains the genes corresponding to the enzymes catalyzing a list of reactions
+#' 
+#' @param r The reaction list.
+#' @param field Name of the extra field specifying EC numbers of the enzymes.
+#' @return A data frame mapping reaction ids to genes.
+enzymes_to_genes = function(r, field="KEGG_enzyme") {
+	have_enzymes = which(!sapply(r, function(x) any(is.na(x[[field]]))))
+	print(have_enzymes)
+	urls = sapply(r[have_enzymes], function(x) 
+				sprintf(KEGG_REST,paste(x[[field]],collapse="+")))
+	print(urls)
+	found = RCurl::getURL(urls)
+	out = lapply(1:length(have_enzymes), function(i) {
+		clean = gsub("\\w+:","",found[i])
+		if(clean=="") return(NULL)
+		dat = cbind(have_enzymes[i],read.table(textConnection(clean)))
+		return(dat)
+	})
+	
+	out = do.call(rbind, out)
+	names(out) = c("idx", "ec", "entrez_id")
+	return(out)
 }
 
 #' Parses concentration values from HMDB.

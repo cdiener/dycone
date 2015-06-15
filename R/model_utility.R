@@ -91,7 +91,6 @@ get_reaction_elems = function(reaction_str) {
 	sides = strsplit(reaction_str, "\\s*<?\\s?=?-?\\s?>\\s*")[[1]]
 	sides = strsplit(sides, "\\s*\\+\\s*")
 	
-	print(sides[[1]])
 	sub_pattern = "((\\d*\\.*\\d*)\\*|^\\s*)([^[:space:]]+)"
 	subs = unlist( regmatches(sides[[1]], regexec(sub_pattern, sides[[1]])) )
 	if (is.null(subs)) subs = c(NA, NA, "1", NA) 

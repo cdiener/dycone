@@ -29,6 +29,7 @@ get_polytope_basis = function(s_matrix, v_terms) {
 	
 	hp = rcdd::makeH(const_matrix, const_b, NC, b)
 	hp = rcdd::addHeq(rep(1,ncol(s_matrix)), 1.0, hp)
+	hp = rcdd::redundant(hp)$output
 	vrep = rcdd::scdd(hp)
 	vp = vrep$output[,-(1:2)]
 	
@@ -37,6 +38,10 @@ get_polytope_basis = function(s_matrix, v_terms) {
 	
 	return( basis)
 } 
+
+save_ine = function(s_matrix, v_terms) {
+	
+}
 
 get_stability = function(evs) {	
 	evs[ abs(evs)<sqrt(.Machine$double.eps) ] = 0
@@ -53,15 +58,23 @@ stability_analysis = function(basis, s_matrix, concs) {
 	evs = NULL
 	stab = NULL
 	
-	for( i in 1:ncol(basis) )
-	{
-		ev = eigen(s_matrix %*% diag(basis[,i]) %*% J)$values
-		evs = rbind(evs, ev)
-		stab = c(stab, get_stability(ev))
+	if(!is.null(ncol(basis))) {
+		nc = ncol(basis)
+		for( i in 1:ncol(basis) )
+		{
+			ev = eigen(s_matrix %*% diag(basis[,i]) %*% J)$values
+			evs = rbind(evs, ev)
+			stab = c(stab, get_stability(ev))
+		}
 	}
-	
-	res = data.frame(what=stab, ev=evs, row.names=1:ncol(basis))
-	names(res)[1:ncol(evs)+1] = paste0("ev",1:ncol(evs))
+	else {
+		nc = 1
+		evs = t(eigen(s_matrix %*% diag(basis) %*% J)$values)
+		stab = get_stability(evs)
+	}
+		
+	res = data.frame(what=stab, ev=evs, row.names=1:nc)
+	names(res)[1:nrow(s_matrix)+1] = paste0("ev",1:nrow(s_matrix))
 	
 	return( res )
 }
@@ -93,14 +106,18 @@ plot.basis_diff = function(bd, ...) {
 		labels_col=1:ncol(bd), ...)
 }
 
-plot_red = function(basis_list, col=c("seagreen", "yellow", "tomato")) {
+plot_red = function(basis_list, arrows=TRUE, col=NULL) {
 	if( !("list" %in% class(basis_list)) ) stop("basis_list must be a list!")
 	
 	n = length(basis_list)
 	all_basis = do.call(cbind, basis_list)
 	pca = prcomp(t(all_basis))
 	plot(NULL, xlim=c(-1,1), ylim=c(-1,1), xlab="PC 1", ylab="PC 2")
-	pal = TRANSCOL(n)
+	
+	if(is.null(col)) pal = TRANSCOL(n)
+	else if(length(basis_list)!=length(col)) 
+		stop("col mus be the same length as the basis list!")
+	else pal = col
 	
 	for( i in 1:n) {
 		red = predict(pca, t(basis_list[[i]]))[,1:2]
@@ -109,12 +126,15 @@ plot_red = function(basis_list, col=c("seagreen", "yellow", "tomato")) {
 		
 		p = rbind(red,c(0,0))
 		redundant_ids = rcdd::redundant( rcdd::makeV(rcdd::d2q(p)) )$redundant
-		polygon(p[-redundant_ids,], border=NA, col=adjustcolor(pal[i], alpha.f=0.3))
-		arrows(x0=0, y0=0, x1=red[,1], y1=red[,2], angle=15, length=0.05, col=pal[i])
+		polygon(p[-redundant_ids,], border=NA, col=adjustcolor(pal[i], alpha.f=0.2))
+		if(arrows) {
+			arrows(x0=0, y0=0, x1=red[,1], y1=red[,2], angle=15, 
+				length=0.05, col=pal[i])
+		}
 	}
 	energy = pca$sdev^2
 	
-	write(sprintf("Total standard deviation explained: %f%%.",
+	write(sprintf("Total energy explained: %f%%.",
 				sum(energy[1:2])/sum(energy)*100), file="")
 }
 
@@ -179,10 +199,16 @@ eigendynamics = function(basis) {
 	return(eps)
 }
 
+r_means = function(x) {
+	if(!is.null(dim(x))) x = rowMeans(x)
+	
+	return(x)
+}
+
 hyp = function(b1, b2, reacts, log_fold_tol=0) {
 	reacts = make_irreversible(reacts)
-	if(!is.null(dim(b1))) b1 = rowMeans(b1)
-	if(!is.null(dim(b2))) b2 = rowMeans(b2)
+	b1 = r_means(b1)
+	b2 = r_means(b2)
 	
 	zero_flux = b1==0 | b2==0
 	b1 = b1[!zero_flux]
@@ -206,10 +232,16 @@ hyp = function(b1, b2, reacts, log_fold_tol=0) {
 	return(res)
 }
 
+mabs_diff = function(x,y) {
+	d = sapply(x, function(xi) sapply(y, function(yi) xi-yi))
+	
+	return(mean(abs(d)))
+}
+
 multi_hyp = function(ref_list, treat_list, reacts, correction_method="fdr") {
 	# Start by reducing the basis to row means
-	ref = sapply(ref_list, rowMeans)
-	treat = sapply(treat_list, rowMeans)
+	ref = sapply(ref_list, r_means)
+	treat = sapply(treat_list, r_means)
 	
 	# Create reference data
 	cref = combn(1:ncol(ref), 2)
@@ -232,7 +264,9 @@ multi_hyp = function(ref_list, treat_list, reacts, correction_method="fdr") {
 	stats = lapply(1:nrow(res), function(i) {
 		ref_data = as.numeric(lfc_ref[i,])
 		treat_data = as.numeric(lfc_treat[i,])
-		test = wilcox.test(x=treat_data, y=ref_data, conf.int=T)
+		if(mabs_diff(ref_data, treat_data)<.Machine$double.eps)
+			test = list(p.value=1, conf.int=rep(mean(ref_data),2))
+		else test = wilcox.test(x=treat_data, y=ref_data, conf.int=T)
 		return(data.frame(sd_ref=sd(ref_data),
 				mean_log_fold=mean(treat_data), 
 				ci_low=test$conf.int[1], ci_high=test$conf.int[2],
@@ -244,7 +278,7 @@ multi_hyp = function(ref_list, treat_list, reacts, correction_method="fdr") {
 		if(x==0) "same" else if(x>0) "up" else "down")
 	res$type = factor(reg)
 	res$pval = p.adjust(res$pval, method=correction_method)
-	res = res[order(res$pval),]
+	res = res[order(res$pval, -abs(res$mean_log_fold)),]
 	
 	return(res)
 }
