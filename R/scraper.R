@@ -55,10 +55,9 @@ sbml_species = function(sbml_file) {
 #' @return A data frame mapping reaction ids to genes.
 enzymes_to_genes = function(r, field="KEGG_enzyme") {
 	have_enzymes = which(!sapply(r, function(x) any(is.na(x[[field]]))))
-	print(have_enzymes)
 	urls = sapply(r[have_enzymes], function(x) 
 				sprintf(KEGG_REST,paste(x[[field]],collapse="+")))
-	print(urls)
+				
 	found = RCurl::getURL(urls)
 	out = lapply(1:length(have_enzymes), function(i) {
 		clean = gsub("\\w+:","",found[i])
@@ -193,16 +192,18 @@ ref_patch = function(x, ref) {
 #' The optional reference data set is further used to fill up holes which cannot
 #' b patched by group means. 
 #'
-#' @param measurements A data frame with one id column, and at least one normal and one
-#'	treatment column
+#' @param measurements A data frame with one id column, and at least one normal 
+#' 	and one treatment column
 #' @param id An index or column name specifying the ids
-#' @param normal A vector of indices or column names specifying the control group
-#' @param treatment A vector of indices or column names specifying the treatment group 
-#' @param ref_data An optional data frame of reference data 2 or 3 columns, where the first column
-#'	denotes the ids, the second the normal reference data and the (optional) third column
-#'	the treatment reference data.
-#' @return The original measurement data frame with a maximum number of missing data being
-#'	patched.
+#' @param normal A vector of indices or column names specifying the control 
+#'	group
+#' @param treatment A vector of indices or column names specifying the treatment 
+#'	group 
+#' @param ref_data An optional data frame of reference data 2 or 3 columns, 
+#'	where the first column denotes the ids, the second the normal reference data 
+#'	and the (optional) third column the treatment reference data.
+#' @return The original measurement data frame with a maximum number of missing 
+#' data being	patched.
 patch = function(measurements, id, normal, treatment, ref_data=NULL) {
 	out = measurements
 	data_cols = c(normal,treatment)

@@ -125,8 +125,8 @@ plot_red = function(basis_list, arrows=TRUE, col=NULL) {
 		red = red[order(a),]
 		
 		p = rbind(red,c(0,0))
-		redundant_ids = rcdd::redundant( rcdd::makeV(rcdd::d2q(p)) )$redundant
-		polygon(p[-redundant_ids,], border=NA, col=adjustcolor(pal[i], alpha.f=0.2))
+		red_ids = rcdd::redundant( rcdd::makeV(rcdd::d2q(p)) )$redundant
+		polygon(p[-red_ids,], border=NA, col=adjustcolor(pal[i], alpha.f=0.2))
 		if(arrows) {
 			arrows(x0=0, y0=0, x1=red[,1], y1=red[,2], angle=15, 
 				length=0.05, col=pal[i])
@@ -267,7 +267,7 @@ multi_hyp = function(ref_list, treat_list, reacts, correction_method="fdr") {
 		if(mabs_diff(ref_data, treat_data)<.Machine$double.eps)
 			test = list(p.value=1, conf.int=rep(mean(ref_data),2))
 		else test = wilcox.test(x=treat_data, y=ref_data, conf.int=T)
-		return(data.frame(sd_ref=sd(ref_data),
+		return(data.frame(sd_ref=sd(ref_data), sd_treat=sd(treat_data),
 				mean_log_fold=mean(treat_data), 
 				ci_low=test$conf.int[1], ci_high=test$conf.int[2],
 				pval=test$p.value))
