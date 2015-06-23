@@ -96,6 +96,13 @@ get_fluxes = function(basis, S, reactions, concs) {
 	return(imp)
 }
 
+occupation = function(basis) {
+	if( !("basis" %in% class(basis)) ) stop("object is not a basis!")
+	
+	return(apply(basis, 1, function(r) 
+		sum(r>sqrt(.Machine$double.eps))/length(r)))
+}
+
 plot.basis = function(b, ...) {	
 	pheatmap::pheatmap(b, border=NA, col=SINGLECOL(32), labels_row=1:nrow(b), 
 		labels_col=1:ncol(b), ...)
@@ -238,8 +245,24 @@ mabs_diff = function(x,y) {
 	return(mean(abs(d)))
 }
 
-multi_hyp = function(ref_list, treat_list, reacts, correction_method="fdr") {
-	# Start by reducing the basis to row means
+#' Identifies hypothesis for differentially regulated reactions between a set of
+#' reference and treatment basis. 
+#'
+#' @param ref_list A list of basis for the reference/control group.
+#' @param treat_list A list of basis for the treatment/disease group.
+#' @param reacts A reaction list.
+#' @param correction_method A correction method for the multiple test p-values.
+#'	Takes the same arguments as the method argument in p.adjust.
+#' @param full If TRUE also returns the individual log fold changes along with
+#'	the differential regulation data.
+#' @return If full is TRUE returns a list of generated hypothesis and the individual
+#' 	log fold changes between all reference basis and between reference and treatments.
+#'	If full is FALSE only returns the generated hypothesis. 
+multi_hyp = function(ref_list, treat_list, reacts, correction_method="fdr", full=FALSE) {
+	# Start by getting variances reducing the basis to row means
+	ref_sd = apply(do.call(cbind, ref_list),1,sd)
+	treat_sd = apply(do.call(cbind, treat_list),1,sd)
+	
 	ref = sapply(ref_list, r_means)
 	treat = sapply(treat_list, r_means)
 	
@@ -267,7 +290,8 @@ multi_hyp = function(ref_list, treat_list, reacts, correction_method="fdr") {
 		if(mabs_diff(ref_data, treat_data)<.Machine$double.eps)
 			test = list(p.value=1, conf.int=rep(mean(ref_data),2))
 		else test = wilcox.test(x=treat_data, y=ref_data, conf.int=T)
-		return(data.frame(sd_ref=sd(ref_data), sd_treat=sd(treat_data),
+		return(data.frame(var_ref=sd(ref_data), var_treat=sd(treat_data),
+				basis_var_ref=ref_sd[i], basis_var_treat=treat_sd[i],
 				mean_log_fold=mean(treat_data), 
 				ci_low=test$conf.int[1], ci_high=test$conf.int[2],
 				pval=test$p.value))
@@ -279,6 +303,12 @@ multi_hyp = function(ref_list, treat_list, reacts, correction_method="fdr") {
 	res$type = factor(reg)
 	res$pval = p.adjust(res$pval, method=correction_method)
 	res = res[order(res$pval, -abs(res$mean_log_fold)),]
+	
+	if(full) {
+		lfc_ref = data.frame(ref=lfc_ref)
+		lfc_treat = data.frame(treat=lfc_treat)
+		res = list(hyp=res, lfc_ref=lfc_ref, lfc_treat=lfc_treat)
+	}
 	
 	return(res)
 }
