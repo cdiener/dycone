@@ -108,11 +108,6 @@ plot.basis = function(b, ...) {
 		labels_col=1:ncol(b), ...)
 }
 
-plot.basis_diff = function(bd, ...) {
-	pheatmap::pheatmap(bd, border=NA, col=DIVCOL(32), labels_row=1:nrow(bd), 
-		labels_col=1:ncol(bd), ...)
-}
-
 plot_red = function(basis_list, arrows=TRUE, col=NULL) {
 	if( !("list" %in% class(basis_list)) ) stop("basis_list must be a list!")
 	
@@ -176,19 +171,6 @@ basis_map = function(b1, b2) {
 	cat("\n")
 	
 	return( data.frame(id1=1:ncol(b1), id2=closest[1,], d=closest[2,]) )
-}
-
-d = function(b1,b2) {
-	if( all(dim(b1) == dim(b2)) ) res = b1-b2
-	else if( nrow(b1) == nrow(b2) ) {
-		bm = basis_map(b1,b2)
-		res = b1[,bm$id1] - b2[,bm$id2]
-	}
-	else stop("Basis describe different reactions!")
-	
-	class(res) = append("basis_diff", class(res))
-	
-	return(res)
 }
 
 inside = function(x, s_matrix, v_terms, tol=sqrt(.Machine$double.eps)) {
@@ -290,8 +272,8 @@ multi_hyp = function(ref_list, treat_list, reacts, correction_method="fdr", full
 		if(mabs_diff(ref_data, treat_data)<.Machine$double.eps)
 			test = list(p.value=1, conf.int=rep(mean(ref_data),2))
 		else test = wilcox.test(x=treat_data, y=ref_data, conf.int=T)
-		return(data.frame(var_ref=sd(ref_data), var_treat=sd(treat_data),
-				basis_var_ref=ref_sd[i], basis_var_treat=treat_sd[i],
+		return(data.frame(sd_ref=sd(ref_data), sd_treat=sd(treat_data),
+				basis_sd_ref=ref_sd[i], basis_sd_treat=treat_sd[i],
 				mean_log_fold=mean(treat_data), 
 				ci_low=test$conf.int[1], ci_high=test$conf.int[2],
 				pval=test$p.value))
