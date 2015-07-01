@@ -22,7 +22,7 @@ get_kcone_basis = function(s_matrix, v_terms) {
 
 get_polytope_basis = function(s_matrix, v_terms) {
 	mat = v_terms
-	const_matrix = rcdd::d2q( -diag(ncol(s_matrix)) )
+	const_matrix = rcdd::d2q(-diag(ncol(s_matrix)))
 	const_b = rcdd::d2q(rep(0,ncol(s_matrix)))
 	NC = rcdd::d2q( as.matrix( s_matrix%*%diag(mat)) )
 	b = rcdd::d2q(rep(0,nrow(s_matrix)))
@@ -180,12 +180,16 @@ inside = function(x, s_matrix, v_terms, tol=sqrt(.Machine$double.eps)) {
 	return( apply(right, 2, function(r) all(r>=0) & all(abs(r)<tol)) )
 }
 
-eigendynamics = function(basis) {
+eigendynamics = function(basis, n=1) {
+	if(is.null(dim(basis))) return(basis)
+	
 	eps = svd(basis)$u
 	eps[ abs(eps)<.Machine$double.eps ] = 0
 	if( any(eps[,1]<0) ) eps = -eps
 	
-	return(eps)
+	eps = apply(eps,2,function(x) x/sum(x))
+	
+	return(eps[,1:n])
 }
 
 r_means = function(x) {
@@ -196,18 +200,12 @@ r_means = function(x) {
 
 hyp = function(b1, b2, reacts, log_fold_tol=0) {
 	reacts = make_irreversible(reacts)
-	b1 = r_means(b1)
-	b2 = r_means(b2)
-	
-	zero_flux = b1==0 | b2==0
-	b1 = b1[!zero_flux]
-	b2 = b2[!zero_flux]
 	logfold = log(b2,2) - log(b1,2)
+	logfold[!is.finite(logfold)] = 0
 	
-	reg_id = which( abs(logfold)>=log_fold_tol )
 	
 	idx = id = r_s = kind = fac = NULL
-	for( i in reg_id) {
+	for( i in 1:length(logfold)) {
 		r = reacts[[i]]
 		idx = c(idx, i)
 		id = c(id, r$abbreviation)
@@ -223,12 +221,14 @@ hyp = function(b1, b2, reacts, log_fold_tol=0) {
 
 mabs_diff = function(x,y) {
 	d = sapply(x, function(xi) sapply(y, function(yi) xi-yi))
+	m = mean(abs(d), na.rm=T)
+	if(is.na(m)) m = 0
 	
-	return(mean(abs(d)))
+	return(m)
 }
 
 #' Identifies hypothesis for differentially regulated reactions between a set of
-#' reference and treatment basis. 
+#' normal and disease conditions. 
 #'
 #' @param ref_list A list of basis for the reference/control group.
 #' @param treat_list A list of basis for the treatment/disease group.
@@ -240,43 +240,41 @@ mabs_diff = function(x,y) {
 #' @return If full is TRUE returns a list of generated hypothesis and the individual
 #' 	log fold changes between all reference basis and between reference and treatments.
 #'	If full is FALSE only returns the generated hypothesis. 
-multi_hyp = function(ref_list, treat_list, reacts, correction_method="fdr", full=FALSE) {
-	# Start by getting variances reducing the basis to row means
-	ref_sd = apply(do.call(cbind, ref_list),1,sd)
-	treat_sd = apply(do.call(cbind, treat_list),1,sd)
-	
-	ref = sapply(ref_list, r_means)
-	treat = sapply(treat_list, r_means)
-	
+multi_hyp = function(normal, disease, reacts, correction_method="fdr", full=FALSE) {
 	# Create reference data
-	cref = combn(1:ncol(ref), 2)
-	res = hyp(ref[,1], ref[,1], reacts)
+	cref = combn(1:ncol(normal), 2)
+	res = hyp(normal[,1], normal[,1], reacts)
 	res = res[,-ncol(res)]
 	
-	lfc_ref = apply(cref, 2, function(idx) {
-		h = hyp(ref[,idx[1]], ref[,idx[2]], reacts)
+	lfc_n = apply(cref, 2, function(idx) {
+		h = hyp(normal[,idx[1]], normal[,idx[2]], reacts)
 		return(h$log2_fold) })
-	lfc_ref = cbind(lfc_ref, -lfc_ref)
+	lfc_n = cbind(lfc_n, -lfc_n)
 	
 	# Create differential analysis
-	ctreat = expand.grid(1:ncol(ref), 1:ncol(treat))
+	ctreat = expand.grid(1:ncol(normal), 1:ncol(disease))
 	
-	lfc_treat = apply(ctreat, 1, function(idx) {
-		h = hyp(ref[,idx[1]], treat[,idx[2]], reacts)
+	lfc_d = apply(ctreat, 1, function(idx) {
+		h = hyp(normal[,idx[1]], disease[,idx[2]], reacts)
 		return(h$log2_fold) })
 	
 	# Generate statistics
 	stats = lapply(1:nrow(res), function(i) {
-		ref_data = as.numeric(lfc_ref[i,])
-		treat_data = as.numeric(lfc_treat[i,])
-		if(mabs_diff(ref_data, treat_data)<.Machine$double.eps)
-			test = list(p.value=1, conf.int=rep(mean(ref_data),2))
-		else test = wilcox.test(x=treat_data, y=ref_data, conf.int=T)
-		return(data.frame(sd_ref=sd(ref_data), sd_treat=sd(treat_data),
-				basis_sd_ref=ref_sd[i], basis_sd_treat=treat_sd[i],
-				mean_log_fold=mean(treat_data), 
-				ci_low=test$conf.int[1], ci_high=test$conf.int[2],
-				pval=test$p.value))
+		n_data = as.numeric(lfc_n[i,])
+		d_data = as.numeric(lfc_d[i,])
+		test = tryCatch({
+				wilcox.test(x=d_data, y=n_data, conf.int=T)
+			},
+			error = function(e) {
+				list(p.value=1, conf.int=rep(mean(n_data),2))
+			},
+			warning = function(w) {
+				suppressWarnings(wilcox.test(x=d_data, y=n_data, conf.int=T))
+			})
+		
+		return(data.frame(sd_normal=sd(n_data), sd_disease=sd(d_data),
+				mean_log_fold=mean(d_data), ci_low=test$conf.int[1], 
+				ci_high=test$conf.int[2], pval=test$p.value))
 	})
 	
 	res = cbind(res, do.call(rbind, stats))
@@ -287,9 +285,9 @@ multi_hyp = function(ref_list, treat_list, reacts, correction_method="fdr", full
 	res = res[order(res$pval, -abs(res$mean_log_fold)),]
 	
 	if(full) {
-		lfc_ref = data.frame(ref=lfc_ref)
-		lfc_treat = data.frame(treat=lfc_treat)
-		res = list(hyp=res, lfc_ref=lfc_ref, lfc_treat=lfc_treat)
+		lfc_n = data.frame(normal=lfc_n)
+		lfc_d = data.frame(disease=lfc_d)
+		res = list(hyp=res, lfc_normal=lfc_n, lfc_disease=lfc_d)
 	}
 	
 	return(res)
