@@ -61,7 +61,7 @@ enzymes_to_genes = function(r, field="KEGG_enzyme") {
 	found = RCurl::getURL(urls)
 	out = lapply(1:length(have_enzymes), function(i) {
 		clean = gsub("\\w+:","",found[i])
-		if(clean=="") return(NULL)
+		if(nchar(clean)<2) return(NULL)
 		dat = cbind(have_enzymes[i],read.table(textConnection(clean)))
 		return(dat)
 	})
@@ -211,12 +211,12 @@ patch = function(measurements, id, normal, treatment, ref_data=NULL) {
 	out[,normal] = group_patch(out[,normal])		# patch grouped by normal
 	out[,treatment] = group_patch(out[,treatment])	# patch grouped by treatment
 	
+	out[,data_cols] = group_patch(out[,data_cols])	# patch between groups
+	
 	# patch normal group by reference
 	if(!is.null(ref_data)) {
-		out[,normal] = ref_patch(out[,c(id,normal)], ref_data)[,-1]
+		out[,data_cols] = ref_patch(out[,c(id,data_cols)], ref_data)[,-1]
 	}
-	
-	out[,data_cols] = group_patch(out[,data_cols])	# patch between groups
 	
 	return(out)
 }

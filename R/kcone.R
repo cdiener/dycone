@@ -114,7 +114,10 @@ plot_red = function(basis_list, arrows=TRUE, col=NULL) {
 	n = length(basis_list)
 	all_basis = do.call(cbind, basis_list)
 	pca = prcomp(t(all_basis))
-	plot(NULL, xlim=c(-1,1), ylim=c(-1,1), xlab="PC 1", ylab="PC 2")
+	red = lapply(basis_list, function(b) predict(pca, t(b))[,1:2])
+	rs = apply(do.call(rbind,red), 2, range)
+	rs = apply(rs, 2, function(x) max(abs(x)))
+	plot(NULL, xlim=c(-rs[1],rs[1]), ylim=c(-rs[2],rs[2]), xlab="PC 1", ylab="PC 2")
 	
 	if(is.null(col)) pal = TRANSCOL(n)
 	else if(length(basis_list)!=length(col)) 
@@ -122,15 +125,14 @@ plot_red = function(basis_list, arrows=TRUE, col=NULL) {
 	else pal = col
 	
 	for( i in 1:n) {
-		red = predict(pca, t(basis_list[[i]]))[,1:2]
-		a = apply(red, 1, angle)
-		red = red[order(a),]
+		a = apply(red[[i]], 1, angle)
+		ro = red[[i]][order(a),]
 		
-		p = rbind(red,c(0,0))
+		p = rbind(ro,c(0,0))
 		red_ids = rcdd::redundant( rcdd::makeV(rcdd::d2q(p)) )$redundant
 		polygon(p[-red_ids,], border=NA, col=adjustcolor(pal[i], alpha.f=0.2))
 		if(arrows) {
-			arrows(x0=0, y0=0, x1=red[,1], y1=red[,2], angle=15, 
+			arrows(x0=0, y0=0, x1=ro[,1], y1=ro[,2], angle=15, 
 				length=0.05, col=pal[i])
 		}
 	}

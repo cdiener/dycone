@@ -248,12 +248,12 @@ make_irreversible = function(reacts) {
 		
 		r = append(r, list(reacts[[i]]))
 		if ( rv ) {
-			nr = reacts[[i]]
-			nr$S = reacts[[i]]$P
-			nr$P = reacts[[i]]$S
-			nr$N_S = reacts[[i]]$N_P
-			nr$N_P = reacts[[i]]$N_S
-			r = append(r, list(nr)) 
+			br = reacts[[i]]
+			br$S = reacts[[i]]$P
+			br$P = reacts[[i]]$S
+			br$N_S = reacts[[i]]$N_P
+			br$N_P = reacts[[i]]$N_S
+			r = append(r, list(br)) 
 		}
 	}
 	
