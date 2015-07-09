@@ -113,8 +113,15 @@ plot_red = function(basis_list, arrows=TRUE, col=NULL) {
 	
 	n = length(basis_list)
 	all_basis = do.call(cbind, basis_list)
-	pca = prcomp(t(all_basis))
-	red = lapply(basis_list, function(b) predict(pca, t(b))[,1:2])
+    if(nrow(all_basis<2)) stop("Basis must be at least 2-dimensional!")
+    if(nrow(all_basis)==2) {
+        pca = list(sdev=c(1,1))
+        red = basis_list
+    }
+    else {
+        pca = prcomp(t(all_basis))
+        red = lapply(basis_list, function(b) predict(pca, t(b))[,1:2])
+    }
 	rs = apply(do.call(rbind,red), 2, range)
 	rs = apply(rs, 2, function(x) max(abs(x)))
 	plot(NULL, xlim=c(-rs[1],rs[1]), ylim=c(-rs[2],rs[2]), xlab="PC 1", ylab="PC 2")
