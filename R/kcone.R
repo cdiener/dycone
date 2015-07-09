@@ -108,23 +108,42 @@ plot.basis = function(b, ...) {
 		labels_col=1:ncol(b), ...)
 }
 
-plot_red = function(basis_list, arrows=TRUE, col=NULL) {
+plot_red = function(basis_list, arrows=TRUE, col=NULL, n_cl=NULL) {
 	if( !("list" %in% class(basis_list)) ) stop("basis_list must be a list!")
 	
-	n = length(basis_list)
-	all_basis = do.call(cbind, basis_list)
-    if(nrow(all_basis<2)) stop("Basis must be at least 2-dimensional!")
+	b_rows = sapply(basis_list, nrow)
+    b_cols = sapply(basis_list, ncol)
+    
+    if(sd(b_rows)>0) stop("All basis need to have the same dimension!")
+    if(nrow(basis_list[[1]])<2) stop("Basis must be at least 2-dimensional!")
+    n = length(basis_list)
+
+	
+    all_basis = do.call(cbind, basis_list)
+    
     if(nrow(all_basis)==2) {
         pca = list(sdev=c(1,1))
-        red = basis_list
+        red = lapply(basis_list, t)
     }
     else {
         pca = prcomp(t(all_basis))
         red = lapply(basis_list, function(b) predict(pca, t(b))[,1:2])
     }
+    
+    if(max(b_cols)>1e3) {
+        write("Basis are very large. Reducing by clustering...", file="")
+        if(is.null(n_cl)) n_cl = sqrt(mean(b_cols))
+        cl = lapply(red, function(b) 
+            kmeans(b,centers=n_cl, iter.max=100, nstart=1))
+        
+        dists = sapply(cl, function(x) mean(sqrt(x$withinss/x$size)))
+        write(sprintf("Mean in-cluster distance: %g.",mean(dists)), file="")
+        
+        red = lapply(cl, function(x) x$centers)
+    }
+    
 	rs = apply(do.call(rbind,red), 2, range)
-	rs = apply(rs, 2, function(x) max(abs(x)))
-	plot(NULL, xlim=c(-rs[1],rs[1]), ylim=c(-rs[2],rs[2]), xlab="PC 1", ylab="PC 2")
+	plot(NULL, xlim=rs[,1], ylim=rs[,2], xlab="PC 1", ylab="PC 2")
 	
 	if(is.null(col)) pal = TRANSCOL(n)
 	else if(length(basis_list)!=length(col)) 
