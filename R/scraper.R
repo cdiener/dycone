@@ -13,6 +13,7 @@ KEGG_REST = "http://rest.kegg.jp/link/hsa/ec:%s"
 #' @param sbml_file A SBML file. This can be a file on the disk or the location
 #' 	to an online resource.
 #' @return A data frame containing the obtained data. Some entries might be NA.
+#' @export
 sbml_params = function(sbml_file) {
 	attrs = c("id", "name", "value")
 	doc = rvest::xml(sbml_file)
@@ -31,6 +32,7 @@ sbml_params = function(sbml_file) {
 #' @param sbml_file A SBML file. This can be a file on the disk or the location
 #' 	to an online resource.
 #' @return A data frame containing the obtained data. Some entries might be NA.
+#' @export
 sbml_species = function(sbml_file) {
 	attrs = c("id", "name", "initialamount", "initialconcentration")
 	doc = rvest::xml(sbml_file)
@@ -48,27 +50,22 @@ sbml_species = function(sbml_file) {
 	return( out )
 }
 
-#' Obtains the genes corresponding to the enzymes catalyzing a list of reactions
+#' Obtains properties from a reaction list
 #' 
 #' @param r The reaction list.
-#' @param field Name of the extra field specifying EC numbers of the enzymes.
-#' @return A data frame mapping reaction ids to genes.
-enzymes_to_genes = function(r, field="KEGG_enzyme") {
-	have_enzymes = which(!sapply(r, function(x) any(is.na(x[[field]]))))
-	urls = sapply(r[have_enzymes], function(x) 
-				sprintf(KEGG_REST,paste(x[[field]],collapse="+")))
-				
-	found = RCurl::getURL(urls)
-	out = lapply(1:length(have_enzymes), function(i) {
-		clean = gsub("\\w+:","",found[i])
-		if(nchar(clean)<2) return(NULL)
-		dat = cbind(have_enzymes[i],read.table(textConnection(clean)))
-		return(dat)
-	})
-	
-	out = do.call(rbind, out)
-	names(out) = c("idx", "ec", "entrez_id")
-	return(out)
+#' @param field Name of the property to be obtained.
+#' @return A data.frame mapping the property to reaction indices.
+#' @export
+rp = function(r, field="KEGG_enzyme") {
+	prop = lapply(1:length(r), function(i) {
+        ri = r[[i]]
+        if(all(is.na(ri[[field]]))) return(NULL)
+        data.frame(r_idx=i, x=ri[[field]], stringsAsFactors=F)
+    })
+    prop = do.call(rbind,prop)
+    names(prop)[2] = field
+    
+	return(prop)
 }
 
 #' Parses concentration values from HMDB.
@@ -90,6 +87,7 @@ parse_conc = function(val) {
 #' @param search_term Can be any text search term or a different ID (for instance
 #' 	a KEGG ID
 #' @return A single HMDB ID or list of putative IDs.
+#' @export
 find_hmdb = function(search_term) {
 	hmids = rvest::html(sprintf(HMDB_SEARCH, RCurl::curlEscape(search_term))) %>%
 			rvest::html_nodes(".result-link .btn-card") %>% rvest::html_text()
@@ -127,6 +125,7 @@ hmdb_parse = function(nodes) {
 #'	information that will be added to the result (for instance names or ids).
 #' @return The scraped data set as a data frame or NULL if no concentrations were
 #'	found.
+#' @export
 hmdb_concentration = function(hmids, add=NULL) {
 	out = NULL
 	cat("\n")
@@ -203,7 +202,8 @@ ref_patch = function(x, ref) {
 #'	where the first column denotes the ids, the second the normal reference data 
 #'	and the (optional) third column the treatment reference data.
 #' @return The original measurement data frame with a maximum number of missing 
-#' data being	patched.
+#' data being patched.
+#' @export
 patch = function(measurements, id, normal, treatment, ref_data=NULL) {
 	out = measurements
 	data_cols = c(normal,treatment)

@@ -6,11 +6,12 @@
 
 # Helper functions in order to extract the model and construct basic data
 
+### General helper functions
 str_conv = function(str) {
 	val = tryCatch(as.numeric(str), warning = function(w) {
 		if( is.null(grep(",",str)) )
 			gsub("^\\s+|\\s+$", "", str)
-		gsub("^\\s+|\\s+$", "", strsplit(str,",[[:space:]]+")[[1]])
+		gsub("^\\s+|\\s+$", "", strsplit(str,",[[:space:]]*")[[1]])
 	})
 
 	return(val)		
@@ -21,8 +22,46 @@ order_by = function(x, y) {
 	return(o)
 }
 
+#' TODO: change me >:(
+#'
+#' \code{ggplot()} initializes a ggplot object. It can be used to
+#' declare the input data frame for a graphic and to specify the
+#' set of plot aesthetics intended to be common throughout all
+#' subsequent layers unless specifically overridden.
+#'
+#' There are three common ways to invoke \code{ggplot}:
+#' \itemize{
+#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
+#'    \item \code{ggplot(df)}
+#'    \item \code{ggplot()}
+#'   }
+#' 
+#' @seealso \url{http://had.co.nz/ggplot2}
+#'  \code{\link{geom_segment}} for a more general approach
+#' @export
+#' @keywords internal
+#' @param data default data set
+#' @param ... other arguments passed to specific methods
+#' @return The stuff :O
+#' @examples
+#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
+#'                  y = rnorm(30))
+#' # Compute sample mean and standard deviation in each group
+#' library(plyr)
+#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+'%c%' = function(ex, filename) {
+	if(!file.exists(filename)) {
+		e = new.env()
+		eval(match.call()$ex, envir=e)
+		save(list=ls(e), file=filename, envir=e)
+	}
+	
+	load(filename, env=parent.frame(4)) 
+}
+
 #' Calculates the mass-action reaction rate
 #'
+#' @export
 #' @param substrates Stochiometry of the substrates
 #' @param concs The concentrations used for the substrates
 #' @return The mass action term \deqn{\prod_{i \in N^-} S_i^|N_i|}
@@ -51,6 +90,33 @@ partial_deriv = function(i, substrates, concs)
 	return( pd )
 }
 
+#' TODO: change me >:(
+#'
+#' \code{ggplot()} initializes a ggplot object. It can be used to
+#' declare the input data frame for a graphic and to specify the
+#' set of plot aesthetics intended to be common throughout all
+#' subsequent layers unless specifically overridden.
+#'
+#' There are three common ways to invoke \code{ggplot}:
+#' \itemize{
+#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
+#'    \item \code{ggplot(df)}
+#'    \item \code{ggplot()}
+#'   }
+#' 
+#' @seealso \url{http://had.co.nz/ggplot2}
+#'  \code{\link{geom_segment}} for a more general approach
+#' @export
+#' @keywords internal
+#' @param data default data set
+#' @param ... other arguments passed to specific methods
+#' @return The stuff :O
+#' @examples
+#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
+#'                  y = rnorm(30))
+#' # Compute sample mean and standard deviation in each group
+#' library(plyr)
+#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
 get_jacobian = function(s_matrix, concs)
 {
 	J = apply(s_matrix, 2, function(x) 
@@ -59,7 +125,33 @@ get_jacobian = function(s_matrix, concs)
 	return( t(J) ) 
 }
 
-# gets the mass action terms \prod_j S_j^N(j,i)
+#' TODO: change me >:(
+#'
+#' \code{ggplot()} initializes a ggplot object. It can be used to
+#' declare the input data frame for a graphic and to specify the
+#' set of plot aesthetics intended to be common throughout all
+#' subsequent layers unless specifically overridden.
+#'
+#' There are three common ways to invoke \code{ggplot}:
+#' \itemize{
+#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
+#'    \item \code{ggplot(df)}
+#'    \item \code{ggplot()}
+#'   }
+#' 
+#' @seealso \url{http://had.co.nz/ggplot2}
+#'  \code{\link{geom_segment}} for a more general approach
+#' @export
+#' @keywords internal
+#' @param data default data set
+#' @param ... other arguments passed to specific methods
+#' @return The stuff :O
+#' @examples
+#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
+#'                  y = rnorm(30))
+#' # Compute sample mean and standard deviation in each group
+#' library(plyr)
+#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
 get_ma_terms = function(s_matrix, concs)
 {
 	prods = NULL
@@ -127,30 +219,6 @@ read_reactions = function(react_file) {
 	return( res )
 }
 
-build_reactions = function(s_matrix) {
-	reacts = list()
-	specs = rownames(s_matrix)
-	for(i in 1:ncol(s_matrix)) {
-		S = specs[ s_matrix[,i]<0 ]
-		P = specs[ s_matrix[,i]>0 ]
-		N_S = s_matrix[ s_matrix[,i]<0 , i ]
-		N_P = s_matrix[ s_matrix[,i]>0 , i ]
-		if (length(S) == 0) {
-			S = NA
-			N_S = 1
-		}
-		if (length(P) == 0) {
-			P = NA
-			N_P = 1
-		}
-		reacts[[i]] = list(S=S, P=P, N_S=abs(N_S), N_P=N_P, rev=FALSE, abbreviation=i)
-	}
-	
-	class(reacts) = append(class(reacts), "reactions")
-	
-	return(reacts)
-}
-
 to_string = function(r, name=T) {
 	id = paste0(r$abbreviation,": ")
 	left = if (is.na(r$S[1])) "\u2205" 
@@ -174,6 +242,33 @@ print.reactions = function(x) {
 	write( format(x), file="" )
 }
 
+#' TODO: change me >:(
+#'
+#' \code{ggplot()} initializes a ggplot object. It can be used to
+#' declare the input data frame for a graphic and to specify the
+#' set of plot aesthetics intended to be common throughout all
+#' subsequent layers unless specifically overridden.
+#'
+#' There are three common ways to invoke \code{ggplot}:
+#' \itemize{
+#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
+#'    \item \code{ggplot(df)}
+#'    \item \code{ggplot()}
+#'   }
+#' 
+#' @seealso \url{http://had.co.nz/ggplot2}
+#'  \code{\link{geom_segment}} for a more general approach
+#' @export
+#' @keywords internal
+#' @param data default data set
+#' @param ... other arguments passed to specific methods
+#' @return The stuff :O
+#' @examples
+#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
+#'                  y = rnorm(30))
+#' # Compute sample mean and standard deviation in each group
+#' library(plyr)
+#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
 get_species = function(reacts) {
 	if ( !("reactions" %in% class(reacts)) ) stop("Argument has wrong type!")
 	
@@ -182,6 +277,33 @@ get_species = function(reacts) {
 	return( unique(species) )
 }
 
+#' TODO: change me >:(
+#'
+#' \code{ggplot()} initializes a ggplot object. It can be used to
+#' declare the input data frame for a graphic and to specify the
+#' set of plot aesthetics intended to be common throughout all
+#' subsequent layers unless specifically overridden.
+#'
+#' There are three common ways to invoke \code{ggplot}:
+#' \itemize{
+#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
+#'    \item \code{ggplot(df)}
+#'    \item \code{ggplot()}
+#'   }
+#' 
+#' @seealso \url{http://had.co.nz/ggplot2}
+#'  \code{\link{geom_segment}} for a more general approach
+#' @export
+#' @keywords internal
+#' @param data default data set
+#' @param ... other arguments passed to specific methods
+#' @return The stuff :O
+#' @examples
+#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
+#'                  y = rnorm(30))
+#' # Compute sample mean and standard deviation in each group
+#' library(plyr)
+#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
 get_stochiometry = function(reacts, reversible=FALSE, const="none") {
 	if ( !("reactions" %in% class(reacts)) ) stop("Argument has wrong type!")
 	
@@ -210,6 +332,33 @@ get_stochiometry = function(reacts, reversible=FALSE, const="none") {
 	return(N)
 }
 
+#' TODO: change me >:(
+#'
+#' \code{ggplot()} initializes a ggplot object. It can be used to
+#' declare the input data frame for a graphic and to specify the
+#' set of plot aesthetics intended to be common throughout all
+#' subsequent layers unless specifically overridden.
+#'
+#' There are three common ways to invoke \code{ggplot}:
+#' \itemize{
+#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
+#'    \item \code{ggplot(df)}
+#'    \item \code{ggplot()}
+#'   }
+#' 
+#' @seealso \url{http://had.co.nz/ggplot2}
+#'  \code{\link{geom_segment}} for a more general approach
+#' @export
+#' @keywords internal
+#' @param data default data set
+#' @param ... other arguments passed to specific methods
+#' @return The stuff :O
+#' @examples
+#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
+#'                  y = rnorm(30))
+#' # Compute sample mean and standard deviation in each group
+#' library(plyr)
+#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
 as.reactions = function(s_matrix, reversible=F, r_names=NA) {
 	if( class(rownames(s_matrix)) != "character" ) 
 		stop("Not a valid stochiometric matrix (no rownames)!")
@@ -240,6 +389,33 @@ as.reactions = function(s_matrix, reversible=F, r_names=NA) {
 	return(reacts)
 }
 
+#' TODO: change me >:(
+#'
+#' \code{ggplot()} initializes a ggplot object. It can be used to
+#' declare the input data frame for a graphic and to specify the
+#' set of plot aesthetics intended to be common throughout all
+#' subsequent layers unless specifically overridden.
+#'
+#' There are three common ways to invoke \code{ggplot}:
+#' \itemize{
+#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
+#'    \item \code{ggplot(df)}
+#'    \item \code{ggplot()}
+#'   }
+#' 
+#' @seealso \url{http://had.co.nz/ggplot2}
+#'  \code{\link{geom_segment}} for a more general approach
+#' @export
+#' @keywords internal
+#' @param data default data set
+#' @param ... other arguments passed to specific methods
+#' @return The stuff :O
+#' @examples
+#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
+#'                  y = rnorm(30))
+#' # Compute sample mean and standard deviation in each group
+#' library(plyr)
+#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
 make_irreversible = function(reacts) {
 	r = list()
 	for( i in 1:length(reacts) ) {
@@ -266,19 +442,75 @@ make_irreversible = function(reacts) {
 #'
 #' @param reacts A reactions object as returned by \code{\link{read_reactions}}
 #' @return A numeric vector containing the number of substrates for each reaction
+#' @export
 r_order = function(reacts) {
 	return( sapply(reacts, function(x) length(x$S)) )
 }
 
+#' TODO: change me >:(
+#'
+#' \code{ggplot()} initializes a ggplot object. It can be used to
+#' declare the input data frame for a graphic and to specify the
+#' set of plot aesthetics intended to be common throughout all
+#' subsequent layers unless specifically overridden.
+#'
+#' There are three common ways to invoke \code{ggplot}:
+#' \itemize{
+#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
+#'    \item \code{ggplot(df)}
+#'    \item \code{ggplot()}
+#'   }
+#' 
+#' @seealso \url{http://had.co.nz/ggplot2}
+#'  \code{\link{geom_segment}} for a more general approach
+#' @export
+#' @keywords internal
+#' @param data default data set
+#' @param ... other arguments passed to specific methods
+#' @return The stuff :O
+#' @examples
+#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
+#'                  y = rnorm(30))
+#' # Compute sample mean and standard deviation in each group
+#' library(plyr)
+#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
 constant_flux = function(reacts) {
 	return( sapply(reacts, function(x) any(is.na(x$S))) )
 }
 
+#' TODO: change me >:(
+#'
+#' \code{ggplot()} initializes a ggplot object. It can be used to
+#' declare the input data frame for a graphic and to specify the
+#' set of plot aesthetics intended to be common throughout all
+#' subsequent layers unless specifically overridden.
+#'
+#' There are three common ways to invoke \code{ggplot}:
+#' \itemize{
+#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
+#'    \item \code{ggplot(df)}
+#'    \item \code{ggplot()}
+#'   }
+#' 
+#' @seealso \url{http://had.co.nz/ggplot2}
+#'  \code{\link{geom_segment}} for a more general approach
+#' @export
+#' @keywords internal
+#' @param data default data set
+#' @param ... other arguments passed to specific methods
+#' @return The stuff :O
+#' @examples
+#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
+#'                  y = rnorm(30))
+#' # Compute sample mean and standard deviation in each group
+#' library(plyr)
+#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
 plot.reactions = function(x) {
 	N = get_stochiometry(x, reversible=TRUE)
 	if (requireNamespace("igraph", quietly = TRUE)) {
 		g = igraph::graph.adjacency(N%*%t(N), weighted=TRUE, diag=FALSE)
-		igraph::plot.igraph(g, layout=layout.circle, vertex.size=10, edge.arrow.size=0.5)
+		igraph::plot.igraph(g, layout=igraph::layout.circle, vertex.size=10, 
+            edge.arrow.size=0.5)
 		
 	} else {
 		warning("igraph is not installed, Just showing the connectivity...")
@@ -288,6 +520,33 @@ plot.reactions = function(x) {
 	}
 }
 
+#' TODO: change me >:(
+#'
+#' \code{ggplot()} initializes a ggplot object. It can be used to
+#' declare the input data frame for a graphic and to specify the
+#' set of plot aesthetics intended to be common throughout all
+#' subsequent layers unless specifically overridden.
+#'
+#' There are three common ways to invoke \code{ggplot}:
+#' \itemize{
+#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
+#'    \item \code{ggplot(df)}
+#'    \item \code{ggplot()}
+#'   }
+#' 
+#' @seealso \url{http://had.co.nz/ggplot2}
+#'  \code{\link{geom_segment}} for a more general approach
+#' @export
+#' @keywords internal
+#' @param data default data set
+#' @param ... other arguments passed to specific methods
+#' @return The stuff :O
+#' @examples
+#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
+#'                  y = rnorm(30))
+#' # Compute sample mean and standard deviation in each group
+#' library(plyr)
+#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
 as.graph = function(reacts) {
 	if ( !("reactions" %in% class(reacts)) ) stop("Argument has wrong type!")
 	
@@ -302,14 +561,3 @@ as.graph = function(reacts) {
 		return(adj)
 	}
 }
-
-### Data documentation
-
-#' Metabolic network of human red blood cell.
-#'
-#' Contains the reactions of the human red blood cell (erythrocite) metabolic 
-#' model together with some randomly sample rates k.
-#'
-#' @format A list of reactions.
-#' @source \url{http://journals.plos.org/plosone/article/asset?unique&id=info:doi/10.1371/journal.pone.0004967.s003}
-"eryth"
