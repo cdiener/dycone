@@ -12,34 +12,27 @@ DC_TRANSCOL = colorRampPalette(c("seagreen", "darkgoldenrod1", "tomato"))
 
 norm = function(x) sqrt(sum(x*x))
 
-#' TODO: change me >:(
+#' Get the k-cone from a given flux cone.
 #'
-#' \code{ggplot()} initializes a ggplot object. It can be used to
-#' declare the input data frame for a graphic and to specify the
-#' set of plot aesthetics intended to be common throughout all
-#' subsequent layers unless specifically overridden.
-#'
-#' There are three common ways to invoke \code{ggplot}:
-#' \itemize{
-#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-#'    \item \code{ggplot(df)}
-#'    \item \code{ggplot()}
-#'   }
+#' \code{kcone()} builds the k-cone from a given flux cone basis V and a set
+#' of metabolic terms M by calculating \eqn{M^{-1}V}.
 #' 
-#' @seealso \url{http://had.co.nz/ggplot2}
-#'  \code{\link{geom_segment}} for a more general approach
+#' @seealso \code{\link{polytope}} for a way to calculate the flux cone, 
+#'  \code{\link{ma_terms}} to get mass action termsq 
 #' @export
-#' @keywords internal
-#' @param data default data set
-#' @param ... other arguments passed to specific methods
+#' @keywords internal basis
+#' @param V The flux cone basis. Rows denote the dimensions and columns the
+#'  individual basis vectors.
+#' @param m_terms The metabolic terms. A vector with as many entries as rows in V.
+#'  All entries hsould be larger than 0.
+#' @param normalize Whether the basis vectors should be scaled to unit length.
+#'  Not recommened for differential analysis.
 #' @return The stuff :O
 #' @examples
-#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-#'                  y = rnorm(30))
-#' # Compute sample mean and standard deviation in each group
-#' library(plyr)
-#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
-kcone = function(V, mats, normalize=F) {
+#' data(eryth)
+#' V = polytope(eryth)
+#' K = kcone(V, mats)
+kcone = function(V, mats, normalize=FALSEq) {
     K = diag(1/mats)%*%V
 	if(normalize) K = apply(K,2,function(x) x/norm(x))
     class(K) = append(c("basis", "kcone"), class(K))
@@ -110,7 +103,7 @@ get_kcone_basis = function(s_matrix, v_terms) {
 #' # Compute sample mean and standard deviation in each group
 #' library(plyr)
 #' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
-get_polytope_basis = function(s_matrix, v_terms) {
+get_polytope_basis = function(s_matrix, v_terms=rep(1, nrow(S))) {
 	mat = v_terms
 	const_matrix = rcdd::d2q(-diag(ncol(s_matrix)))
 	const_b = rcdd::d2q(rep(0,ncol(s_matrix)))
