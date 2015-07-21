@@ -32,7 +32,7 @@ norm = function(x) sqrt(sum(x*x))
 #' data(eryth)
 #' V = polytope(eryth)
 #' K = kcone(V, mats)
-kcone = function(V, mats, normalize=FALSEq) {
+kcone = function(V, mats, normalize=FALSE) {
     K = diag(1/mats)%*%V
 	if(normalize) K = apply(K,2,function(x) x/norm(x))
     class(K) = append(c("basis", "kcone"), class(K))
@@ -103,7 +103,7 @@ get_kcone_basis = function(s_matrix, v_terms) {
 #' # Compute sample mean and standard deviation in each group
 #' library(plyr)
 #' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
-get_polytope_basis = function(s_matrix, v_terms=rep(1, nrow(S))) {
+get_polytope_basis = function(s_matrix, v_terms=rep(1, ncol(S))) {
 	mat = v_terms
 	const_matrix = rcdd::d2q(-diag(ncol(s_matrix)))
 	const_b = rcdd::d2q(rep(0,ncol(s_matrix)))
@@ -320,7 +320,7 @@ occupation = function(basis) {
 plot.basis = function(b, n_cl=sqrt(ncol(b)/2), ...) {	
     clustered = F
     
-    if(ncol(b)>1e3 && !is.na(n_cl)) {
+    if((ncol(b)>1e3 || n_cl != sqrt(ncol(b)/2)) && !is.na(n_cl)) {
         write("Basis are very large. Reducing by clustering...", file="")
         cl = kmeans(t(b), centers=n_cl, iter.max=100, nstart=3)
         write(sprintf("Mean in-cluster distance: %g.",
@@ -332,11 +332,11 @@ plot.basis = function(b, n_cl=sqrt(ncol(b)/2), ...) {
     if(clustered) {
         ann = data.frame(n=cl$size)
         pheatmap::pheatmap(b, border=NA, col=DC_SINGLECOL(101), 
-            labels_col=1:ncol(b), annotation_col=ann)
+            labels_row=1:nrow(b), annotation_col=ann)
     }
     else {
         pheatmap::pheatmap(b, border=NA, col=DC_SINGLECOL(101), 
-            labels_col=1:ncol(b), ...)
+            labels_row=1:nrow(b), ...)
     }
 }
 
@@ -572,12 +572,19 @@ mabs_diff = function(x,y) {
 	return(m)
 }
 
+inv = function(i, A) 1/A[,i]
+
 #' Identifies hypothesis for differentially regulated reactions between a set of
 #' normal and disease conditions. 
 #'
-#' @param ref_list A list of basis for the reference/control group.
-#' @param treat_list A list of basis for the treatment/disease group.
-#' @param reacts A reaction list.
+#' @param normal A matrix or data frame containing the metabolic terms of the 
+#'  normal condition in the columns.
+#' @param disease A matrix or data frame containing the metabolic terms of the 
+#'  diseasse condition in the columns.
+#' @param type The type of analysis to be performed. Either 'transformation' or
+#'  'optimization'.
+#' @param v_opt A vector defining the optimization criterion. Must have the same
+#'  length as there are irreversible reactions. 
 #' @param correction_method A correction method for the multiple test p-values.
 #'	Takes the same arguments as the method argument in p.adjust.
 #' @param full If TRUE also returns the individual log fold changes along with
@@ -586,9 +593,36 @@ mabs_diff = function(x,y) {
 #' 	log fold changes between all reference basis and between reference and treatments.
 #'	If full is FALSE only returns the generated hypothesis. 
 #' @export
-hyp = function(normal, disease, reacts, correction_method="fdr", full=FALSE) {
+hyp = function(normal, disease, reacts, type="transformation", 
+    correction_method="fdr", v_opt=NULL, full=FALSE) {
 	# Create reference data
 	cref = combn(1:ncol(normal), 2)
+    normal = as.matrix(normal)
+    disease = as.matrix(disease)
+    
+    if(type == "transformation") {
+        normal = 1/normal
+        disease = 1/disease
+    }
+    else if(type == "optimization") {
+        M = cbind(normal,disease)
+        S = get_stochiometry(reacts)
+        if(is.null(v_opt)) v_opt = c(rep(0,ncol(S)-1),1)
+        if (requireNamespace("foreach", quietly = TRUE)) {
+            opt = foreach(i=1:ncol(M), .combine=cbind) %dopar%
+                dba(v_opt, S, M[,i], lower=0, upper=1)
+        }
+        else {
+            opt = lapply(1:ncol(M), function(i) 
+                dba(v_opt, S, M[,i], lower=0, upper=1))
+            opt = do.call(cbind, opt)
+        }
+        normal = opt[,1:ncol(normal)]
+        disease = opt[,(ncol(normal)+1):ncol(M)]
+    }
+    else if(type != "raw") 
+        stop("type must be either 'transformation' or 'optimization' :(") 
+    
 	res = single_hyp(normal[,1], normal[,1], reacts)
 	res = res[,-ncol(res)]
 	
@@ -637,41 +671,5 @@ hyp = function(normal, disease, reacts, correction_method="fdr", full=FALSE) {
 	}
 	
 	return(res)
-}
-
-#' TODO: change me >:(
-#'
-#' \code{ggplot()} initializes a ggplot object. It can be used to
-#' declare the input data frame for a graphic and to specify the
-#' set of plot aesthetics intended to be common throughout all
-#' subsequent layers unless specifically overridden.
-#'
-#' There are three common ways to invoke \code{ggplot}:
-#' \itemize{
-#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-#'    \item \code{ggplot(df)}
-#'    \item \code{ggplot()}
-#'   }
-#' 
-#' @seealso \url{http://had.co.nz/ggplot2}
-#'  \code{\link{geom_segment}} for a more general approach
-#' @export
-#' @keywords internal
-#' @param data default data set
-#' @param ... other arguments passed to specific methods
-#' @return The stuff :O
-#' @examples
-#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-#'                  y = rnorm(30))
-#' # Compute sample mean and standard deviation in each group
-#' library(plyr)
-#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
-trans_hyp = function(M_normal, M_disease, reacts, correction_method="fdr") {
-    inv = function(i, A) 1/A[,i]
-    h = multi_hyp(lapply(1:ncol(M_normal), inv, A=M_normal), 
-        lapply(1:ncol(M_disease), inv, A=M_disease), 
-        correction_method=correction_method)
-    
-    return(h)
 }
 

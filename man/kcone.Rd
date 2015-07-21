@@ -4,7 +4,7 @@
 \alias{kcone}
 \title{Get the k-cone from a given flux cone.}
 \usage{
-kcone(V, mats, normalize = FALSEq)
+kcone(V, mats, normalize = FALSE)
 }
 \arguments{
 \item{V}{The flux cone basis. Rows denote the dimensions and columns the

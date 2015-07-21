@@ -1,6 +1,6 @@
 Package: dycone
 Title: dycone - create the dynamic landscape from metabolome data
-Version: 0.1
+Version: 0.2
 Authors@R: person("Christian", "Diener", , "ch.diener@gmail.com", role = c("aut", "cre"))
 Description: Dycone allows you to analyze the dynamic landscape of a metabolic system 
 	without knowing its kinetic parameters by using steady state and dynamic metabolome data 

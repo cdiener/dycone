@@ -5,20 +5,27 @@
 \title{Identifies hypothesis for differentially regulated reactions between a set of
 normal and disease conditions.}
 \usage{
-hyp(normal, disease, reacts, correction_method = "fdr", full = FALSE)
+hyp(normal, disease, reacts, type = "transformation",
+  correction_method = "fdr", v_opt = NULL, full = FALSE)
 }
 \arguments{
-\item{reacts}{A reaction list.}
+\item{normal}{A matrix or data frame containing the metabolic terms of the
+normal condition in the columns.}
+
+\item{disease}{A matrix or data frame containing the metabolic terms of the
+diseasse condition in the columns.}
+
+\item{type}{The type of analysis to be performed. Either 'transformation' or
+'optimization'.}
 
 \item{correction_method}{A correction method for the multiple test p-values.
 Takes the same arguments as the method argument in p.adjust.}
 
+\item{v_opt}{A vector defining the optimization criterion. Must have the same
+length as there are irreversible reactions.}
+
 \item{full}{If TRUE also returns the individual log fold changes along with
 the differential regulation data.}
-
-\item{ref_list}{A list of basis for the reference/control group.}
-
-\item{treat_list}{A list of basis for the treatment/disease group.}
 }
 \value{
 If full is TRUE returns a list of generated hypothesis and the individual

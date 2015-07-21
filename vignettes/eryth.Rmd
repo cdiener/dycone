@@ -19,7 +19,8 @@ In this example we will use dycone to analyze some perturbations in the
 Red blood cell model of Resendis. First we will use dycone to get its stochiometric matrix and extract the steady state from the orginial SBML file.
 
 ```{r}
-library(dycone)
+#library(dycone)
+devtools::load_all()
 data(eryth)
 reacts = make_irreversible(eryth)
 print(eryth)
@@ -47,41 +48,44 @@ S = get_stochiometry(eryth, const=constants)
 Extracting the k-cone
 ---------------------
 
-Getting the consistent (all $k_i>0$) is simple with dycone and can be done straight
-forward. Let's also extract the eigenpathway at once.
+Getting the consistent k-cone (all $k_i>0$) takes two steps in dycone. First, 
+calculation of the general flux cone and, second, calculation of the specific
+flux cone. Let's calculate and look at the flux cone first...
 
-```{r fig.width=24, fig.height=8}
-kc = get_polytope_basis(S, get_ma_terms(S, concs))
-ep = eigendynamics(kc)
-plot(kc, key=F)
+```{r fig.width=16, fig.height=8}
+V = get_polytope_basis(S)
+m_terms = get_ma_terms(S, concs)
+K = kcone(V, m_terms)
+plot(V)
 ```
 
-Some interesting structurs can be observed from the basis alone. For instance basis vectors with only two reactions indicate a constant relation of $k_i/k_j = const".
+Some interesting structurs can be observed from the flux kone alone. For instance, 
+basis vectors with only two reactions indicate a constant relation of the form
+$k_i/k_j = const.$.
 
 Perturbance experiment
 ----------------------
 
-Now, let's set up a small perturbation experiment in order to execute the differential k-cone analysis. We will use a faster version of the eigenpathways
+Now, let's set up a small perturbation experiment in order to execute the 
+differential k-cone analysis. We will use a faster version of the eigendynamics
 as reference parameters and perturb the steady state value of pyruvate.
 
 ```{r}
-k = 1e3*ep
+k = 1e3*eigendynamics(K)
 
 # Now we generate several new steady states coming from a disturbed ethanol 
 # production 
 
-scales = 10^c(-2,-4)
+scales = 10^c(-1,-2)
 d_concs = concs
-d_eps = ep 
-d_basis = list(kc)
 for( i in 1:length(scales) ) {
 	d_c = concs
 	d_c["pyr"] = d_c["pyr"]*scales[i]
 	d_concs = rbind(d_concs, d_c)
-	basis = get_polytope_basis(S, get_ma_terms(S, d_c))
-	d_basis[[i+1]] = basis
-	d_eps = rbind(d_eps, eigendynamics(basis))
 }
+
+m_terms = apply(d_concs, 1, function(co) get_ma_terms(S, co))
+d_basis = lapply(1:3, function(i) kcone(V, m_terms[,i]))
 ``` 
 
 First we will have a look at the projection of the respective k-cones in a 2D space
@@ -91,34 +95,33 @@ with colors from green to red indicating a diminishing ethanol production.
 plot_red(d_basis)
 ```
 
-So we can already observe that only a small portion of the k-cone is influenced.
-In order to see which parts of the basis are changed we will compare the reference
-k-cone to the one obtained from the largest perturbation. We can use the dycone function `d()` to get the differnce between two basis, even if they have different numbers of basis vectors.
-
-```{r fig.width=24, fig.height=8}
-plot( d(d_basis[[3]], kc) )
-```
-We see that the most prominent change is an increased reaction rate for two reactions, 
-which result to be the two reactions consuming Pyruvate. However, there are also some other
-changes which represent alternative hypothesis what might have caused the change in
-steady states. In order to investigate them in more detail there are two strategies.
-
-First, we can evaluate the k-cones by its eigenpathways alone. This gives us some
-comparative analysis over the most representative k-vector in the space.
-
-```{r fig.width=25, fig.height=8}
-barplot( d_eps, col=TRANSCOL(3), names=1:ncol(d_eps), xlab="reactions", beside=T )
-```
-
-Here we also see some other reactions popping up.
-Alternatively, we can also generate hypothesis from the entire space by seeing which
-reactions are changed at least by 1% across all k-cone basis vectors. This is done
-with the function `hyp()`.
+This gives a visual representation but no detailed information which reactions 
+are the most likely to be perturbed in the transition from the high to low
+pyruvate state. This can be achieved by the `hyp` function. We will add noise
+samples to each condition to simulate an experimental measurement.
 
 ```{r}
-h = hyp(kc, d_basis[[3]], reacts, tol=1e-2)
-print(h)
+noise = function(x) {
+    new = pmax(0, x*rnorm(length(x),1,0.25))
+    names(new) = names(x)
+    return(new)
+}
+
+set.seed(42)
+
+exp_concs = cbind(noise(d_concs[1,]), noise)
+normal = replicate(4, get_ma_terms(S, noise(d_concs[1,])))
+disease = replicate(4, get_ma_terms(S, noise(d_concs[3,])))
+
+h = hyp(normal, disease, reacts)
+print(h[h$pval<0.05,])
 ```
+
+We see that the most prominent change is an increased reaction rate for two reactions, 
+which result to be the two reactions consuming Pyruvate. However, there are also some other
+changes, however, their fold_changes are much smaller than 2, indicating only slight alterations
+due to the added noise. The mean log-fold change of the alterations in pyruvate
+production are close to the actual alteration (90-fold predicted vs 100-fold truth).
 
 As we can see the change in Pyruvate is explained by either up-regulating the pyruvate
 consumption or (less likely) a lower production of upstream substrates which might have to act together. 
