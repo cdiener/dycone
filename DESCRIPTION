@@ -11,5 +11,5 @@ BugReports: https://github.com/cdiener/dycone/issues
 License: MIT
 LazyData: true
 Imports: deSolve, rcdd, MASS, pheatmap, magrittr, RCurl, rvest
-Suggests: igraph, sybilSBML, testthat, knitr, doMC, quadprog
+Suggests: testthat, covr, igraph, sybilSBML, knitr, doMC, quadprog
 VignetteBuilder: knitr

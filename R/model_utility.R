@@ -10,15 +10,17 @@
 str_conv = function(str) {
 	val = tryCatch(as.numeric(str), warning = function(w) {
 		if( is.null(grep(",",str)) )
-			gsub("^\\s+|\\s+$", "", str)
-		gsub("^\\s+|\\s+$", "", strsplit(str,",[[:space:]]*")[[1]])
+			return(gsub("^\\s+|\\s+$", "", str))
+		v = gsub("^\\s+|\\s+$", "", strsplit(str,",[[:space:]]*")[[1]])
+        v = tryCatch(as.numeric(v), warning = function(w) v)
+        return(v)
 	})
 
 	return(val)		
 }
 
 order_by = function(x, y) {
-	o = sapply(x, function(x) which(x==y))
+	o = sapply(x, function(x) which(x==y)[1])
 	return(o)
 }
 
