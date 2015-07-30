@@ -4,7 +4,7 @@
 \alias{get_polytope_basis}
 \title{TODO: change me >:(}
 \usage{
-get_polytope_basis(s_matrix, v_terms = rep(1, ncol(S)))
+get_polytope_basis(s_matrix, v_terms = rep(1, ncol(s_matrix)))
 }
 \arguments{
 \item{data}{default data set}

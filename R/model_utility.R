@@ -76,7 +76,7 @@ mass_action = function(substrates, concs)
 	return( prod(sc^nc) )
 }
 
-partial_deriv = function(i, substrates, concs)
+deriv_ma = function(i, substrates, concs)
 {
 	f = abs( min(substrates[i], 0) )
 	substrates[i] = 0
@@ -85,7 +85,7 @@ partial_deriv = function(i, substrates, concs)
 	sc = concs[substrates<0]
 	nc = abs( substrates[substrates<0] )
 	
-	if( length(sc) == 0 ) return( 0 )
+	# if( length(sc) == 0 ) return( 0 )
 
 	pd = prod(sc^nc)*f*concs[i]^(f-1)
 	
@@ -119,10 +119,10 @@ partial_deriv = function(i, substrates, concs)
 #' # Compute sample mean and standard deviation in each group
 #' library(plyr)
 #' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
-get_jacobian = function(s_matrix, concs)
+get_jacobian = function(s_matrix, concs, deriv_func = deriv_ma)
 {
 	J = apply(s_matrix, 2, function(x) 
-			sapply(seq_along(x), partial_deriv, substrates=x, concs=concs) )
+			sapply(seq_along(x), deriv_func, substrates=x, concs=concs) )
 	
 	return( t(J) ) 
 }
@@ -204,17 +204,16 @@ get_reaction_elems = function(reaction_str) {
 }
 
 read_reactions = function(react_file) {
-	reacts = read.csv(react_file)
+	reacts = read.csv(react_file, stringsAsFactors=FALSE)
 	
 	has_arrows = grepl("\\s*<?\\s?=?-?\\s?>\\s*", reacts[,1])
 	if ( !all(has_arrows) ) {
-		cat("Missing arrows in lines:")
-		print(which(!has_arrows))
-		stop("At least one of the lines has no reaction arrows!")
+		stop(sprintf("The following reactions are missing reacion arrows: %s",
+            paste(which(!has_arrows), collapse=", ")))
 	}
 	
-	res = apply( reacts, 1, function(x) 
-		c( get_reaction_elems(x[1]), sapply(x[-1], str_conv) ))
+	res = apply(reacts, 1, function(x) 
+		c( get_reaction_elems(x[1]), lapply(x[-1], str_conv) ))
 	
 	class(res) = append(class(res), "reactions")
 	
@@ -440,13 +439,31 @@ make_irreversible = function(reacts) {
 	return(r)
 }
 
+#' Obtains properties from a reaction list
+#' 
+#' @param r The reaction list.
+#' @param field Name of the property to be obtained.
+#' @return A data.frame mapping the property to reaction indices.
+#' @export
+rp = function(r, field="KEGG_enzyme") {
+	prop = lapply(1:length(r), function(i) {
+        ri = r[[i]]
+        if(all(is.na(ri[[field]]))) return(NULL)
+        data.frame(r_idx=i, x=ri[[field]], stringsAsFactors=F)
+    })
+    prop = do.call(rbind,prop)
+    names(prop)[2] = field
+    
+	return(prop)
+}
+
 #' Returns the number of different substrates a reaction has
 #'
 #' @param reacts A reactions object as returned by \code{\link{read_reactions}}
 #' @return A numeric vector containing the number of substrates for each reaction
 #' @export
 r_order = function(reacts) {
-	return( sapply(reacts, function(x) length(x$S)) )
+	return( sapply(reacts, function(x) length(x$S) - is.na(x$S[1])) )
 }
 
 #' TODO: change me >:(
@@ -509,6 +526,7 @@ constant_flux = function(reacts) {
 #' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
 plot.reactions = function(x) {
 	N = get_stochiometry(x, reversible=TRUE)
+
 	if (requireNamespace("igraph", quietly = TRUE)) {
 		g = igraph::graph.adjacency(N%*%t(N), weighted=TRUE, diag=FALSE)
 		igraph::plot.igraph(g, layout=igraph::layout.circle, vertex.size=10, 

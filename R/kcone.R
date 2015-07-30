@@ -35,6 +35,7 @@ norm = function(x) sqrt(sum(x*x))
 kcone = function(V, mats, normalize=FALSE) {
     K = diag(1/mats)%*%V
 	if(normalize) K = apply(K,2,function(x) x/norm(x))
+    K = as.matrix(K)
     class(K) = append(c("basis", "kcone"), class(K))
 	return(K)
 }
@@ -103,7 +104,7 @@ get_kcone_basis = function(s_matrix, v_terms) {
 #' # Compute sample mean and standard deviation in each group
 #' library(plyr)
 #' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
-get_polytope_basis = function(s_matrix, v_terms=rep(1, ncol(S))) {
+get_polytope_basis = function(s_matrix, v_terms=rep(1, ncol(s_matrix))) {
 	mat = v_terms
 	const_matrix = rcdd::d2q(-diag(ncol(s_matrix)))
 	const_b = rcdd::d2q(rep(0,ncol(s_matrix)))
@@ -116,7 +117,7 @@ get_polytope_basis = function(s_matrix, v_terms=rep(1, ncol(S))) {
 	vrep = rcdd::scdd(hp)
 	vp = vrep$output[,-(1:2)]
 	
-	basis = apply(rcdd::q2d(t(vp)), 2, function(x) x/norm(x))
+	basis = as.matrix(apply(rcdd::q2d(t(vp)), 2, function(x) x/norm(x)))
 	class(basis) = append("basis", class(basis))
 	
 	return( basis)
@@ -212,49 +213,6 @@ stability_analysis = function(basis, s_matrix, concs) {
 	return( res )
 }
 
-#' TODO: change me >:(
-#'
-#' \code{ggplot()} initializes a ggplot object. It can be used to
-#' declare the input data frame for a graphic and to specify the
-#' set of plot aesthetics intended to be common throughout all
-#' subsequent layers unless specifically overridden.
-#'
-#' There are three common ways to invoke \code{ggplot}:
-#' \itemize{
-#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-#'    \item \code{ggplot(df)}
-#'    \item \code{ggplot()}
-#'   }
-#' 
-#' @seealso \url{http://had.co.nz/ggplot2}
-#'  \code{\link{geom_segment}} for a more general approach
-#' @export
-#' @keywords internal
-#' @param data default data set
-#' @param ... other arguments passed to specific methods
-#' @return The stuff :O
-#' @examples
-#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-#'                  y = rnorm(30))
-#' # Compute sample mean and standard deviation in each group
-#' library(plyr)
-#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
-get_fluxes = function(basis, S, reactions, concs) {
-	mat = get_ma_terms(S, concs)
-	imp = rowMeans(basis)*mat
-	names(imp) = 1:length(imp)
-
-	rn = NULL
-	for(r in reactions) {
-		rn = rbind(rn, c(r$abbreviation, r$name))
-		if( r$rev ) rn = rbind(rn, c(r$abbreviation, r$name))
-	}
-
-	imp = data.frame( flux=imp, id=rn[,1], name=rn[,2] )
-	imp = imp[order(imp$flux, decreasing=T),]
-	
-	return(imp)
-}
 
 #' TODO: change me >:(
 #'
@@ -373,11 +331,11 @@ plot_red = function(basis_list, arrows=TRUE, col=NULL, n_cl=NULL) {
 	b_rows = sapply(basis_list, nrow)
     b_cols = sapply(basis_list, ncol)
     
-    if(sd(b_rows)>0) stop("All basis need to have the same dimension!")
-    if(nrow(basis_list[[1]])<2) stop("Basis must be at least 2-dimensional!")
+    if(length(basis_list)>1 && sd(b_rows)>0) 
+        stop("All basis need to have the same dimension!")
+    if(any(b_rows<2)) stop("Basis must be at least 2-dimensional!")
     n = length(basis_list)
 
-	
     all_basis = do.call(cbind, basis_list)
     
     if(nrow(all_basis)==2) {
@@ -389,7 +347,7 @@ plot_red = function(basis_list, arrows=TRUE, col=NULL, n_cl=NULL) {
         red = lapply(basis_list, function(b) predict(pca, t(b))[,1:2])
     }
     
-    if(max(b_cols)>1e3) {
+    if(max(b_cols)>1e3 || !is.null(n_cl)) {
         write("Basis are very large. Reducing by clustering...", file="")
         if(is.null(n_cl)) n_cl = sqrt(mean(b_cols)/2)
         cl = lapply(red, function(b) 
@@ -494,7 +452,7 @@ scaling = function(x, y=0:1) {
 inside = function(x, s_matrix, v_terms, tol=sqrt(.Machine$double.eps)) {
 	right = s_matrix%*%diag(v_terms)%*%x
 	
-	if(is.null(dim(x))) return(all(right>=0) & all(abs(right)<tol))
+	if(is.null(dim(x))) return(all(right>-tol) & all(abs(right)<tol))
 	return( apply(right, 2, function(r) all(r>=0) & all(abs(r)<tol)) )
 }
 
@@ -572,8 +530,6 @@ mabs_diff = function(x,y) {
 	return(m)
 }
 
-inv = function(i, A) 1/A[,i]
-
 #' Identifies hypothesis for differentially regulated reactions between a set of
 #' normal and disease conditions. 
 #'
@@ -609,8 +565,8 @@ hyp = function(normal, disease, reacts, type="transformation",
         S = get_stochiometry(reacts)
         if(is.null(v_opt)) v_opt = c(rep(0,ncol(S)-1),1)
         if (requireNamespace("foreach", quietly = TRUE)) {
-            opt = foreach(i=1:ncol(M), .combine=cbind) %dopar%
-                dba(v_opt, S, M[,i], lower=0, upper=1)
+            opt = foreach::"%dopar%"(foreach::foreach(i=1:ncol(M), .combine=cbind),  
+                dba(v_opt, S, M[,i], lower=0, upper=1))
         }
         else {
             opt = lapply(1:ncol(M), function(i) 

@@ -42,11 +42,13 @@ closest = function(p, S, m_terms) {
     if (!requireNamespace("quadprog", quietly = TRUE))
         stop("This function requires the quadprog package.")
     
-    if(length(p) != nrow(S)) stop("p does not have the correct dimension!")
+    if(length(p) != ncol(S)) stop("p does not have the correct dimension!")
+    dp = norm(p)
     
-    A = t(S%*%m_terms)
-    qp = quadprog::solve.QP(diag(ncol(S)), p, A, meq=nrow(S))
+    A = S%*%diag(m_terms)
+    A = t(rbind(A, diag(ncol(S))))
+    qp = quadprog::solve.QP(diag(ncol(S)), p/dp, A, meq=nrow(S))
 
 	
-	return(qp$solution)
+	return(qp$solution*dp)
 }

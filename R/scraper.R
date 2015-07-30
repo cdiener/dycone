@@ -50,24 +50,6 @@ sbml_species = function(sbml_file) {
 	return( out )
 }
 
-#' Obtains properties from a reaction list
-#' 
-#' @param r The reaction list.
-#' @param field Name of the property to be obtained.
-#' @return A data.frame mapping the property to reaction indices.
-#' @export
-rp = function(r, field="KEGG_enzyme") {
-	prop = lapply(1:length(r), function(i) {
-        ri = r[[i]]
-        if(all(is.na(ri[[field]]))) return(NULL)
-        data.frame(r_idx=i, x=ri[[field]], stringsAsFactors=F)
-    })
-    prop = do.call(rbind,prop)
-    names(prop)[2] = field
-    
-	return(prop)
-}
-
 #' Parses concentration values from HMDB.
 #'
 #' @param val The value as it appears in HMDB.

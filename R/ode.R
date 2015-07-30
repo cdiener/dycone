@@ -14,14 +14,3 @@ timecourse = function(x0, t, k, s_matrix) {
 	
 	return(sol)
 }
-
-plot.dyconetc = function(tc) {
-	melted = reshape2::melt(tc[,-1])
-	melted = cbind(tc[,1], melted)
-	names(melted) = c("t", "tid", "species", "conc")
-	
-	pl = ggplot2::ggplot(melted, ggplot2::aes(x=t, y=conc)) + ggplot2::geom_line() +
-			facet_wrap(~species, scales="free_y") + ggplot2::theme_bw()
-			
-	return(pl)
-}

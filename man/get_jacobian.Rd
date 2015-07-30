@@ -4,7 +4,7 @@
 \alias{get_jacobian}
 \title{TODO: change me >:(}
 \usage{
-get_jacobian(s_matrix, concs)
+get_jacobian(s_matrix, concs, deriv_func = deriv_ma)
 }
 \arguments{
 \item{data}{default data set}
