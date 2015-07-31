@@ -167,7 +167,7 @@ get_ma_terms = function(s_matrix, concs)
 	}
 	else if(is.data.frame(concs)) {
 		if("name" %in% names(concs)) {
-			o = order_by(concs$name, rownames(S))
+			o = order_by(concs$name, rownames(s_matrix))
 			concs = concs[o,]
 			name_idx = which(names(concs) == "name")
 			prods = apply(concs[,-name_idx], 2, function(co) 
@@ -463,7 +463,7 @@ rp = function(r, field="KEGG_enzyme") {
 #' @return A numeric vector containing the number of substrates for each reaction
 #' @export
 r_order = function(reacts) {
-	return( sapply(reacts, function(x) length(x$S) - is.na(x$S[1])) )
+	return( sapply(reacts, function(x) sum(x$N_S) - is.na(x$S[1])) )
 }
 
 #' TODO: change me >:(

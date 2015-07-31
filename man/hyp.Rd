@@ -6,7 +6,7 @@
 normal and disease conditions.}
 \usage{
 hyp(normal, disease, reacts, type = "transformation",
-  correction_method = "fdr", v_opt = NULL, full = FALSE)
+  correction_method = "fdr", sorted = T, v_opt = NULL, full = FALSE)
 }
 \arguments{
 \item{normal}{A matrix or data frame containing the metabolic terms of the
@@ -15,8 +15,8 @@ normal condition in the columns.}
 \item{disease}{A matrix or data frame containing the metabolic terms of the
 diseasse condition in the columns.}
 
-\item{type}{The type of analysis to be performed. Either 'transformation' or
-'optimization'.}
+\item{type}{The type of analysis to be performed. Either 'transformation',
+'optimization' or 'raw' for a pass-through option.}
 
 \item{correction_method}{A correction method for the multiple test p-values.
 Takes the same arguments as the method argument in p.adjust.}
@@ -26,6 +26,9 @@ length as there are irreversible reactions.}
 
 \item{full}{If TRUE also returns the individual log fold changes along with
 the differential regulation data.}
+
+\item{sort}{Whether the results should be sorted by p-value and mean log-fold
+change.}
 }
 \value{
 If full is TRUE returns a list of generated hypothesis and the individual

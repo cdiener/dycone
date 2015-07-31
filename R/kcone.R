@@ -537,8 +537,10 @@ mabs_diff = function(x,y) {
 #'  normal condition in the columns.
 #' @param disease A matrix or data frame containing the metabolic terms of the 
 #'  diseasse condition in the columns.
-#' @param type The type of analysis to be performed. Either 'transformation' or
-#'  'optimization'.
+#' @param type The type of analysis to be performed. Either 'transformation',
+#'  'optimization' or 'raw' for a pass-through option.
+#' @param sort Whether the results should be sorted by p-value and mean log-fold
+#'  change.
 #' @param v_opt A vector defining the optimization criterion. Must have the same
 #'  length as there are irreversible reactions. 
 #' @param correction_method A correction method for the multiple test p-values.
@@ -550,7 +552,7 @@ mabs_diff = function(x,y) {
 #'	If full is FALSE only returns the generated hypothesis. 
 #' @export
 hyp = function(normal, disease, reacts, type="transformation", 
-    correction_method="fdr", v_opt=NULL, full=FALSE) {
+    correction_method="fdr", sorted=T, v_opt=NULL, full=FALSE) {
 	# Create reference data
 	cref = combn(1:ncol(normal), 2)
     normal = as.matrix(normal)
@@ -618,7 +620,7 @@ hyp = function(normal, disease, reacts, type="transformation",
 		if(x==0) "same" else if(x>0) "up" else "down")
 	res$type = factor(reg)
 	res$pval = p.adjust(res$pval, method=correction_method)
-	res = res[order(res$pval, -abs(res$mean_log_fold)),]
+	if(sorted) res = res[order(res$pval, -abs(res$mean_log_fold)),]
 	
 	if(full) {
 		lfc_n = data.frame(normal=lfc_n)
