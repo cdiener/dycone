@@ -2,42 +2,23 @@
 % Please edit documentation in R/model_utility.R
 \name{plot.reactions}
 \alias{plot.reactions}
-\title{TODO: change me >:(}
+\title{Plots the reactions as a graph.}
 \usage{
 \method{plot}{reactions}(x)
 }
 \arguments{
-\item{data}{default data set}
-
-\item{...}{other arguments passed to specific methods}
-}
-\value{
-The stuff :O
+\item{x}{A reaction list.}
 }
 \description{
-\code{ggplot()} initializes a ggplot object. It can be used to
-declare the input data frame for a graphic and to specify the
-set of plot aesthetics intended to be common throughout all
-subsequent layers unless specifically overridden.
-}
-\details{
-There are three common ways to invoke \code{ggplot}:
-\itemize{
-   \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-   \item \code{ggplot(df)}
-   \item \code{ggplot()}
-  }
+Plots the reactions as a graph.
 }
 \examples{
-df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-                 y = rnorm(30))
-# Compute sample mean and standard deviation in each group
-library(plyr)
-ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+data(eryth)
+plot(eryth)
 }
 \seealso{
-\url{http://had.co.nz/ggplot2}
- \code{\link{geom_segment}} for a more general approach
+\code{\link{print.reactions}} for a nicely formatted representation.
 }
-\keyword{internal}
+\keyword{plot,}
+\keyword{reactions}
 

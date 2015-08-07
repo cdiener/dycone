@@ -2,42 +2,35 @@
 % Please edit documentation in R/model_utility.R
 \name{get_jacobian}
 \alias{get_jacobian}
-\title{TODO: change me >:(}
+\title{Calculates the Jacobian matrix.}
 \usage{
 get_jacobian(s_matrix, concs, deriv_func = deriv_ma)
 }
 \arguments{
-\item{data}{default data set}
+\item{s_matrix}{The stochiometric matrix of the model.}
 
-\item{...}{other arguments passed to specific methods}
+\item{concs}{The concentrations of the substrates.}
+
+\item{deriv_func}{The function calculating the derivative. Must be of the
+form func(idx, subs, concs) where idx is the index of the differentiation
+variable, subs the stochiometry of the substrates and concs the concentration
+of substrates. See \code{\link{mass_action}} for an example.}
 }
 \value{
-The stuff :O
+The Jacobian matrix of dimension n_s x n_r where entry (i,j) denotes
+	the derivative dv[j]/dS[i].
 }
 \description{
-\code{ggplot()} initializes a ggplot object. It can be used to
-declare the input data frame for a graphic and to specify the
-set of plot aesthetics intended to be common throughout all
-subsequent layers unless specifically overridden.
-}
-\details{
-There are three common ways to invoke \code{ggplot}:
-\itemize{
-   \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-   \item \code{ggplot(df)}
-   \item \code{ggplot()}
-  }
+Calculates the Jacobian matrix.
 }
 \examples{
-df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-                 y = rnorm(30))
-# Compute sample mean and standard deviation in each group
-library(plyr)
-ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+data(eryth)
+S = stochiometry(eryth)
+J = jacobian(S, runif(nrow(S)))
 }
 \seealso{
-\url{http://had.co.nz/ggplot2}
- \code{\link{geom_segment}} for a more general approach
+\code{\link{stochiometry}} to calculate the stochiometric matrix.
 }
-\keyword{internal}
+\keyword{jacobian,}
+\keyword{stochiometry}
 

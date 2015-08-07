@@ -12,9 +12,13 @@ rp(r, field = "KEGG_enzyme")
 \item{field}{Name of the property to be obtained.}
 }
 \value{
-A data.frame mapping the property to reaction indices.
+A data frame mapping the property to reaction indices.
 }
 \description{
 Obtains properties from a reaction list
+}
+\examples{
+data(eryth)
+print(rp(eryth, "name"))
 }
 

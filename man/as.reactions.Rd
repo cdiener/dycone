@@ -2,42 +2,28 @@
 % Please edit documentation in R/model_utility.R
 \name{as.reactions}
 \alias{as.reactions}
-\title{TODO: change me >:(}
+\title{Converts a stochiometric matrix to a reaction list.}
 \usage{
 as.reactions(s_matrix, reversible = F, r_names = NA)
 }
 \arguments{
-\item{data}{default data set}
+\item{s_matrix}{The stochiometric matrix to be converted.}
 
-\item{...}{other arguments passed to specific methods}
+\item{reversible}{Marks reversible reactions. FALSE denotes that
+all reactions are irreversible. Otherwise a boolean vector of length
+n_r defining the reversibility for each reaction.}
 }
 \value{
-The stuff :O
+A reaction list containing the reactions from S.
 }
 \description{
-\code{ggplot()} initializes a ggplot object. It can be used to
-declare the input data frame for a graphic and to specify the
-set of plot aesthetics intended to be common throughout all
-subsequent layers unless specifically overridden.
-}
-\details{
-There are three common ways to invoke \code{ggplot}:
-\itemize{
-   \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-   \item \code{ggplot(df)}
-   \item \code{ggplot()}
-  }
+Converts a stochiometric matrix to a reaction list.
 }
 \examples{
-df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-                 y = rnorm(30))
-# Compute sample mean and standard deviation in each group
-library(plyr)
-ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+S = matrix(c(-1,1,1,-1))
+rownames(S) <- c("A", "B")
+print(as.reactions(S))
 }
-\seealso{
-\url{http://had.co.nz/ggplot2}
- \code{\link{geom_segment}} for a more general approach
-}
-\keyword{internal}
+\keyword{reactions}
+\keyword{stochiometry,}
 

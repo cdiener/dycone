@@ -10,9 +10,13 @@ r_order(reacts)
 \item{reacts}{A reactions object as returned by \code{\link{read_reactions}}}
 }
 \value{
-A numeric vector containing the number of substrates for each reaction
+A numeric vector containing the number of reactants for each reaction
 }
 \description{
 Returns the number of different substrates a reaction has
+}
+\examples{
+data(eryth)
+print(r_order(eryth))
 }
 

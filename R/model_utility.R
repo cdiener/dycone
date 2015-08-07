@@ -24,33 +24,22 @@ order_by = function(x, y) {
 	return(o)
 }
 
-#' TODO: change me >:(
+#' %c% is a caching operator. It is used after an
+#' expression, detects all assigned variables and saves
+#' them into a file. If the file given exists the variables
+#' are read from the cache file and not calculated again.
+#' In order to delete the cache simply delete the associated
+#' file.
 #'
-#' \code{ggplot()} initializes a ggplot object. It can be used to
-#' declare the input data frame for a graphic and to specify the
-#' set of plot aesthetics intended to be common throughout all
-#' subsequent layers unless specifically overridden.
-#'
-#' There are three common ways to invoke \code{ggplot}:
-#' \itemize{
-#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-#'    \item \code{ggplot(df)}
-#'    \item \code{ggplot()}
-#'   }
-#' 
-#' @seealso \url{http://had.co.nz/ggplot2}
-#'  \code{\link{geom_segment}} for a more general approach
 #' @export
-#' @keywords internal
-#' @param data default data set
-#' @param ... other arguments passed to specific methods
-#' @return The stuff :O
+#' @keywords operator, caching
+#' @param ex The R expression to be cached. Use brackets for 
+#'	multiline statements.	
+#' @param filename The filename of the cache file. 
 #' @examples
-#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-#'                  y = rnorm(30))
-#' # Compute sample mean and standard deviation in each group
-#' library(plyr)
-#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+#' # Is executed only if the file does not exist, otherwise
+#' # samples a and b are read from "samples.Rd"
+#' { a <- rnorm(1e5) } %c% "samples.Rd"
 '%c%' = function(ex, filename) {
 	if(!file.exists(filename)) {
 		e = new.env()
@@ -63,10 +52,17 @@ order_by = function(x, y) {
 
 #' Calculates the mass-action reaction rate
 #'
+#' @seealso \code{\link{stochiometry}} to generate the stochiometric
+#'	matrix from a reaction list.
+#'	\code{\link{ma_terms}} to calculate all mass-action terms at once.
 #' @export
 #' @param substrates Stochiometry of the substrates
 #' @param concs The concentrations used for the substrates
 #' @return The mass action term \deqn{\prod_{i \in N^-} S_i^|N_i|}
+#' @examples
+#' data(eryth)
+#' S = stochiometry(eryth)
+#' ma1 = mass_action(S[,1], runif(nrow(S)))
 mass_action = function(substrates, concs)
 {
 	sc = concs[substrates<0]
@@ -76,6 +72,18 @@ mass_action = function(substrates, concs)
 	return( prod(sc^nc) )
 }
 
+#' Calculates derivatives of mass-action kinetics.
+#'
+#' @seealso \code{\link{jacobian}} to calculate the Jacobian matrix.
+#' @export
+#' @param i The index of the substrate used as the differentiation variable.
+#' @param substrates The stochiometry of the subbstrates (column in the
+#'	stochiometric matrix.
+#' @param concs Concentrations of the substrates.
+#' @examples
+#' data(eryth)
+#' S = stochiometry(eryth)
+#' dma1_dS3 = deriv_ma(3, S[,1], runif(nrow(S)))
 deriv_ma = function(i, substrates, concs)
 {
 	f = abs( min(substrates[i], 0) )
@@ -92,33 +100,23 @@ deriv_ma = function(i, substrates, concs)
 	return( pd )
 }
 
-#' TODO: change me >:(
+#' Calculates the Jacobian matrix.
 #'
-#' \code{ggplot()} initializes a ggplot object. It can be used to
-#' declare the input data frame for a graphic and to specify the
-#' set of plot aesthetics intended to be common throughout all
-#' subsequent layers unless specifically overridden.
-#'
-#' There are three common ways to invoke \code{ggplot}:
-#' \itemize{
-#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-#'    \item \code{ggplot(df)}
-#'    \item \code{ggplot()}
-#'   }
-#' 
-#' @seealso \url{http://had.co.nz/ggplot2}
-#'  \code{\link{geom_segment}} for a more general approach
+#' @seealso \code{\link{stochiometry}} to calculate the stochiometric matrix.
 #' @export
-#' @keywords internal
-#' @param data default data set
-#' @param ... other arguments passed to specific methods
-#' @return The stuff :O
+#' @keywords jacobian, stochiometry
+#' @param s_matrix The stochiometric matrix of the model.
+#' @param concs The concentrations of the substrates.
+#' @param deriv_func The function calculating the derivative. Must be of the 
+#'	form func(idx, subs, concs) where idx is the index of the differentiation 
+#'	variable, subs the stochiometry of the substrates and concs the concentration
+#'	of substrates. See \code{\link{mass_action}} for an example.
+#' @return The Jacobian matrix of dimension n_s x n_r where entry (i,j) denotes
+#'	the derivative dv[j]/dS[i].
 #' @examples
-#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-#'                  y = rnorm(30))
-#' # Compute sample mean and standard deviation in each group
-#' library(plyr)
-#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+#' data(eryth)
+#' S = stochiometry(eryth)
+#' J = jacobian(S, runif(nrow(S)))
 get_jacobian = function(s_matrix, concs, deriv_func = deriv_ma)
 {
 	J = apply(s_matrix, 2, function(x) 
@@ -127,33 +125,26 @@ get_jacobian = function(s_matrix, concs, deriv_func = deriv_ma)
 	return( t(J) ) 
 }
 
-#' TODO: change me >:(
+#' Calculates all mass action terms \deqn{\prod_{i \in N^-} S_i^|N_i|}
 #'
-#' \code{ggplot()} initializes a ggplot object. It can be used to
-#' declare the input data frame for a graphic and to specify the
-#' set of plot aesthetics intended to be common throughout all
-#' subsequent layers unless specifically overridden.
-#'
-#' There are three common ways to invoke \code{ggplot}:
-#' \itemize{
-#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-#'    \item \code{ggplot(df)}
-#'    \item \code{ggplot()}
-#'   }
-#' 
-#' @seealso \url{http://had.co.nz/ggplot2}
-#'  \code{\link{geom_segment}} for a more general approach
+#' @seealso \code{\link{stochiometry()}} to calculate the stochiometric matrix.
 #' @export
-#' @keywords internal
-#' @param data default data set
-#' @param ... other arguments passed to specific methods
-#' @return The stuff :O
+#' @keywords kinetics, mass-action
+#' @param s_matrix The stochiometric matrix.
+#' @param concs The concentrations of the substrates. Can be one of two
+#'	\begin{itemize}
+#'		\item{A named vector containing the concentratiions for all substrates, 
+#'		where its names come from the same set as the rownames of S.}
+#'		\item{A data frame with one column names "name" containing the 
+#'		names and all other columns containing multiple concentration entries.}
+#'	\end{itemize}
+#' @return Either vector of length n_r containing the mass-action terms, if
+#'	concs was a vector, or a matrix with n_r rows containing the mass-action
+#'	in its columns.
 #' @examples
-#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-#'                  y = rnorm(30))
-#' # Compute sample mean and standard deviation in each group
-#' library(plyr)
-#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+#' data(eryth)
+#' S = stochiometry(eryth)
+#' mats = ma_terms(S, runif(nrow(S)))
 get_ma_terms = function(s_matrix, concs)
 {
 	prods = NULL
@@ -179,6 +170,8 @@ get_ma_terms = function(s_matrix, concs)
 	return( prods )
 }
 
+# Internal function to get the stochiometry from a string representation
+# of the reaction
 get_reaction_elems = function(reaction_str) {
 	
 	reversible = grepl("\\s*<.+\\s*", reaction_str)
@@ -203,6 +196,19 @@ get_reaction_elems = function(reaction_str) {
 					N_P=as.numeric(prods[seq(3,n_p,4)]), rev=reversible ) )
 }
 
+#' Reads a list of reactions with optional annotations from a file.
+#' 
+#' @export
+#' @param react_file A csv file containing the reactions, where the first
+#'	column denotes the reaction string and additional columns contain
+#'  annotations. A single annotation can contain several values as a 
+#'	comma separated string. The csv file should be saved with all entries
+#'	quoted.
+#' @param A list of reactions containing the stochiometry and additional 
+#'	annotations.
+#' @examples
+#' r_str = "'reaction','name','numbers'\n'A + B <=> C','r1','1,2,4'"
+#' r = read_reactions(textConnection(r_str))
 read_reactions = function(react_file) {
 	reacts = read.csv(react_file, stringsAsFactors=FALSE)
 	
@@ -220,6 +226,7 @@ read_reactions = function(react_file) {
 	return( res )
 }
 
+# Helper function to convert a reaction entry to a clean string version
 to_string = function(r, name=T) {
 	id = paste0(r$abbreviation,": ")
 	left = if (is.na(r$S[1])) "\u2205" 
@@ -231,45 +238,37 @@ to_string = function(r, name=T) {
 	return( out )
 }
 
+# Formats reactions to a nice string representation
 format.reactions = function(x) {
 	r_str = sapply(x, to_string)
 	
 	return( paste(r_str, collapse="\n") ) 
 }
 
+#' Prints a nice description of the reactions.
+#'
+#' @seealso \code{\link{as.reaction()}} to convert a stochiometric matrix
+#'	to a reaction list.
+#' @export
+#' @param x The reaction list to be output.
+#' @examples
+#' data(eryth)
+#' print(eryth)
 print.reactions = function(x) {
 	write( sprintf("Model has %d reactions (%d reversible)", 
 			length(x), sum(sapply(x, function(a) a$rev))), file="" )
 	write( format(x), file="" )
 }
 
-#' TODO: change me >:(
+#' Gets all species/metabolites from a reaction list.
 #'
-#' \code{ggplot()} initializes a ggplot object. It can be used to
-#' declare the input data frame for a graphic and to specify the
-#' set of plot aesthetics intended to be common throughout all
-#' subsequent layers unless specifically overridden.
-#'
-#' There are three common ways to invoke \code{ggplot}:
-#' \itemize{
-#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-#'    \item \code{ggplot(df)}
-#'    \item \code{ggplot()}
-#'   }
-#' 
-#' @seealso \url{http://had.co.nz/ggplot2}
-#'  \code{\link{geom_segment}} for a more general approach
 #' @export
-#' @keywords internal
-#' @param data default data set
-#' @param ... other arguments passed to specific methods
-#' @return The stuff :O
+#' @keywords susbtrates, stochiometry
+#' @param react A reaction list.
+#' @return A vector containing all unique species in the model.
 #' @examples
-#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-#'                  y = rnorm(30))
-#' # Compute sample mean and standard deviation in each group
-#' library(plyr)
-#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+#' data(eryth)
+#' print(species(eryth))
 get_species = function(reacts) {
 	if ( !("reactions" %in% class(reacts)) ) stop("Argument has wrong type!")
 	
@@ -278,34 +277,22 @@ get_species = function(reacts) {
 	return( unique(species) )
 }
 
-#' TODO: change me >:(
-#'
-#' \code{ggplot()} initializes a ggplot object. It can be used to
-#' declare the input data frame for a graphic and to specify the
-#' set of plot aesthetics intended to be common throughout all
-#' subsequent layers unless specifically overridden.
-#'
-#' There are three common ways to invoke \code{ggplot}:
-#' \itemize{
-#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-#'    \item \code{ggplot(df)}
-#'    \item \code{ggplot()}
-#'   }
+#' Calculates the stochiometric matrix for a list of reactions.
 #' 
-#' @seealso \url{http://had.co.nz/ggplot2}
-#'  \code{\link{geom_segment}} for a more general approach
+#' @seealso \code{\link{read_reactions()}} to read a reaction list from a file.
 #' @export
-#' @keywords internal
-#' @param data default data set
-#' @param ... other arguments passed to specific methods
-#' @return The stuff :O
+#' @keywords stochiometry
+#' @param reacts The reaction list to be used.
+#' @param reversible Whether the stochiometric matrix can include reversible 
+#'	reactions.
+#' @param const A vector of species names that are assumed to be invariant and
+#'	will be dropped from the stochiometric matrix. The default is not to drop
+#'	any species.
+#' @return The stochiometric matrix with dimension n_s x n_r.
 #' @examples
-#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-#'                  y = rnorm(30))
-#' # Compute sample mean and standard deviation in each group
-#' library(plyr)
-#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
-get_stochiometry = function(reacts, reversible=FALSE, const="none") {
+#' data(eryth)
+#' S = stochiommetry(eryth)
+get_stochiometry = function(reacts, reversible=FALSE, const=NULL) {
 	if ( !("reactions" %in% class(reacts)) ) stop("Argument has wrong type!")
 	
 	species = get_species(reacts)
@@ -327,39 +314,25 @@ get_stochiometry = function(reacts, reversible=FALSE, const="none") {
 			i = i+1
 		}
 	}
-	eliminate = rownames(N) %in% const
+	eliminate = rownames(N) %in% c("none",const)
 	N = N[!eliminate,]
 	
 	return(N)
 }
 
-#' TODO: change me >:(
+#' Converts a stochiometric matrix to a reaction list.
 #'
-#' \code{ggplot()} initializes a ggplot object. It can be used to
-#' declare the input data frame for a graphic and to specify the
-#' set of plot aesthetics intended to be common throughout all
-#' subsequent layers unless specifically overridden.
-#'
-#' There are three common ways to invoke \code{ggplot}:
-#' \itemize{
-#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-#'    \item \code{ggplot(df)}
-#'    \item \code{ggplot()}
-#'   }
-#' 
-#' @seealso \url{http://had.co.nz/ggplot2}
-#'  \code{\link{geom_segment}} for a more general approach
 #' @export
-#' @keywords internal
-#' @param data default data set
-#' @param ... other arguments passed to specific methods
-#' @return The stuff :O
+#' @keywords stochiometry, reactions
+#' @param s_matrix The stochiometric matrix to be converted.
+#' @param reversible Marks reversible reactions. FALSE denotes that
+#'	all reactions are irreversible. Otherwise a boolean vector of length
+#'	n_r defining the reversibility for each reaction.
+#' @return A reaction list containing the reactions from S.
 #' @examples
-#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-#'                  y = rnorm(30))
-#' # Compute sample mean and standard deviation in each group
-#' library(plyr)
-#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+#' S = matrix(c(-1,1,1,-1))
+#' rownames(S) <- c("A", "B")
+#' print(as.reactions(S))
 as.reactions = function(s_matrix, reversible=F, r_names=NA) {
 	if( class(rownames(s_matrix)) != "character" ) 
 		stop("Not a valid stochiometric matrix (no rownames)!")
@@ -390,33 +363,17 @@ as.reactions = function(s_matrix, reversible=F, r_names=NA) {
 	return(reacts)
 }
 
-#' TODO: change me >:(
-#'
-#' \code{ggplot()} initializes a ggplot object. It can be used to
-#' declare the input data frame for a graphic and to specify the
-#' set of plot aesthetics intended to be common throughout all
-#' subsequent layers unless specifically overridden.
-#'
-#' There are three common ways to invoke \code{ggplot}:
-#' \itemize{
-#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-#'    \item \code{ggplot(df)}
-#'    \item \code{ggplot()}
-#'   }
+#' Converts a given reaction list into an irreversible one, splitting up
+#' all reversible ones into two irreversible reactions.
 #' 
-#' @seealso \url{http://had.co.nz/ggplot2}
-#'  \code{\link{geom_segment}} for a more general approach
 #' @export
-#' @keywords internal
-#' @param data default data set
-#' @param ... other arguments passed to specific methods
-#' @return The stuff :O
+#' @keywords reactions
+#' @param reacts The reaction list.
+#' @return A reaction list containing all reactions in reacts with reversible
+#'  reactions being split in two.
 #' @examples
-#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-#'                  y = rnorm(30))
-#' # Compute sample mean and standard deviation in each group
-#' library(plyr)
-#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+#' data(eryth)
+#' print(make_irreversible(eryth))
 make_irreversible = function(reacts) {
 	r = list()
 	for( i in 1:length(reacts) ) {
@@ -441,10 +398,13 @@ make_irreversible = function(reacts) {
 
 #' Obtains properties from a reaction list
 #' 
+#' @export
 #' @param r The reaction list.
 #' @param field Name of the property to be obtained.
-#' @return A data.frame mapping the property to reaction indices.
-#' @export
+#' @return A data frame mapping the property to reaction indices.
+#' @examples
+#' data(eryth)
+#' print(rp(eryth, "name"))
 rp = function(r, field="KEGG_enzyme") {
 	prop = lapply(1:length(r), function(i) {
         ri = r[[i]]
@@ -459,71 +419,40 @@ rp = function(r, field="KEGG_enzyme") {
 
 #' Returns the number of different substrates a reaction has
 #'
-#' @param reacts A reactions object as returned by \code{\link{read_reactions}}
-#' @return A numeric vector containing the number of substrates for each reaction
 #' @export
+#' @param reacts A reactions object as returned by \code{\link{read_reactions}}
+#' @return A numeric vector containing the number of reactants for each reaction
+#' @examples
+#' data(eryth)
+#' print(r_order(eryth))
 r_order = function(reacts) {
 	return( sapply(reacts, function(x) sum(x$N_S) - is.na(x$S[1])) )
 }
 
-#' TODO: change me >:(
+#' Identifies reactions with a constant flux, thus reactions with no
+#' substrates.
 #'
-#' \code{ggplot()} initializes a ggplot object. It can be used to
-#' declare the input data frame for a graphic and to specify the
-#' set of plot aesthetics intended to be common throughout all
-#' subsequent layers unless specifically overridden.
-#'
-#' There are three common ways to invoke \code{ggplot}:
-#' \itemize{
-#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-#'    \item \code{ggplot(df)}
-#'    \item \code{ggplot()}
-#'   }
-#' 
-#' @seealso \url{http://had.co.nz/ggplot2}
-#'  \code{\link{geom_segment}} for a more general approach
+#' @seealso \code{\link{r_order}} to get the reaction order.
 #' @export
-#' @keywords internal
-#' @param data default data set
-#' @param ... other arguments passed to specific methods
-#' @return The stuff :O
+#' @keywords reactions
+#' @param reacts The reaction list.
+#' @return A boolean vector identifying reactions with constant flux.
 #' @examples
-#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-#'                  y = rnorm(30))
-#' # Compute sample mean and standard deviation in each group
-#' library(plyr)
-#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+#' data(eryth)
+#' which(constant_flux(eryth))
 constant_flux = function(reacts) {
 	return( sapply(reacts, function(x) any(is.na(x$S))) )
 }
 
-#' TODO: change me >:(
-#'
-#' \code{ggplot()} initializes a ggplot object. It can be used to
-#' declare the input data frame for a graphic and to specify the
-#' set of plot aesthetics intended to be common throughout all
-#' subsequent layers unless specifically overridden.
-#'
-#' There are three common ways to invoke \code{ggplot}:
-#' \itemize{
-#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-#'    \item \code{ggplot(df)}
-#'    \item \code{ggplot()}
-#'   }
+#' Plots the reactions as a graph.
 #' 
-#' @seealso \url{http://had.co.nz/ggplot2}
-#'  \code{\link{geom_segment}} for a more general approach
+#' @seealso \code{\link{print.reactions}} for a nicely formatted representation.
 #' @export
-#' @keywords internal
-#' @param data default data set
-#' @param ... other arguments passed to specific methods
-#' @return The stuff :O
+#' @keywords plot, reactions
+#' @param x A reaction list.
 #' @examples
-#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-#'                  y = rnorm(30))
-#' # Compute sample mean and standard deviation in each group
-#' library(plyr)
-#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+#' data(eryth)
+#' plot(eryth)
 plot.reactions = function(x) {
 	N = get_stochiometry(x, reversible=TRUE)
 
@@ -540,33 +469,17 @@ plot.reactions = function(x) {
 	}
 }
 
-#' TODO: change me >:(
+#' Converts a reaction list into a graph object.
 #'
-#' \code{ggplot()} initializes a ggplot object. It can be used to
-#' declare the input data frame for a graphic and to specify the
-#' set of plot aesthetics intended to be common throughout all
-#' subsequent layers unless specifically overridden.
-#'
-#' There are three common ways to invoke \code{ggplot}:
-#' \itemize{
-#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-#'    \item \code{ggplot(df)}
-#'    \item \code{ggplot()}
-#'   }
-#' 
-#' @seealso \url{http://had.co.nz/ggplot2}
-#'  \code{\link{geom_segment}} for a more general approach
 #' @export
-#' @keywords internal
-#' @param data default data set
+#' @keywords reactions, graph
+#' @param reacts A reaction list.
 #' @param ... other arguments passed to specific methods
-#' @return The stuff :O
+#' @return An igraph object representing with the species being the nodes and
+#'  reactions denoting edges.
 #' @examples
-#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-#'                  y = rnorm(30))
-#' # Compute sample mean and standard deviation in each group
-#' library(plyr)
-#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+#' data(eryth)
+#' print(as.graph(eryth))
 as.graph = function(reacts) {
 	if ( !("reactions" %in% class(reacts)) ) stop("Argument has wrong type!")
 	

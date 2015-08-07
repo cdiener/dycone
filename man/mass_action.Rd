@@ -17,4 +17,14 @@ The mass action term \deqn{\prod_{i \in N^-} S_i^|N_i|}
 \description{
 Calculates the mass-action reaction rate
 }
+\examples{
+data(eryth)
+S = stochiometry(eryth)
+ma1 = mass_action(S[,1], runif(nrow(S)))
+}
+\seealso{
+\code{\link{stochiometry}} to generate the stochiometric
+	matrix from a reaction list.
+	\code{\link{ma_terms}} to calculate all mass-action terms at once.
+}
 

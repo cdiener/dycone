@@ -2,42 +2,34 @@
 % Please edit documentation in R/model_utility.R
 \name{\%c\%}
 \alias{\%c\%}
-\title{TODO: change me >:(}
+\title{%c% is a caching operator. It is used after an
+expression, detects all assigned variables and saves
+them into a file. If the file given exists the variables
+are read from the cache file and not calculated again.
+In order to delete the cache simply delete the associated
+file.}
 \usage{
 ex \%c\% filename
 }
 \arguments{
-\item{data}{default data set}
+\item{ex}{The R expression to be cached. Use brackets for
+multiline statements.}
 
-\item{...}{other arguments passed to specific methods}
-}
-\value{
-The stuff :O
+\item{filename}{The filename of the cache file.}
 }
 \description{
-\code{ggplot()} initializes a ggplot object. It can be used to
-declare the input data frame for a graphic and to specify the
-set of plot aesthetics intended to be common throughout all
-subsequent layers unless specifically overridden.
-}
-\details{
-There are three common ways to invoke \code{ggplot}:
-\itemize{
-   \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-   \item \code{ggplot(df)}
-   \item \code{ggplot()}
-  }
+%c% is a caching operator. It is used after an
+expression, detects all assigned variables and saves
+them into a file. If the file given exists the variables
+are read from the cache file and not calculated again.
+In order to delete the cache simply delete the associated
+file.
 }
 \examples{
-df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-                 y = rnorm(30))
-# Compute sample mean and standard deviation in each group
-library(plyr)
-ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+# Is executed only if the file does not exist, otherwise
+# samples a and b are read from "samples.Rd"
+{ a <- rnorm(1e5) } \%c\% "samples.Rd"
 }
-\seealso{
-\url{http://had.co.nz/ggplot2}
- \code{\link{geom_segment}} for a more general approach
-}
-\keyword{internal}
+\keyword{caching}
+\keyword{operator,}
 

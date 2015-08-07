@@ -2,42 +2,37 @@
 % Please edit documentation in R/model_utility.R
 \name{get_ma_terms}
 \alias{get_ma_terms}
-\title{TODO: change me >:(}
+\title{Calculates all mass action terms \deqn{\prod_{i \in N^-} S_i^|N_i|}}
 \usage{
 get_ma_terms(s_matrix, concs)
 }
 \arguments{
-\item{data}{default data set}
+\item{s_matrix}{The stochiometric matrix.}
 
-\item{...}{other arguments passed to specific methods}
+\item{concs}{The concentrations of the substrates. Can be one of two
+\begin{itemize}
+    \item{A named vector containing the concentratiions for all substrates,
+    where its names come from the same set as the rownames of S.}
+    \item{A data frame with one column names "name" containing the
+    names and all other columns containing multiple concentration entries.}
+\end{itemize}}
 }
 \value{
-The stuff :O
+Either vector of length n_r containing the mass-action terms, if
+	concs was a vector, or a matrix with n_r rows containing the mass-action
+	in its columns.
 }
 \description{
-\code{ggplot()} initializes a ggplot object. It can be used to
-declare the input data frame for a graphic and to specify the
-set of plot aesthetics intended to be common throughout all
-subsequent layers unless specifically overridden.
-}
-\details{
-There are three common ways to invoke \code{ggplot}:
-\itemize{
-   \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-   \item \code{ggplot(df)}
-   \item \code{ggplot()}
-  }
+Calculates all mass action terms \deqn{\prod_{i \in N^-} S_i^|N_i|}
 }
 \examples{
-df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-                 y = rnorm(30))
-# Compute sample mean and standard deviation in each group
-library(plyr)
-ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+data(eryth)
+S = stochiometry(eryth)
+mats = ma_terms(S, runif(nrow(S)))
 }
 \seealso{
-\url{http://had.co.nz/ggplot2}
- \code{\link{geom_segment}} for a more general approach
+\code{\link{stochiometry()}} to calculate the stochiometric matrix.
 }
-\keyword{internal}
+\keyword{kinetics,}
+\keyword{mass-action}
 

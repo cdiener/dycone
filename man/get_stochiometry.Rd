@@ -2,42 +2,32 @@
 % Please edit documentation in R/model_utility.R
 \name{get_stochiometry}
 \alias{get_stochiometry}
-\title{TODO: change me >:(}
+\title{Calculates the stochiometric matrix for a list of reactions.}
 \usage{
-get_stochiometry(reacts, reversible = FALSE, const = "none")
+get_stochiometry(reacts, reversible = FALSE, const = NULL)
 }
 \arguments{
-\item{data}{default data set}
+\item{reacts}{The reaction list to be used.}
 
-\item{...}{other arguments passed to specific methods}
+\item{reversible}{Whether the stochiometric matrix can include reversible
+reactions.}
+
+\item{const}{A vector of species names that are assumed to be invariant and
+will be dropped from the stochiometric matrix. The default is not to drop
+any species.}
 }
 \value{
-The stuff :O
+The stochiometric matrix with dimension n_s x n_r.
 }
 \description{
-\code{ggplot()} initializes a ggplot object. It can be used to
-declare the input data frame for a graphic and to specify the
-set of plot aesthetics intended to be common throughout all
-subsequent layers unless specifically overridden.
-}
-\details{
-There are three common ways to invoke \code{ggplot}:
-\itemize{
-   \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-   \item \code{ggplot(df)}
-   \item \code{ggplot()}
-  }
+Calculates the stochiometric matrix for a list of reactions.
 }
 \examples{
-df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-                 y = rnorm(30))
-# Compute sample mean and standard deviation in each group
-library(plyr)
-ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+data(eryth)
+S = stochiommetry(eryth)
 }
 \seealso{
-\url{http://had.co.nz/ggplot2}
- \code{\link{geom_segment}} for a more general approach
+\code{\link{read_reactions()}} to read a reaction list from a file.
 }
-\keyword{internal}
+\keyword{stochiometry}
 

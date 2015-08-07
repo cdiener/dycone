@@ -2,42 +2,25 @@
 % Please edit documentation in R/model_utility.R
 \name{make_irreversible}
 \alias{make_irreversible}
-\title{TODO: change me >:(}
+\title{Converts a given reaction list into an irreversible one, splitting up
+all reversible ones into two irreversible reactions.}
 \usage{
 make_irreversible(reacts)
 }
 \arguments{
-\item{data}{default data set}
-
-\item{...}{other arguments passed to specific methods}
+\item{reacts}{The reaction list.}
 }
 \value{
-The stuff :O
+A reaction list containing all reactions in reacts with reversible
+ reactions being split in two.
 }
 \description{
-\code{ggplot()} initializes a ggplot object. It can be used to
-declare the input data frame for a graphic and to specify the
-set of plot aesthetics intended to be common throughout all
-subsequent layers unless specifically overridden.
-}
-\details{
-There are three common ways to invoke \code{ggplot}:
-\itemize{
-   \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-   \item \code{ggplot(df)}
-   \item \code{ggplot()}
-  }
+Converts a given reaction list into an irreversible one, splitting up
+all reversible ones into two irreversible reactions.
 }
 \examples{
-df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-                 y = rnorm(30))
-# Compute sample mean and standard deviation in each group
-library(plyr)
-ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+data(eryth)
+print(make_irreversible(eryth))
 }
-\seealso{
-\url{http://had.co.nz/ggplot2}
- \code{\link{geom_segment}} for a more general approach
-}
-\keyword{internal}
+\keyword{reactions}
 

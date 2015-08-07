@@ -2,42 +2,27 @@
 % Please edit documentation in R/model_utility.R
 \name{constant_flux}
 \alias{constant_flux}
-\title{TODO: change me >:(}
+\title{Identifies reactions with a constant flux, thus reactions with no
+substrates.}
 \usage{
 constant_flux(reacts)
 }
 \arguments{
-\item{data}{default data set}
-
-\item{...}{other arguments passed to specific methods}
+\item{reacts}{The reaction list.}
 }
 \value{
-The stuff :O
+A boolean vector identifying reactions with constant flux.
 }
 \description{
-\code{ggplot()} initializes a ggplot object. It can be used to
-declare the input data frame for a graphic and to specify the
-set of plot aesthetics intended to be common throughout all
-subsequent layers unless specifically overridden.
-}
-\details{
-There are three common ways to invoke \code{ggplot}:
-\itemize{
-   \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-   \item \code{ggplot(df)}
-   \item \code{ggplot()}
-  }
+Identifies reactions with a constant flux, thus reactions with no
+substrates.
 }
 \examples{
-df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-                 y = rnorm(30))
-# Compute sample mean and standard deviation in each group
-library(plyr)
-ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+data(eryth)
+which(constant_flux(eryth))
 }
 \seealso{
-\url{http://had.co.nz/ggplot2}
- \code{\link{geom_segment}} for a more general approach
+\code{\link{r_order}} to get the reaction order.
 }
-\keyword{internal}
+\keyword{reactions}
 
