@@ -165,13 +165,13 @@ ref_patch = function(x, ref) {
 
 #' Patches holes in a data set by using group means and reference data.
 #'
-#' Biological data is only rarely complete this, however cone analysis requires
-#' fully populated steady state concentration data. This functions help to patch
-#' holes in your data. It assumes that your measurement data set is data frame
+#' Biological data is only rarely complete, however k-cone analysis requires
+#' fully populated steady state concentration data. This functions helps to patch
+#' holes in your data. It assumes that the measurements data set is a data frame
 #' where the id column uses a shared identifier as the reference data set and
 #' the data columns specifify control and treatment measurements.
 #' The optional reference data set is further used to fill up holes which cannot
-#' b patched by group means. 
+#' be patched by group means. 
 #'
 #' @param measurements A data frame with one id column, and at least one normal 
 #' 	and one treatment column

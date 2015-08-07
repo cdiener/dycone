@@ -2,42 +2,29 @@
 % Please edit documentation in R/kcone.R
 \name{plot.basis}
 \alias{plot.basis}
-\title{TODO: change me >:(}
+\title{Plots a heatmap of the basis.}
 \usage{
-\method{plot}{basis}(b, n_cl = sqrt(ncol(b)/2), ...)
+\method{plot}{basis}(b, n_cl = NA, ...)
 }
 \arguments{
-\item{...}{other arguments passed to specific methods}
+\item{b}{The basis matrix, containing the basis vectors in the columns.}
 
-\item{data}{default data set}
-}
-\value{
-The stuff :O
+\item{n_cl}{The number of clusters individual basis vectors are grouped
+into. NA means no clustering is performed.}
+
+\item{...}{other arguments passed to pheatmap.}
 }
 \description{
-\code{ggplot()} initializes a ggplot object. It can be used to
-declare the input data frame for a graphic and to specify the
-set of plot aesthetics intended to be common throughout all
-subsequent layers unless specifically overridden.
-}
-\details{
-There are three common ways to invoke \code{ggplot}:
-\itemize{
-   \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-   \item \code{ggplot(df)}
-   \item \code{ggplot()}
-  }
+Plots a heatmap of the basis.
 }
 \examples{
-df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-                 y = rnorm(30))
-# Compute sample mean and standard deviation in each group
-library(plyr)
-ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+data(eryth)
+V = polytope_basis(stochiometry(eryth))
+plot(V, n_cl=sqrt(ncol(V)/2))
 }
 \seealso{
-\url{http://had.co.nz/ggplot2}
- \code{\link{geom_segment}} for a more general approach
+\code{\link{plot_red}} for a geometric visualization.
 }
-\keyword{internal}
+\keyword{basis,}
+\keyword{plot}
 

@@ -2,42 +2,29 @@
 % Please edit documentation in R/kcone.R
 \name{eigendynamics}
 \alias{eigendynamics}
-\title{TODO: change me >:(}
+\title{Gets the eigendynamics for a given k.cone basis.}
 \usage{
 eigendynamics(basis, n = 1)
 }
 \arguments{
-\item{data}{default data set}
+\item{basis}{The k-cone to be reduced.}
 
-\item{...}{other arguments passed to specific methods}
+\item{n}{The number of eigendynamics to extract. Defaults to only the first.}
 }
 \value{
-The stuff :O
+A matrix containing the first k eigendynamics in its columns.
 }
 \description{
-\code{ggplot()} initializes a ggplot object. It can be used to
-declare the input data frame for a graphic and to specify the
-set of plot aesthetics intended to be common throughout all
-subsequent layers unless specifically overridden.
-}
-\details{
-There are three common ways to invoke \code{ggplot}:
-\itemize{
-   \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-   \item \code{ggplot(df)}
-   \item \code{ggplot()}
-  }
+The eigendynamics for a given k-cone is the set of k vectors reproducing
+the original k-cone with the most accuracy, using only k basis-vectors.
+Here, only the first eigendynamics is guaranteed to be consistent with
+the k-cone (all entries positive), all the additional eigendynamics can
+be intepreted as fine tuning of the first eigendynamics.
 }
 \examples{
-df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-                 y = rnorm(30))
-# Compute sample mean and standard deviation in each group
-library(plyr)
-ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+data(eyrth)
+V = polytope_basis(stochiometry(eryth))
+ed = eigendynamics(V) # gets the eigenpathways
 }
-\seealso{
-\url{http://had.co.nz/ggplot2}
- \code{\link{geom_segment}} for a more general approach
-}
-\keyword{internal}
+\keyword{basis}
 

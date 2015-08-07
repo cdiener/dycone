@@ -2,42 +2,35 @@
 % Please edit documentation in R/kcone.R
 \name{stability_analysis}
 \alias{stability_analysis}
-\title{TODO: change me >:(}
+\title{Performs a stability analysis for each basis vector in a k-cone.}
 \usage{
 stability_analysis(basis, s_matrix, concs)
 }
 \arguments{
-\item{data}{default data set}
+\item{basis}{A basis matrix, where each column denotes a basis vector.}
 
-\item{...}{other arguments passed to specific methods}
+\item{s_matrix}{The stochiometric matrix of the model.}
+
+\item{concs}{Vector of metabolite concentrations.}
 }
 \value{
-The stuff :O
+A data frame containing the a string describing the type of
+	stability along with its eigenvalues for each vector in the basis.
 }
 \description{
-\code{ggplot()} initializes a ggplot object. It can be used to
-declare the input data frame for a graphic and to specify the
-set of plot aesthetics intended to be common throughout all
-subsequent layers unless specifically overridden.
-}
-\details{
-There are three common ways to invoke \code{ggplot}:
-\itemize{
-   \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-   \item \code{ggplot(df)}
-   \item \code{ggplot()}
-  }
+Performs a stability analysis for each basis vector in a k-cone.
 }
 \examples{
-df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-                 y = rnorm(30))
-# Compute sample mean and standard deviation in each group
-library(plyr)
-ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+data(eryth)
+S = stochiometry(eryth)
+V = polytope_basis(S)
+concs = runif(nrow(S))
+K = kcone(V, ma_terms(S, concs))
+stab = stability_analysis(K, S, concs)
 }
 \seealso{
-\url{http://had.co.nz/ggplot2}
- \code{\link{geom_segment}} for a more general approach
+\code{\link{polytope_basis}} and \code{}\link{kcone} to
+	calculate the k-cone.
 }
-\keyword{internal}
+\keyword{stability}
 

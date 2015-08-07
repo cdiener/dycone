@@ -2,42 +2,43 @@
 % Please edit documentation in R/kcone.R
 \name{plot_red}
 \alias{plot_red}
-\title{TODO: change me >:(}
+\title{Plots a geometric visualization of the given k-cone reduced into
+two dimensions.}
 \usage{
 plot_red(basis_list, arrows = TRUE, col = NULL, n_cl = NULL)
 }
 \arguments{
-\item{data}{default data set}
+\item{basis_list}{A list of basis to be reduced.}
 
-\item{...}{other arguments passed to specific methods}
-}
-\value{
-The stuff :O
+\item{arrows}{Whether to draw the individual basis vectors or just the
+interior of the cone.}
+
+\item{col}{If NULL colors are automatically generated from a green to red
+palette. If not NULL must be of the same length as basis_list and denotes
+the colors used to draw the individual basis.}
+
+\item{n_cl}{The numbers of clusters to be used. If there are more than 1000
+basis vectors per basis, clustering is always performed since calculation
+of the convex hull (interior area of the cone) is extremely lengthy
+otherwise.}
 }
 \description{
-\code{ggplot()} initializes a ggplot object. It can be used to
-declare the input data frame for a graphic and to specify the
-set of plot aesthetics intended to be common throughout all
-subsequent layers unless specifically overridden.
-}
-\details{
-There are three common ways to invoke \code{ggplot}:
-\itemize{
-   \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-   \item \code{ggplot(df)}
-   \item \code{ggplot()}
-  }
+Plotting the reduced k-cone is a two step procedure. Where the k-cones
+are first projected into the two most informative dimensions by PCA. In
+case the basis is very large this is followed by clustering of the basis
+vectors to reduce overlap in the projection. In the plot, arrows denote
+the basis vectors, or 'extreme rays' of the respective k-cones and the
+shaded area denotes the interior of the k-cone into which all feasible
+k vectors must fall.
 }
 \examples{
-df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-                 y = rnorm(30))
-# Compute sample mean and standard deviation in each group
-library(plyr)
-ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+data(eryth)
+V = polytope_basis(stochiometry(eryth))
+plot_red(list(V)) # A single basis is fine as long as it is a list
 }
 \seealso{
-\url{http://had.co.nz/ggplot2}
- \code{\link{geom_segment}} for a more general approach
+\code{\link{plot.basis}} for heatmap of the basis.
 }
-\keyword{internal}
+\keyword{basis,}
+\keyword{plot}
 

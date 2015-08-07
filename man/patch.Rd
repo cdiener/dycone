@@ -27,12 +27,12 @@ The original measurement data frame with a maximum number of missing
 data being patched.
 }
 \description{
-Biological data is only rarely complete this, however cone analysis requires
-fully populated steady state concentration data. This functions help to patch
-holes in your data. It assumes that your measurement data set is data frame
+Biological data is only rarely complete, however k-cone analysis requires
+fully populated steady state concentration data. This functions helps to patch
+holes in your data. It assumes that the measurements data set is a data frame
 where the id column uses a shared identifier as the reference data set and
 the data columns specifify control and treatment measurements.
 The optional reference data set is further used to fill up holes which cannot
-b patched by group means.
+be patched by group means.
 }
 

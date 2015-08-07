@@ -40,34 +40,21 @@ kcone = function(V, mats, normalize=FALSE) {
 	return(K)
 }
 
-#' TODO: change me >:(
-#'
-#' \code{ggplot()} initializes a ggplot object. It can be used to
-#' declare the input data frame for a graphic and to specify the
-#' set of plot aesthetics intended to be common throughout all
-#' subsequent layers unless specifically overridden.
-#'
-#' There are three common ways to invoke \code{ggplot}:
-#' \itemize{
-#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-#'    \item \code{ggplot(df)}
-#'    \item \code{ggplot()}
-#'   }
+#' Gets the null-space for the given k-cone assuming that all reactions
+#' are irreversible.
 #' 
-#' @seealso \url{http://had.co.nz/ggplot2}
-#'  \code{\link{geom_segment}} for a more general approach
+#' @seealso \code{\link{polytope_basis}} for arbitrary reversibility 
+#'  constraints.
 #' @export
-#' @keywords internal
-#' @param data default data set
-#' @param ... other arguments passed to specific methods
-#' @return The stuff :O
+#' @keywords basis, k-cone
+#' @param s_matrix The stochiometric matrix to be used.
+#' @param m_terms The metabolic terms. 
+#' @return A matrix containing the basis vectors in the columns.
 #' @examples
-#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-#'                  y = rnorm(30))
-#' # Compute sample mean and standard deviation in each group
-#' library(plyr)
-#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
-get_kcone_basis = function(s_matrix, v_terms) {	
+#' data(eryth)
+#' S = stochiometry(eryth)
+#' K = kcone_null(S, runif(nrow(S)))
+get_kcone_basis = function(s_matrix, m_terms) {	
 	mat = v_terms
 	SM = s_matrix %*% diag(mat)
 	
@@ -77,33 +64,18 @@ get_kcone_basis = function(s_matrix, v_terms) {
 	return( basis )
 }
 
-#' TODO: change me >:(
-#'
-#' \code{ggplot()} initializes a ggplot object. It can be used to
-#' declare the input data frame for a graphic and to specify the
-#' set of plot aesthetics intended to be common throughout all
-#' subsequent layers unless specifically overridden.
-#'
-#' There are three common ways to invoke \code{ggplot}:
-#' \itemize{
-#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-#'    \item \code{ggplot(df)}
-#'    \item \code{ggplot()}
-#'   }
+#' Gets the polytope basis of the k-cone.
 #' 
-#' @seealso \url{http://had.co.nz/ggplot2}
-#'  \code{\link{geom_segment}} for a more general approach
 #' @export
-#' @keywords internal
-#' @param data default data set
-#' @param ... other arguments passed to specific methods
-#' @return The stuff :O
+#' @keywords k-cone, basis
+#' @param s_matrix The stochiometric matrix.
+#' @param m_terms The metabolic terms for each reaction. Default to
+#'	calculation of flux cone.
+#' @return A matrix containing the basis vectors (normalized to a sum of 1) 
+#'	in its columns.
 #' @examples
-#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-#'                  y = rnorm(30))
-#' # Compute sample mean and standard deviation in each group
-#' library(plyr)
-#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+#' data(eryth)
+#' V = polytope_basis(stochiometry(S))
 get_polytope_basis = function(s_matrix, v_terms=rep(1, ncol(s_matrix))) {
 	mat = v_terms
 	const_matrix = rcdd::d2q(-diag(ncol(s_matrix)))
@@ -123,33 +95,17 @@ get_polytope_basis = function(s_matrix, v_terms=rep(1, ncol(s_matrix))) {
 	return( basis)
 } 
 
-#' TODO: change me >:(
-#'
-#' \code{ggplot()} initializes a ggplot object. It can be used to
-#' declare the input data frame for a graphic and to specify the
-#' set of plot aesthetics intended to be common throughout all
-#' subsequent layers unless specifically overridden.
-#'
-#' There are three common ways to invoke \code{ggplot}:
-#' \itemize{
-#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-#'    \item \code{ggplot(df)}
-#'    \item \code{ggplot()}
-#'   }
+#' Translates the eigenvectors to the corresponding stability term.
 #' 
-#' @seealso \url{http://had.co.nz/ggplot2}
-#'  \code{\link{geom_segment}} for a more general approach
+#' @seealso \code{\link{stability_analysis}} for an analysis of the entire
+#'	basis.
 #' @export
-#' @keywords internal
-#' @param data default data set
-#' @param ... other arguments passed to specific methods
-#' @return The stuff :O
+#' @keywords stability
+#' @param evs A vector of (complex) eigenvalues.
+#' @return A single string of either stable, unstable, limit cycle or 
+#'	zero jacobian.
 #' @examples
-#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-#'                  y = rnorm(30))
-#' # Compute sample mean and standard deviation in each group
-#' library(plyr)
-#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+#' print(as.stability(c(0+2i, 0-3i)))
 get_stability = function(evs) {	
 	evs[ abs(evs)<sqrt(.Machine$double.eps) ] = 0
 	
@@ -160,33 +116,24 @@ get_stability = function(evs) {
 	else return ("unstable")
 }
 
-#' TODO: change me >:(
-#'
-#' \code{ggplot()} initializes a ggplot object. It can be used to
-#' declare the input data frame for a graphic and to specify the
-#' set of plot aesthetics intended to be common throughout all
-#' subsequent layers unless specifically overridden.
-#'
-#' There are three common ways to invoke \code{ggplot}:
-#' \itemize{
-#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-#'    \item \code{ggplot(df)}
-#'    \item \code{ggplot()}
-#'   }
+#' Performs a stability analysis for each basis vector in a k-cone.
 #' 
-#' @seealso \url{http://had.co.nz/ggplot2}
-#'  \code{\link{geom_segment}} for a more general approach
+#' @seealso \code{\link{polytope_basis}} and \code{}\link{kcone} to 
+#'	calculate the k-cone.
 #' @export
-#' @keywords internal
-#' @param data default data set
-#' @param ... other arguments passed to specific methods
-#' @return The stuff :O
+#' @keywords stability
+#' @param basis A basis matrix, where each column denotes a basis vector.
+#' @param s_matrix The stochiometric matrix of the model.
+#' @param concs Vector of metabolite concentrations.
+#' @return A data frame containing the a string describing the type of 
+#'	stability along with its eigenvalues for each vector in the basis.
 #' @examples
-#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-#'                  y = rnorm(30))
-#' # Compute sample mean and standard deviation in each group
-#' library(plyr)
-#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+#' data(eryth)
+#' S = stochiometry(eryth)
+#' V = polytope_basis(S)
+#' concs = runif(nrow(S))
+#' K = kcone(V, ma_terms(S, concs))
+#' stab = stability_analysis(K, S, concs)
 stability_analysis = function(basis, s_matrix, concs) {
 	J = get_jacobian(s_matrix, concs)
 	evs = NULL
@@ -214,71 +161,44 @@ stability_analysis = function(basis, s_matrix, concs) {
 }
 
 
-#' TODO: change me >:(
-#'
-#' \code{ggplot()} initializes a ggplot object. It can be used to
-#' declare the input data frame for a graphic and to specify the
-#' set of plot aesthetics intended to be common throughout all
-#' subsequent layers unless specifically overridden.
-#'
-#' There are three common ways to invoke \code{ggplot}:
-#' \itemize{
-#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-#'    \item \code{ggplot(df)}
-#'    \item \code{ggplot()}
-#'   }
+#' Calculates the occupation for a basis. Here, occupation denotes 
+#' the faction of basis vectors for each varibale where the variable 
+#' is not zero.
 #' 
-#' @seealso \url{http://had.co.nz/ggplot2}
-#'  \code{\link{geom_segment}} for a more general approach
+#' @seealso \code{\link{polytope_basis}} to get a k-cone.
 #' @export
-#' @keywords internal
-#' @param data default data set
-#' @param ... other arguments passed to specific methods
-#' @return The stuff :O
+#' @keywords basis
+#' @param basis A basis matrix, where each column denotes a basis vector.
+#' @return A vector of length nrow(basis) containing the occupation for
+#'	each dimension.
 #' @examples
-#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-#'                  y = rnorm(30))
-#' # Compute sample mean and standard deviation in each group
-#' library(plyr)
-#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+#' data(eryth)
+#' V = polytope_basis(stochiometry(eryth))
+#' occ = occupation(V)
 occupation = function(basis) {
 	if( !("basis" %in% class(basis)) ) stop("object is not a basis!")
 	
 	return(apply(basis, 1, function(r) 
-		sum(r>sqrt(.Machine$double.eps))/length(r)))
+		sum(abs(r)>sqrt(.Machine$double.eps))/length(r)))
 }
 
-#' TODO: change me >:(
+#' Plots a heatmap of the basis.
 #'
-#' \code{ggplot()} initializes a ggplot object. It can be used to
-#' declare the input data frame for a graphic and to specify the
-#' set of plot aesthetics intended to be common throughout all
-#' subsequent layers unless specifically overridden.
-#'
-#' There are three common ways to invoke \code{ggplot}:
-#' \itemize{
-#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-#'    \item \code{ggplot(df)}
-#'    \item \code{ggplot()}
-#'   }
-#' 
-#' @seealso \url{http://had.co.nz/ggplot2}
-#'  \code{\link{geom_segment}} for a more general approach
+#' @seealso \code{\link{plot_red}} for a geometric visualization.
 #' @export
-#' @keywords internal
-#' @param data default data set
-#' @param ... other arguments passed to specific methods
-#' @return The stuff :O
+#' @keywords basis, plot
+#' @param b The basis matrix, containing the basis vectors in the columns.
+#' @param n_cl The number of clusters individual basis vectors are grouped 
+#'	into. NA means no clustering is performed.
+#' @param ... other arguments passed to pheatmap.
 #' @examples
-#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-#'                  y = rnorm(30))
-#' # Compute sample mean and standard deviation in each group
-#' library(plyr)
-#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
-plot.basis = function(b, n_cl=sqrt(ncol(b)/2), ...) {	
+#' data(eryth)
+#' V = polytope_basis(stochiometry(eryth))
+#' plot(V, n_cl=sqrt(ncol(V)/2))
+plot.basis = function(b, n_cl=NA, ...) {	
     clustered = F
     
-    if((ncol(b)>1e3 || n_cl != sqrt(ncol(b)/2)) && !is.na(n_cl)) {
+    if(!is.na(n_cl)) {
         write("Basis are very large. Reducing by clustering...", file="")
         cl = kmeans(t(b), centers=n_cl, iter.max=100, nstart=3)
         write(sprintf("Mean in-cluster distance: %g.",
@@ -298,33 +218,34 @@ plot.basis = function(b, n_cl=sqrt(ncol(b)/2), ...) {
     }
 }
 
-#' TODO: change me >:(
+#' Plots a geometric visualization of the given k-cone reduced into
+#' two dimensions.
 #'
-#' \code{ggplot()} initializes a ggplot object. It can be used to
-#' declare the input data frame for a graphic and to specify the
-#' set of plot aesthetics intended to be common throughout all
-#' subsequent layers unless specifically overridden.
-#'
-#' There are three common ways to invoke \code{ggplot}:
-#' \itemize{
-#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-#'    \item \code{ggplot(df)}
-#'    \item \code{ggplot()}
-#'   }
+#' Plotting the reduced k-cone is a two step procedure. Where the k-cones
+#' are first projected into the two most informative dimensions by PCA. In 
+#' case the basis is very large this is followed by clustering of the basis 
+#' vectors to reduce overlap in the projection. In the plot, arrows denote
+#' the basis vectors, or 'extreme rays' of the respective k-cones and the 
+#' shaded area denotes the interior of the k-cone into which all feasible
+#' k vectors must fall.
 #' 
-#' @seealso \url{http://had.co.nz/ggplot2}
-#'  \code{\link{geom_segment}} for a more general approach
+#' @seealso \code{\link{plot.basis}} for heatmap of the basis.
 #' @export
-#' @keywords internal
-#' @param data default data set
-#' @param ... other arguments passed to specific methods
-#' @return The stuff :O
+#' @keywords basis, plot
+#' @param basis_list A list of basis to be reduced.
+#' @param arrows Whether to draw the individual basis vectors or just the 
+#'	interior of the cone.
+#' @param col If NULL colors are automatically generated from a green to red
+#'	palette. If not NULL must be of the same length as basis_list and denotes
+#'	the colors used to draw the individual basis.
+#' @param n_cl The numbers of clusters to be used. If there are more than 1000
+#'	basis vectors per basis, clustering is always performed since calculation 
+#'	of the convex hull (interior area of the cone) is extremely lengthy 
+#'	otherwise.
 #' @examples
-#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-#'                  y = rnorm(30))
-#' # Compute sample mean and standard deviation in each group
-#' library(plyr)
-#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+#' data(eryth)
+#' V = polytope_basis(stochiometry(eryth))
+#' plot_red(list(V)) # A single basis is fine as long as it is a list
 plot_red = function(basis_list, arrows=TRUE, col=NULL, n_cl=NULL) {
 	if( !("list" %in% class(basis_list)) ) stop("basis_list must be a list!")
 	
@@ -385,12 +306,14 @@ plot_red = function(basis_list, arrows=TRUE, col=NULL, n_cl=NULL) {
 				sum(energy[1:2])/sum(energy)*100), file="")
 }
 
+# Helper function to calculate angls between tow vectors
 angle = function(x, y=0:1, clockwise=T) {
 	theta = acos( sum(x * y) / sqrt(sum(x * x) * sum(y * y)) ) 
 	if(clockwise && x[1]<0) theta = 2*pi - theta 
 	return(theta)
 }
 
+# Helper function to calculate the length ratio of two vectors
 scaling = function(x, y=0:1) {
     s = sum(x * x)/sum(y * y)
     return(sqrt(s))
@@ -422,67 +345,49 @@ scaling = function(x, y=0:1) {
 #	return( data.frame(id1=1:ncol(b1), id2=closest[1,], d=closest[2,]) )
 #}
 
-#' TODO: change me >:(
-#'
-#' \code{ggplot()} initializes a ggplot object. It can be used to
-#' declare the input data frame for a graphic and to specify the
-#' set of plot aesthetics intended to be common throughout all
-#' subsequent layers unless specifically overridden.
-#'
-#' There are three common ways to invoke \code{ggplot}:
-#' \itemize{
-#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-#'    \item \code{ggplot(df)}
-#'    \item \code{ggplot()}
-#'   }
+#' Evaluates whether a given point lies within a given k-cone. Assumes a 
+#' pointed cone (all reactions irreversible).
 #' 
-#' @seealso \url{http://had.co.nz/ggplot2}
-#'  \code{\link{geom_segment}} for a more general approach
 #' @export
-#' @keywords internal
-#' @param data default data set
-#' @param ... other arguments passed to specific methods
-#' @return The stuff :O
+#' @keywords basis
+#' @param x A single point (vector) or multiple points (matrix with points as
+#'	columns) to be checked.
+#' @param s_matrix The stochiometric matrix of the k-cone to be used.
+#' @param m_terms The metabolic terms of the k-cone.
+#' @param tol The numerical accuracy of the check. Defaults to the square
+#'	of the double accuracy.
+#' @return A single boolean of vector of booleans indicating whether the
+#'	point(s) lie within the k-cone.
 #' @examples
-#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-#'                  y = rnorm(30))
-#' # Compute sample mean and standard deviation in each group
-#' library(plyr)
-#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
-inside = function(x, s_matrix, v_terms, tol=sqrt(.Machine$double.eps)) {
+#' data(eryth)
+#' S = stochiometry(eryth)
+#' 
+#' # Check whether a random point falls within the flux cone
+#' inside(runif(ncol(S)), S, rep(1,ncol(S))) # probably not true
+inside = function(x, s_matrix, m_terms, tol=sqrt(.Machine$double.eps)) {
 	right = s_matrix%*%diag(v_terms)%*%x
 	
 	if(is.null(dim(x))) return(all(right>-tol) & all(abs(right)<tol))
-	return( apply(right, 2, function(r) all(r>=0) & all(abs(r)<tol)) )
+	return( apply(right, 2, function(r) all(abs(r)>-tol)) )
 }
 
-#' TODO: change me >:(
+#' Gets the eigendynamics for a given k.cone basis.
 #'
-#' \code{ggplot()} initializes a ggplot object. It can be used to
-#' declare the input data frame for a graphic and to specify the
-#' set of plot aesthetics intended to be common throughout all
-#' subsequent layers unless specifically overridden.
-#'
-#' There are three common ways to invoke \code{ggplot}:
-#' \itemize{
-#'    \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-#'    \item \code{ggplot(df)}
-#'    \item \code{ggplot()}
-#'   }
+#' The eigendynamics for a given k-cone is the set of k vectors reproducing
+#' the original k-cone with the most accuracy, using only k basis-vectors.
+#' Here, only the first eigendynamics is guaranteed to be consistent with
+#' the k-cone (all entries positive), all the additional eigendynamics can
+#' be intepreted as fine tuning of the first eigendynamics.
 #' 
-#' @seealso \url{http://had.co.nz/ggplot2}
-#'  \code{\link{geom_segment}} for a more general approach
 #' @export
-#' @keywords internal
-#' @param data default data set
-#' @param ... other arguments passed to specific methods
-#' @return The stuff :O
+#' @keywords basis
+#' @param basis The k-cone to be reduced.
+#' @param n The number of eigendynamics to extract. Defaults to only the first.
+#' @return A matrix containing the first k eigendynamics in its columns.
 #' @examples
-#' df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-#'                  y = rnorm(30))
-#' # Compute sample mean and standard deviation in each group
-#' library(plyr)
-#' ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+#' data(eyrth)
+#' V = polytope_basis(stochiometry(eryth))
+#' ed = eigendynamics(V) # gets the eigenpathways
 eigendynamics = function(basis, n=1) {
 	if(is.null(dim(basis))) return(basis)
 	
@@ -490,18 +395,21 @@ eigendynamics = function(basis, n=1) {
 	eps[ abs(eps)<.Machine$double.eps ] = 0
 	if( any(eps[,1]<0) ) eps = -eps
 	
-	eps = apply(eps,2,function(x) x/sum(x))
-	
 	return(eps[,1:n])
 }
 
-#r_means = function(x) {
-#	if(!is.null(dim(x))) x = rowMeans(x)
-	
-#	return(x)
-#}
-
-single_hyp = function(b1, b2, reacts, log_fold_tol=0) {
+#' Helper function to get the differential regulation between two approximations
+#' of kinetic constansts.
+#'
+#' @seealso \code{\link{hyp}} for a complete differential analysis.
+#' @export
+#' @param k1 A vector containing kinetic constants >=0.
+#' @param k2 A vector containing kinetic constants >=0.
+#' @param reacts A reaction lists.
+#' @return A data frame containig the reaction indices, reactions, kind of regulation
+#'	and log2-fold changes of k2 relative to k1. Log-fold changes where either of the
+#'	constants is 0 are evaluated to 0.
+single_hyp = function(k1, k2, reacts) {
 	reacts = make_irreversible(reacts)
 	logfold = log(b2,2) - log(b1,2)
 	logfold[!is.finite(logfold)] = 0
@@ -522,17 +430,17 @@ single_hyp = function(b1, b2, reacts, log_fold_tol=0) {
 	return(res)
 }
 
-mabs_diff = function(x,y) {
-	d = sapply(x, function(xi) sapply(y, function(yi) xi-yi))
-	m = mean(abs(d), na.rm=T)
-	if(is.na(m)) m = 0
-	
-	return(m)
-}
-
 #' Identifies hypothesis for differentially regulated reactions between a set of
-#' normal and disease conditions. 
+#' normal and disease conditions.
 #'
+#' \code{hyp()} is the main driver for differential analysis. It first uses a
+#' reduction method to approximate the relative kientic constant changes. Than
+#' performs calculation of all combinatorial log-fold changes within the normal 
+#' group and between the disease and normal group and calculates the wilcoxon
+#' ranked sum statistics for each reaction.
+#'
+#' @export
+#' @keywords hypothesis, k-cone, analysis
 #' @param normal A matrix or data frame containing the metabolic terms of the 
 #'  normal condition in the columns.
 #' @param disease A matrix or data frame containing the metabolic terms of the 
@@ -549,8 +457,7 @@ mabs_diff = function(x,y) {
 #'	the differential regulation data.
 #' @return If full is TRUE returns a list of generated hypothesis and the individual
 #' 	log fold changes between all reference basis and between reference and treatments.
-#'	If full is FALSE only returns the generated hypothesis. 
-#' @export
+#'	If full is FALSE only returns the generated hypothesis as a data frame. 
 hyp = function(normal, disease, reacts, type="transformation", 
     correction_method="fdr", sorted=T, v_opt=NULL, full=FALSE) {
 	# Create reference data

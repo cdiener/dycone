@@ -2,42 +2,36 @@
 % Please edit documentation in R/kcone.R
 \name{inside}
 \alias{inside}
-\title{TODO: change me >:(}
+\title{Evaluates whether a given point lies within a given k-cone. Assumes a
+pointed cone (all reactions irreversible).}
 \usage{
-inside(x, s_matrix, v_terms, tol = sqrt(.Machine$double.eps))
+inside(x, s_matrix, m_terms, tol = sqrt(.Machine$double.eps))
 }
 \arguments{
-\item{data}{default data set}
+\item{x}{A single point (vector) or multiple points (matrix with points as
+columns) to be checked.}
 
-\item{...}{other arguments passed to specific methods}
+\item{s_matrix}{The stochiometric matrix of the k-cone to be used.}
+
+\item{m_terms}{The metabolic terms of the k-cone.}
+
+\item{tol}{The numerical accuracy of the check. Defaults to the square
+of the double accuracy.}
 }
 \value{
-The stuff :O
+A single boolean of vector of booleans indicating whether the
+	point(s) lie within the k-cone.
 }
 \description{
-\code{ggplot()} initializes a ggplot object. It can be used to
-declare the input data frame for a graphic and to specify the
-set of plot aesthetics intended to be common throughout all
-subsequent layers unless specifically overridden.
-}
-\details{
-There are three common ways to invoke \code{ggplot}:
-\itemize{
-   \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-   \item \code{ggplot(df)}
-   \item \code{ggplot()}
-  }
+Evaluates whether a given point lies within a given k-cone. Assumes a
+pointed cone (all reactions irreversible).
 }
 \examples{
-df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-                 y = rnorm(30))
-# Compute sample mean and standard deviation in each group
-library(plyr)
-ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+data(eryth)
+S = stochiometry(eryth)
+
+# Check whether a random point falls within the flux cone
+inside(runif(ncol(S)), S, rep(1,ncol(S))) # probably not true
 }
-\seealso{
-\url{http://had.co.nz/ggplot2}
- \code{\link{geom_segment}} for a more general approach
-}
-\keyword{internal}
+\keyword{basis}
 

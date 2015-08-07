@@ -33,10 +33,16 @@ change.}
 \value{
 If full is TRUE returns a list of generated hypothesis and the individual
 	log fold changes between all reference basis and between reference and treatments.
-	If full is FALSE only returns the generated hypothesis.
+	If full is FALSE only returns the generated hypothesis as a data frame.
 }
 \description{
-Identifies hypothesis for differentially regulated reactions between a set of
-normal and disease conditions.
+\code{hyp()} is the main driver for differential analysis. It first uses a
+reduction method to approximate the relative kientic constant changes. Than
+performs calculation of all combinatorial log-fold changes within the normal
+group and between the disease and normal group and calculates the wilcoxon
+ranked sum statistics for each reaction.
 }
+\keyword{analysis}
+\keyword{hypothesis,}
+\keyword{k-cone,}
 

@@ -2,42 +2,31 @@
 % Please edit documentation in R/kcone.R
 \name{occupation}
 \alias{occupation}
-\title{TODO: change me >:(}
+\title{Calculates the occupation for a basis. Here, occupation denotes
+the faction of basis vectors for each varibale where the variable
+is not zero.}
 \usage{
 occupation(basis)
 }
 \arguments{
-\item{data}{default data set}
-
-\item{...}{other arguments passed to specific methods}
+\item{basis}{A basis matrix, where each column denotes a basis vector.}
 }
 \value{
-The stuff :O
+A vector of length nrow(basis) containing the occupation for
+	each dimension.
 }
 \description{
-\code{ggplot()} initializes a ggplot object. It can be used to
-declare the input data frame for a graphic and to specify the
-set of plot aesthetics intended to be common throughout all
-subsequent layers unless specifically overridden.
-}
-\details{
-There are three common ways to invoke \code{ggplot}:
-\itemize{
-   \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-   \item \code{ggplot(df)}
-   \item \code{ggplot()}
-  }
+Calculates the occupation for a basis. Here, occupation denotes
+the faction of basis vectors for each varibale where the variable
+is not zero.
 }
 \examples{
-df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-                 y = rnorm(30))
-# Compute sample mean and standard deviation in each group
-library(plyr)
-ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+data(eryth)
+V = polytope_basis(stochiometry(eryth))
+occ = occupation(V)
 }
 \seealso{
-\url{http://had.co.nz/ggplot2}
- \code{\link{geom_segment}} for a more general approach
+\code{\link{polytope_basis}} to get a k-cone.
 }
-\keyword{internal}
+\keyword{basis}
 

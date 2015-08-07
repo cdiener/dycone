@@ -2,42 +2,27 @@
 % Please edit documentation in R/kcone.R
 \name{get_polytope_basis}
 \alias{get_polytope_basis}
-\title{TODO: change me >:(}
+\title{Gets the polytope basis of the k-cone.}
 \usage{
 get_polytope_basis(s_matrix, v_terms = rep(1, ncol(s_matrix)))
 }
 \arguments{
-\item{data}{default data set}
+\item{s_matrix}{The stochiometric matrix.}
 
-\item{...}{other arguments passed to specific methods}
+\item{m_terms}{The metabolic terms for each reaction. Default to
+calculation of flux cone.}
 }
 \value{
-The stuff :O
+A matrix containing the basis vectors (normalized to a sum of 1)
+	in its columns.
 }
 \description{
-\code{ggplot()} initializes a ggplot object. It can be used to
-declare the input data frame for a graphic and to specify the
-set of plot aesthetics intended to be common throughout all
-subsequent layers unless specifically overridden.
-}
-\details{
-There are three common ways to invoke \code{ggplot}:
-\itemize{
-   \item \code{ggplot(df, aes(x, y, <other aesthetics>))}
-   \item \code{ggplot(df)}
-   \item \code{ggplot()}
-  }
+Gets the polytope basis of the k-cone.
 }
 \examples{
-df <- data.frame(gp = factor(rep(letters[1:3], each = 10)),
-                 y = rnorm(30))
-# Compute sample mean and standard deviation in each group
-library(plyr)
-ds <- ddply(df, .(gp), summarise, mean = mean(y), sd = sd(y))
+data(eryth)
+V = polytope_basis(stochiometry(S))
 }
-\seealso{
-\url{http://had.co.nz/ggplot2}
- \code{\link{geom_segment}} for a more general approach
-}
-\keyword{internal}
+\keyword{basis}
+\keyword{k-cone,}
 
