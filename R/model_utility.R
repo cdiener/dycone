@@ -132,12 +132,12 @@ get_jacobian = function(s_matrix, concs, deriv_func = deriv_ma)
 #' @keywords kinetics, mass-action
 #' @param s_matrix The stochiometric matrix.
 #' @param concs The concentrations of the substrates. Can be one of two
-#'	\begin{itemize}
-#'		\item{A named vector containing the concentratiions for all substrates, 
-#'		where its names come from the same set as the rownames of S.}
-#'		\item{A data frame with one column names "name" containing the 
-#'		names and all other columns containing multiple concentration entries.}
-#'	\end{itemize}
+#'	\itemize{
+#'		\item A named vector containing the concentratiions for all substrates, 
+#'		where its names come from the same set as the rownames of S.
+#'		\item A data frame with one column names "name" containing the 
+#'		names and all other columns containing multiple concentration entries.
+#'	}
 #' @return Either vector of length n_r containing the mass-action terms, if
 #'	concs was a vector, or a matrix with n_r rows containing the mass-action
 #'	in its columns.

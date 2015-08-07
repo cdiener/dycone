@@ -10,12 +10,12 @@ get_ma_terms(s_matrix, concs)
 \item{s_matrix}{The stochiometric matrix.}
 
 \item{concs}{The concentrations of the substrates. Can be one of two
-\begin{itemize}
-    \item{A named vector containing the concentratiions for all substrates,
-    where its names come from the same set as the rownames of S.}
-    \item{A data frame with one column names "name" containing the
-    names and all other columns containing multiple concentration entries.}
-\end{itemize}}
+\itemize{
+    \item A named vector containing the concentratiions for all substrates,
+    where its names come from the same set as the rownames of S.
+    \item A data frame with one column names "name" containing the
+    names and all other columns containing multiple concentration entries.
+}}
 }
 \value{
 Either vector of length n_r containing the mass-action terms, if
