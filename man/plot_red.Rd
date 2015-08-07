@@ -37,7 +37,7 @@ V = polytope_basis(stochiometry(eryth))
 plot_red(list(V)) # A single basis is fine as long as it is a list
 }
 \seealso{
-\code{\link{plot.basis}} for heatmap of the basis.
+\code{\link{plot_basis}} for heatmap of the basis.
 }
 \keyword{basis,}
 \keyword{plot}

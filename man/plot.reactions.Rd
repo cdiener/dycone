@@ -4,10 +4,12 @@
 \alias{plot.reactions}
 \title{Plots the reactions as a graph.}
 \usage{
-\method{plot}{reactions}(x)
+\method{plot}{reactions}(x, ...)
 }
 \arguments{
 \item{x}{A reaction list.}
+
+\item{...}{Additional arguments passed to plot.igraph.}
 }
 \description{
 Plots the reactions as a graph.

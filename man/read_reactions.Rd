@@ -12,15 +12,12 @@ read_reactions(react_file)
 annotations. A single annotation can contain several values as a
    comma separated string. The csv file should be saved with all entries
    quoted.}
-
-\item{A}{list of reactions containing the stochiometry and additional
-annotations.}
 }
 \description{
 Reads a list of reactions with optional annotations from a file.
 }
 \examples{
-r_str = "'reaction','name','numbers'\\n'A + B <=> C','r1','1,2,4'"
+r_str = 'reaction,abbreviation,numbers\\nA -> B,blub,"1,2,3"\\nB <=>, bla, 3'
 r = read_reactions(textConnection(r_str))
 }
 

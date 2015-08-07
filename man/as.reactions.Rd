@@ -12,6 +12,9 @@ as.reactions(s_matrix, reversible = F, r_names = NA)
 \item{reversible}{Marks reversible reactions. FALSE denotes that
 all reactions are irreversible. Otherwise a boolean vector of length
 n_r defining the reversibility for each reaction.}
+
+\item{r_names}{If NA reaction names are generated as r1,...,rn. Can be a a vector
+of length n_r denoting names for the reactions.}
 }
 \value{
 A reaction list containing the reactions from S.
@@ -20,7 +23,7 @@ A reaction list containing the reactions from S.
 Converts a stochiometric matrix to a reaction list.
 }
 \examples{
-S = matrix(c(-1,1,1,-1))
+S = matrix(c(-1,1,1,-1), nrow=2)
 rownames(S) <- c("A", "B")
 print(as.reactions(S))
 }

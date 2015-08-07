@@ -28,5 +28,5 @@ test_that("patching works", {
     ref = data.frame(id=2, x=9)
     aim = data.frame(id=1:3, n1=c(4,9,6), n2=c(4,9,6), d1=8:10, d2=8:10)
     full = patch(miss, id=1, 2:3, 4:5, ref_data=ref)
-    expect_equal(aim, full)
+    expect_true(all(aim==full))
 })

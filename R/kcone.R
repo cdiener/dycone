@@ -17,7 +17,7 @@ norm = function(x) sqrt(sum(x*x))
 #' \code{kcone()} builds the k-cone from a given flux cone basis V and a set
 #' of metabolic terms M by calculating \eqn{M^{-1}V}.
 #' 
-#' @seealso \code{\link{polytope}} for a way to calculate the flux cone, 
+#' @seealso \code{\link{polytope_basis}} for a way to calculate the flux cone, 
 #'  \code{\link{ma_terms}} to get mass action termsq 
 #' @export
 #' @keywords internal basis
@@ -30,8 +30,9 @@ norm = function(x) sqrt(sum(x*x))
 #' @return The stuff :O
 #' @examples
 #' data(eryth)
-#' V = polytope(eryth)
-#' K = kcone(V, mats)
+#' S = stochiometry(eryth)
+#' V = polytope_basis(S)
+#' K = kcone(V, runif(ncol(S)))
 kcone = function(V, mats, normalize=FALSE) {
     K = diag(1/mats)%*%V
 	if(normalize) K = apply(K,2,function(x) x/norm(x))
@@ -53,10 +54,9 @@ kcone = function(V, mats, normalize=FALSE) {
 #' @examples
 #' data(eryth)
 #' S = stochiometry(eryth)
-#' K = kcone_null(S, runif(nrow(S)))
-get_kcone_basis = function(s_matrix, m_terms) {	
-	mat = v_terms
-	SM = s_matrix %*% diag(mat)
+#' K = kcone_null(S, runif(ncol(S)))
+kcone_null = function(s_matrix, m_terms) {	
+	SM = s_matrix %*% diag(m_terms)
 	
 	basis = MASS::Null( t(SM) )
 	class(basis) = append("basis", class(basis))
@@ -75,9 +75,9 @@ get_kcone_basis = function(s_matrix, m_terms) {
 #'	in its columns.
 #' @examples
 #' data(eryth)
-#' V = polytope_basis(stochiometry(S))
-get_polytope_basis = function(s_matrix, v_terms=rep(1, ncol(s_matrix))) {
-	mat = v_terms
+#' V = polytope_basis(stochiometry(eryth))
+polytope_basis = function(s_matrix, m_terms=rep(1, ncol(s_matrix))) {
+	mat = m_terms
 	const_matrix = rcdd::d2q(-diag(ncol(s_matrix)))
 	const_b = rcdd::d2q(rep(0,ncol(s_matrix)))
 	NC = rcdd::d2q( as.matrix( s_matrix%*%diag(mat)) )
@@ -106,7 +106,7 @@ get_polytope_basis = function(s_matrix, v_terms=rep(1, ncol(s_matrix))) {
 #'	zero jacobian.
 #' @examples
 #' print(as.stability(c(0+2i, 0-3i)))
-get_stability = function(evs) {	
+as.stability = function(evs) {	
 	evs[ abs(evs)<sqrt(.Machine$double.eps) ] = 0
 	
 	r = evs
@@ -132,29 +132,31 @@ get_stability = function(evs) {
 #' S = stochiometry(eryth)
 #' V = polytope_basis(S)
 #' concs = runif(nrow(S))
+#' names(concs) = rownames(S)
 #' K = kcone(V, ma_terms(S, concs))
 #' stab = stability_analysis(K, S, concs)
 stability_analysis = function(basis, s_matrix, concs) {
-	J = get_jacobian(s_matrix, concs)
+	J = jacobian(s_matrix, concs)
 	evs = NULL
 	stab = NULL
 	
 	if(!is.null(ncol(basis))) {
 		nc = ncol(basis)
-		for( i in 1:ncol(basis) )
-		{
-			ev = eigen(s_matrix %*% diag(basis[,i]) %*% J)$values
-			evs = rbind(evs, ev)
-			stab = c(stab, get_stability(ev))
-		}
+		data = lapply(1:ncol(basis), function(i) {
+			evs = t(eigen(s_matrix %*% diag(basis[,i]) %*% J)$values)
+			stab = as.stability(evs)
+            return(data.frame(what=stab, evs=evs))
+		})
 	}
 	else {
 		nc = 1
 		evs = t(eigen(s_matrix %*% diag(basis) %*% J)$values)
-		stab = get_stability(evs)
+		stab = as.stability(evs)
+        data = data.frame(what=stab, evs=evs)
 	}
-		
-	res = data.frame(what=stab, ev=evs, row.names=1:nc)
+	
+    if(nc > 1) data = do.call(rbind, data)	
+	res = cbind(row.names=1:nc, data)
 	names(res)[1:nrow(s_matrix)+1] = paste0("ev",1:nrow(s_matrix))
 	
 	return( res )
@@ -194,8 +196,8 @@ occupation = function(basis) {
 #' @examples
 #' data(eryth)
 #' V = polytope_basis(stochiometry(eryth))
-#' plot(V, n_cl=sqrt(ncol(V)/2))
-plot.basis = function(b, n_cl=NA, ...) {	
+#' plot_basis(V, n_cl=sqrt(ncol(V)/2))
+plot_basis = function(b, n_cl=NA, ...) {	
     clustered = F
     
     if(!is.na(n_cl)) {
@@ -229,7 +231,7 @@ plot.basis = function(b, n_cl=NA, ...) {
 #' shaded area denotes the interior of the k-cone into which all feasible
 #' k vectors must fall.
 #' 
-#' @seealso \code{\link{plot.basis}} for heatmap of the basis.
+#' @seealso \code{\link{plot_basis}} for heatmap of the basis.
 #' @export
 #' @keywords basis, plot
 #' @param basis_list A list of basis to be reduced.
@@ -365,7 +367,7 @@ scaling = function(x, y=0:1) {
 #' # Check whether a random point falls within the flux cone
 #' inside(runif(ncol(S)), S, rep(1,ncol(S))) # probably not true
 inside = function(x, s_matrix, m_terms, tol=sqrt(.Machine$double.eps)) {
-	right = s_matrix%*%diag(v_terms)%*%x
+	right = s_matrix%*%diag(m_terms)%*%x
 	
 	if(is.null(dim(x))) return(all(right>-tol) & all(abs(right)<tol))
 	return( apply(right, 2, function(r) all(abs(r)>-tol)) )
@@ -411,7 +413,7 @@ eigendynamics = function(basis, n=1) {
 #'	constants is 0 are evaluated to 0.
 single_hyp = function(k1, k2, reacts) {
 	reacts = make_irreversible(reacts)
-	logfold = log(b2,2) - log(b1,2)
+	logfold = log(k2,2) - log(k1,2)
 	logfold[!is.finite(logfold)] = 0
 	
 	
@@ -445,9 +447,10 @@ single_hyp = function(k1, k2, reacts) {
 #'  normal condition in the columns.
 #' @param disease A matrix or data frame containing the metabolic terms of the 
 #'  diseasse condition in the columns.
+#' @param reacts The reaction list.
 #' @param type The type of analysis to be performed. Either 'transformation',
 #'  'optimization' or 'raw' for a pass-through option.
-#' @param sort Whether the results should be sorted by p-value and mean log-fold
+#' @param sorted Whether the results should be sorted by p-value and mean log-fold
 #'  change.
 #' @param v_opt A vector defining the optimization criterion. Must have the same
 #'  length as there are irreversible reactions. 
@@ -471,10 +474,11 @@ hyp = function(normal, disease, reacts, type="transformation",
     }
     else if(type == "optimization") {
         M = cbind(normal,disease)
-        S = get_stochiometry(reacts)
+        S = stochiometry(reacts)
         if(is.null(v_opt)) v_opt = c(rep(0,ncol(S)-1),1)
         if (requireNamespace("foreach", quietly = TRUE)) {
-            opt = foreach::"%dopar%"(foreach::foreach(i=1:ncol(M), .combine=cbind),  
+            i = 1:ncol(M)
+            opt = foreach::"%dopar%"(foreach::foreach(i=i, .combine=cbind),  
                 dba(v_opt, S, M[,i], lower=0, upper=1))
         }
         else {

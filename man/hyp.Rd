@@ -15,20 +15,22 @@ normal condition in the columns.}
 \item{disease}{A matrix or data frame containing the metabolic terms of the
 diseasse condition in the columns.}
 
+\item{reacts}{The reaction list.}
+
 \item{type}{The type of analysis to be performed. Either 'transformation',
 'optimization' or 'raw' for a pass-through option.}
 
 \item{correction_method}{A correction method for the multiple test p-values.
 Takes the same arguments as the method argument in p.adjust.}
 
+\item{sorted}{Whether the results should be sorted by p-value and mean log-fold
+change.}
+
 \item{v_opt}{A vector defining the optimization criterion. Must have the same
 length as there are irreversible reactions.}
 
 \item{full}{If TRUE also returns the individual log fold changes along with
 the differential regulation data.}
-
-\item{sort}{Whether the results should be sorted by p-value and mean log-fold
-change.}
 }
 \value{
 If full is TRUE returns a list of generated hypothesis and the individual

@@ -38,22 +38,22 @@ test_that("we can calculate all mass-action terms", {
     co = c(x=1, y=2)
     S = matrix(c(-1,1,3,-2), ncol=2, byrow=T)
     rownames(S) = c("x","y")
-    expect_equal(get_ma_terms(S, co), c(1,4))
-    expect_error(get_ma_terms(S, 1:2))
+    expect_equal(ma_terms(S, co), c(1,4))
+    expect_error(ma_terms(S, 1:2))
     
     rownames(S) = c("y","x")
-    expect_equal(get_ma_terms(S,co), 2:1)
+    expect_equal(ma_terms(S,co), 2:1)
     
     co = data.frame(name=c("x","y"), co, co)
-    expect_equal(rowSums(get_ma_terms(S,co)), c(4,2))
-    expect_error(get_ma_terms(S,co[-1]))
+    expect_equal(rowSums(ma_terms(S,co)), c(4,2))
+    expect_error(ma_terms(S,co[-1]))
 })
 
 test_that("we can cancalculate a Jacobian", {
   S = matrix(c(-1,1,3,-2), ncol=2, byrow=TRUE)
   concs = c(2,4)
   J = matrix(c(1,0,0,8), ncol=2, byrow=TRUE)
-  expect_equal(get_jacobian(S, concs), J)  
+  expect_equal(jacobian(S, concs), J)  
 })
 
 test_that("we can calculate derivatives of mass-action terms", {
@@ -85,7 +85,7 @@ test_that("we can read and format reactions from a file", {
     expect_equal(r[[2]]$abbreviation, "bla")
     expect_false(r[[1]]$rev)
     expect_true(r[[2]]$rev) 
-    expect_equal(get_species(r), c("A","B", "none")) 
+    expect_equal(species(r), c("A","B", "none")) 
     expect_equal(grep("1*A", format(r)), 1)
     expect_equal(grep("Model has", capture.output(print(r))), 1)
 
@@ -99,8 +99,8 @@ test_that("we can get the stochiometry from reactions", {
     S1 = matrix(c(-1,1,0,-1,0,1), ncol=3)
     S2 = matrix(c(-1,1,0,-1), ncol=2)
     rownames(S1) <- rownames(S2) <- c("A","B")
-    expect_equal(get_stochiometry(r), S1)
-    expect_equal(get_stochiometry(r, reversible=TRUE), S2)
+    expect_equal(stochiometry(r), S1)
+    expect_equal(stochiometry(r, reversible=TRUE), S2)
 })
 
 test_that("we can convert to irreversible", {
@@ -111,12 +111,12 @@ test_that("we can convert to irreversible", {
 
 test_that("we can get info from sample model", {
 	data(eryth)
-	s = get_species(eryth)
+	s = species(eryth)
 	n_s = length(s)
 	expect_true( all(grepl("\\d:", format(eryth))) )
-	expect_true( all(dim(get_stochiometry(eryth)) == c(n_s-1, 68)) )
-	expect_true( all(dim(get_stochiometry(eryth, reversible=TRUE)) == c(n_s-1, 45)) )
-	expect_true( all(c("atp", "23dpg", "none") %in% get_species(eryth)) )
+	expect_true( all(dim(stochiometry(eryth)) == c(n_s-1, 68)) )
+	expect_true( all(dim(stochiometry(eryth, reversible=TRUE)) == c(n_s-1, 45)) )
+	expect_true( all(c("atp", "23dpg", "none") %in% species(eryth)) )
 })
 
 test_that("graph conversions", {
@@ -138,7 +138,7 @@ test_that("additional helpers work", {
     expect_equal(r_order(make_irreversible(r)), c(1,1,0))
     expect_false(any(constant_flux(r)))
     expect_true(any(constant_flux(make_irreversible(r)))) 
-    expect_true("reactions" %in% class(as.reactions(get_stochiometry(r))))
-    expect_equal(length(methods(class="reactions")), 3)
+    expect_true("reactions" %in% class(as.reactions(stochiometry(r))))
+    expect_more_than(length(methods(class="reactions")), 1)
     expect_equal(rp(r,"numbers")[,2], c(1,2,3,3))
 })

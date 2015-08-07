@@ -102,7 +102,7 @@ hmdb_parse = function(nodes) {
 
 #' Scrapes measured metabolite concentration values for a given HMDB ID.
 #'
-#' @param hmid The HMDB ID or a vector of IDs for the metabolites.
+#' @param hmids The HMDB ID or a vector of IDs for the metabolites.
 #' @param add A data frame with as many rows as entries in hmid containing additional
 #'	information that will be added to the result (for instance names or ids).
 #' @return The scraped data set as a data frame or NULL if no concentrations were
@@ -133,7 +133,7 @@ hmdb_concentration = function(hmids, add=NULL) {
 	return(out)
 }
 
-#' Primitive function for group patching missing data
+# Primitive function for group patching missing data
 group_patch = function(x) {
 	miss = t(apply(x, 1, is.na))
 	
@@ -147,7 +147,7 @@ group_patch = function(x) {
 	return(x)
 }
 
-#' Primitive function for reference patching missing data
+# Primitive function for reference patching missing data
 ref_patch = function(x, ref) {
 	miss = t(apply(x[,-1], 1, is.na))
 	

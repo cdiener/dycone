@@ -25,6 +25,7 @@ data(eryth)
 S = stochiometry(eryth)
 V = polytope_basis(S)
 concs = runif(nrow(S))
+names(concs) = rownames(S)
 K = kcone(V, ma_terms(S, concs))
 stab = stability_analysis(K, S, concs)
 }

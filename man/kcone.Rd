@@ -25,11 +25,12 @@ of metabolic terms M by calculating \eqn{M^{-1}V}.
 }
 \examples{
 data(eryth)
-V = polytope(eryth)
-K = kcone(V, mats)
+S = stochiometry(eryth)
+V = polytope_basis(S)
+K = kcone(V, runif(ncol(S)))
 }
 \seealso{
-\code{\link{polytope}} for a way to calculate the flux cone,
+\code{\link{polytope_basis}} for a way to calculate the flux cone,
  \code{\link{ma_terms}} to get mass action termsq
 }
 \keyword{basis}

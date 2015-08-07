@@ -4,10 +4,12 @@
 \alias{print.reactions}
 \title{Prints a nice description of the reactions.}
 \usage{
-\method{print}{reactions}(x)
+\method{print}{reactions}(x, ...)
 }
 \arguments{
 \item{x}{The reaction list to be output.}
+
+\item{...}{Additional arguments passed on to write.}
 }
 \description{
 Prints a nice description of the reactions.
@@ -17,7 +19,7 @@ data(eryth)
 print(eryth)
 }
 \seealso{
-\code{\link{as.reaction()}} to convert a stochiometric matrix
+\code{\link{as.reactions}} to convert a stochiometric matrix
 	to a reaction list.
 }
 

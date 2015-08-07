@@ -9,9 +9,9 @@ context("kcone analysis")
 test_that("cones can be calculated and analyzed", {
     S = t(c(1,-1))
     rownames(S) = "A"
-    V = get_polytope_basis(S)
+    V = polytope_basis(S)
     expect_equal(as.vector(V), c(1,1))
-    expect_equal(as.vector(get_kcone_basis(S,c(1,1))), c(sqrt(2),sqrt(2))/2)
+    expect_equal(as.vector(kcone_null(S,c(1,1))), c(sqrt(2),sqrt(2))/2)
     mats = runif(2,0,10)
     K = kcone(V, mats)
     expect_equal(dim(K),dim(V))
@@ -25,7 +25,7 @@ test_that("cones can be calculated and analyzed", {
 test_that("stability analysis works", {
     S = matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
     rownames(S) = c("A", "B")
-    V = get_polytope_basis(S)
+    V = polytope_basis(S)
     stab = stability_analysis(V, S, 1)
     expect_true(all(stab$what=="stable"))
     expect_equal(stab$ev2, -0.5*rep(sqrt(2),2))
@@ -42,7 +42,6 @@ test_that("helper functions work", {
     y = c(0,2)
     expect_equal(angle(x,y), pi/2)
     expect_equal(scaling(y,0:1), 2)
-    expect_equal(mabs_diff(1:2, 1:2),0.5)
 })
 
 test_that("eigendynamics work", {
@@ -69,7 +68,7 @@ test_that("basis plotting works", {
     B = matrix(runif(1e4), nrow=10)
     class(B) = append(class(B), "basis")
     png("test-plot-42.png")
-    out = capture.output(plot(B, n_cl=100))
+    out = capture.output(plot_basis(B, n_cl=100))
     dev.off()
     expect_true(file.exists("test-plot-42.png"))
     expect_match(out, "in-cluster distance", all=F)

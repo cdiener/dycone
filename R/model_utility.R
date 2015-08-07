@@ -47,7 +47,7 @@ order_by = function(x, y) {
 		save(list=ls(e), file=filename, envir=e)
 	}
 	
-	load(filename, env=parent.frame(4)) 
+	load(filename, envir=parent.frame(4)) 
 }
 
 #' Calculates the mass-action reaction rate
@@ -117,7 +117,7 @@ deriv_ma = function(i, substrates, concs)
 #' data(eryth)
 #' S = stochiometry(eryth)
 #' J = jacobian(S, runif(nrow(S)))
-get_jacobian = function(s_matrix, concs, deriv_func = deriv_ma)
+jacobian = function(s_matrix, concs, deriv_func = deriv_ma)
 {
 	J = apply(s_matrix, 2, function(x) 
 			sapply(seq_along(x), deriv_func, substrates=x, concs=concs) )
@@ -127,7 +127,7 @@ get_jacobian = function(s_matrix, concs, deriv_func = deriv_ma)
 
 #' Calculates all mass action terms \deqn{\prod_{i \in N^-} S_i^|N_i|}
 #'
-#' @seealso \code{\link{stochiometry()}} to calculate the stochiometric matrix.
+#' @seealso \code{\link{stochiometry}} to calculate the stochiometric matrix.
 #' @export
 #' @keywords kinetics, mass-action
 #' @param s_matrix The stochiometric matrix.
@@ -144,8 +144,10 @@ get_jacobian = function(s_matrix, concs, deriv_func = deriv_ma)
 #' @examples
 #' data(eryth)
 #' S = stochiometry(eryth)
-#' mats = ma_terms(S, runif(nrow(S)))
-get_ma_terms = function(s_matrix, concs)
+#' concs = runif(nrow(S))
+#' names(concs) = rownames(S)
+#' mats = ma_terms(S, concs)
+ma_terms = function(s_matrix, concs)
 {
 	prods = NULL
 	
@@ -204,10 +206,8 @@ get_reaction_elems = function(reaction_str) {
 #'  annotations. A single annotation can contain several values as a 
 #'	comma separated string. The csv file should be saved with all entries
 #'	quoted.
-#' @param A list of reactions containing the stochiometry and additional 
-#'	annotations.
 #' @examples
-#' r_str = "'reaction','name','numbers'\n'A + B <=> C','r1','1,2,4'"
+#' r_str = 'reaction,abbreviation,numbers\nA -> B,blub,"1,2,3"\nB <=>, bla, 3'
 #' r = read_reactions(textConnection(r_str))
 read_reactions = function(react_file) {
 	reacts = read.csv(react_file, stringsAsFactors=FALSE)
@@ -247,29 +247,30 @@ format.reactions = function(x) {
 
 #' Prints a nice description of the reactions.
 #'
-#' @seealso \code{\link{as.reaction()}} to convert a stochiometric matrix
+#' @seealso \code{\link{as.reactions}} to convert a stochiometric matrix
 #'	to a reaction list.
 #' @export
 #' @param x The reaction list to be output.
+#' @param ... Additional arguments passed on to write.
 #' @examples
 #' data(eryth)
 #' print(eryth)
-print.reactions = function(x) {
-	write( sprintf("Model has %d reactions (%d reversible)", 
-			length(x), sum(sapply(x, function(a) a$rev))), file="" )
-	write( format(x), file="" )
+print.reactions = function(x, ...) {
+	write(sprintf("Model has %d reactions (%d reversible)", 
+			length(x), sum(sapply(x, function(a) a$rev))), file="")	
+    write(format(x), file="", ...)
 }
 
 #' Gets all species/metabolites from a reaction list.
 #'
 #' @export
 #' @keywords susbtrates, stochiometry
-#' @param react A reaction list.
+#' @param reacts A reaction list.
 #' @return A vector containing all unique species in the model.
 #' @examples
 #' data(eryth)
 #' print(species(eryth))
-get_species = function(reacts) {
+species = function(reacts) {
 	if ( !("reactions" %in% class(reacts)) ) stop("Argument has wrong type!")
 	
 	species = unlist( lapply(reacts, function(x) c(x$S, x$P)) )
@@ -279,7 +280,7 @@ get_species = function(reacts) {
 
 #' Calculates the stochiometric matrix for a list of reactions.
 #' 
-#' @seealso \code{\link{read_reactions()}} to read a reaction list from a file.
+#' @seealso \code{\link{read_reactions}} to read a reaction list from a file.
 #' @export
 #' @keywords stochiometry
 #' @param reacts The reaction list to be used.
@@ -291,16 +292,16 @@ get_species = function(reacts) {
 #' @return The stochiometric matrix with dimension n_s x n_r.
 #' @examples
 #' data(eryth)
-#' S = stochiommetry(eryth)
-get_stochiometry = function(reacts, reversible=FALSE, const=NULL) {
+#' S = stochiometry(eryth)
+stochiometry = function(reacts, reversible=FALSE, const=NULL) {
 	if ( !("reactions" %in% class(reacts)) ) stop("Argument has wrong type!")
 	
-	species = get_species(reacts)
+	spec = species(reacts)
 	n_r = if (reversible) length(reacts)
 			else length(reacts) + sum(sapply(reacts, function(x) x$rev))
 	
-	N = matrix(0, nrow=length(species), ncol=n_r)
-	rownames(N) = species
+	N = matrix(0, nrow=length(spec), ncol=n_r)
+	rownames(N) = spec
 	i = 1
 	for( r in reacts ) { 
 		S = if (is.na(r$S)[1]) "none" else r$S
@@ -328,9 +329,11 @@ get_stochiometry = function(reacts, reversible=FALSE, const=NULL) {
 #' @param reversible Marks reversible reactions. FALSE denotes that
 #'	all reactions are irreversible. Otherwise a boolean vector of length
 #'	n_r defining the reversibility for each reaction.
+#' @param r_names If NA reaction names are generated as r1,...,rn. Can be a a vector
+#'  of length n_r denoting names for the reactions.
 #' @return A reaction list containing the reactions from S.
 #' @examples
-#' S = matrix(c(-1,1,1,-1))
+#' S = matrix(c(-1,1,1,-1), nrow=2)
 #' rownames(S) <- c("A", "B")
 #' print(as.reactions(S))
 as.reactions = function(s_matrix, reversible=F, r_names=NA) {
@@ -450,16 +453,17 @@ constant_flux = function(reacts) {
 #' @export
 #' @keywords plot, reactions
 #' @param x A reaction list.
+#' @param ... Additional arguments passed to plot.igraph.
 #' @examples
 #' data(eryth)
 #' plot(eryth)
-plot.reactions = function(x) {
-	N = get_stochiometry(x, reversible=TRUE)
+plot.reactions = function(x, ...) {
+	N = stochiometry(x, reversible=TRUE)
 
 	if (requireNamespace("igraph", quietly = TRUE)) {
 		g = igraph::graph.adjacency(N%*%t(N), weighted=TRUE, diag=FALSE)
 		igraph::plot.igraph(g, layout=igraph::layout.circle, vertex.size=10, 
-            edge.arrow.size=0.5)
+            edge.arrow.size=0.5, ...)
 		
 	} else {
 		warning("igraph is not installed, Just showing the connectivity...")
@@ -483,7 +487,7 @@ plot.reactions = function(x) {
 as.graph = function(reacts) {
 	if ( !("reactions" %in% class(reacts)) ) stop("Argument has wrong type!")
 	
-	N = get_stochiometry(reacts, reversible=TRUE)
+	N = stochiometry(reacts, reversible=TRUE)
 	adj = abs(N%*%t(N))
 	
 	if (requireNamespace("igraph", quietly = TRUE)) {

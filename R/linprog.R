@@ -8,11 +8,13 @@
 #'
 #' @param a A vector a such that the fluxes \eqn{a^Tv} are maximized.
 #' @param s_matrix The stochiometrix matrix to be used (must be irreversible).
-#' @param v_terms The corresponding flux products.
+#' @param m_terms The corresponding flux products.
+#' @param lower Lower bound for the reaction constants.
+#' @param upper Upper bound for the reactions constants.
 #' @return A vector with the same length as \code{a} containing the solution
 #'  of the optimization.
 #' @export
-dba = function(a, s_matrix, m_terms, lower=0, upper=20) {
+dba = function(a, s_matrix, m_terms, lower=0, upper=1) {
 	const_matrix = rcdd::d2q( rbind(-diag(ncol(s_matrix)), diag(ncol(s_matrix))) )
 	const_b = rcdd::d2q(rep(c(-lower,upper),each=ncol(s_matrix)))
 	NC = rcdd::d2q( as.matrix( s_matrix%*%diag(m_terms) ) )

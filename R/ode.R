@@ -17,7 +17,7 @@
 #'	concentrations of the metabolites in the following columns.
 timecourse = function(x0, t, k, s_matrix) {
 	f = function(t, y, p) { 
-		list( s_matrix %*% diag(p) %*% get_ma_terms(s_matrix, y) )
+		list( s_matrix %*% diag(p) %*% ma_terms(s_matrix, y) )
 	}
 	
 	sol = deSolve::lsoda(x0, t, f, k)

@@ -7,10 +7,10 @@
 hmdb_concentration(hmids, add = NULL)
 }
 \arguments{
+\item{hmids}{The HMDB ID or a vector of IDs for the metabolites.}
+
 \item{add}{A data frame with as many rows as entries in hmid containing additional
 information that will be added to the result (for instance names or ids).}
-
-\item{hmid}{The HMDB ID or a vector of IDs for the metabolites.}
 }
 \value{
 The scraped data set as a data frame or NULL if no concentrations were

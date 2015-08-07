@@ -4,14 +4,18 @@
 \alias{dba}
 \title{Maximizes a given flux within the k-cone.}
 \usage{
-dba(a, s_matrix, m_terms, lower = 0, upper = 20)
+dba(a, s_matrix, m_terms, lower = 0, upper = 1)
 }
 \arguments{
 \item{a}{A vector a such that the fluxes \eqn{a^Tv} are maximized.}
 
 \item{s_matrix}{The stochiometrix matrix to be used (must be irreversible).}
 
-\item{v_terms}{The corresponding flux products.}
+\item{m_terms}{The corresponding flux products.}
+
+\item{lower}{Lower bound for the reaction constants.}
+
+\item{upper}{Upper bound for the reactions constants.}
 }
 \value{
 A vector with the same length as \code{a} containing the solution
