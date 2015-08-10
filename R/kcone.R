@@ -287,10 +287,13 @@ plot_red = function(basis_list, arrows=TRUE, col=NULL, n_cl=NULL) {
     }
     
     if(max(b_cols)>1e3 || !is.null(n_cl)) {
-        write("Basis are very large. Reducing by clustering...", file="")
-        if(is.null(n_cl)) n_cl = sqrt(mean(b_cols)/2)
+        if(is.null(n_cl)) n_cl = floor(min(1e3, sqrt(mean(b_cols)/2)))
+        
+         write(sprintf("Basis are very large. Reducing to %d clusters...",n_cl)
+            , file="")
+        
         cl = lapply(red, function(b) 
-            kmeans(b,centers=n_cl, iter.max=100, nstart=3))
+            suppressWarnings(kmeans(b,centers=n_cl, iter.max=100, nstart=3)))
         
         dists = sapply(cl, function(x) mean(sqrt(x$withinss/x$size)))
         write(sprintf("Mean in-cluster distance: %g.",mean(dists)), file="")

@@ -1,7 +1,7 @@
-[![Travis-CI Build Status](https://travis-ci.org/cdiener/dycone.svg?branch=master)](https://travis-ci.org/cdiener/dycone)
+[![Travis-CI Build Status](https://travis-ci.org/cdiener/dycone.svg?
+branch=master)](https://travis-ci.org/cdiener/dycone)
 
-dycone
-======
+![dycone](stuff/logo.svg)
 
 ...create the dynamic landscape from metabolome data
 
