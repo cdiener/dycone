@@ -18,9 +18,10 @@ into. NA means no clustering is performed.}
 Plots a heatmap of the basis.
 }
 \examples{
-data(eryth)
-V = polytope_basis(stochiometry(eryth))
-plot_basis(V, n_cl=sqrt(ncol(V)/2))
+S = matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
+rownames(S) = c("A", "B")
+V = polytope_basis(S)
+plot_basis(V)
 }
 \seealso{
 \code{\link{plot_red}} for a geometric visualization.

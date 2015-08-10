@@ -21,8 +21,9 @@ the faction of basis vectors for each varibale where the variable
 is not zero.
 }
 \examples{
-data(eryth)
-V = polytope_basis(stochiometry(eryth))
+S = matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
+rownames(S) = c("A", "B")
+V = polytope_basis(S)
 occ = occupation(V)
 }
 \seealso{

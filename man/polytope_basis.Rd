@@ -20,8 +20,9 @@ A matrix containing the basis vectors (normalized to a sum of 1)
 Gets the polytope basis of the k-cone.
 }
 \examples{
-data(eryth)
-V = polytope_basis(stochiometry(eryth))
+S = matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
+rownames(S) = c("A", "B")
+V = polytope_basis(S)
 }
 \keyword{basis}
 \keyword{k-cone,}

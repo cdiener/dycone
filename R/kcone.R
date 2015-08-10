@@ -10,7 +10,15 @@ DC_SINGLECOL = colorRampPalette(c("white","darkred"))
 DC_DIVCOL = colorRampPalette(c("blue", "white", "tomato"))
 DC_TRANSCOL = colorRampPalette(c("seagreen", "darkgoldenrod1", "tomato"))
 
-norm = function(x) sqrt(sum(x*x))
+#' Calculates the euclidean norm of a vector
+#'
+#' @export
+#' @param x A numeric vector.
+#' @return The norm of the vector x.
+#' @examples
+#' x = rnorm(10)
+#' enorm(x)
+enorm = function(x) sqrt(sum(x*x))
 
 #' Get the k-cone from a given flux cone.
 #'
@@ -30,12 +38,13 @@ norm = function(x) sqrt(sum(x*x))
 #' @return The stuff :O
 #' @examples
 #' data(eryth)
-#' S = stochiometry(eryth)
+#' S = matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
+#' rownames(S) = c("A", "B")
 #' V = polytope_basis(S)
 #' K = kcone(V, runif(ncol(S)))
 kcone = function(V, mats, normalize=FALSE) {
     K = diag(1/mats)%*%V
-	if(normalize) K = apply(K,2,function(x) x/norm(x))
+	if(normalize) K = apply(K,2,function(x) x/enorm(x))
     K = as.matrix(K)
     class(K) = append(c("basis", "kcone"), class(K))
 	return(K)
@@ -52,8 +61,8 @@ kcone = function(V, mats, normalize=FALSE) {
 #' @param m_terms The metabolic terms. 
 #' @return A matrix containing the basis vectors in the columns.
 #' @examples
-#' data(eryth)
-#' S = stochiometry(eryth)
+#' S = matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
+#' rownames(S) = c("A", "B")
 #' K = kcone_null(S, runif(ncol(S)))
 kcone_null = function(s_matrix, m_terms) {	
 	SM = s_matrix %*% diag(m_terms)
@@ -74,8 +83,9 @@ kcone_null = function(s_matrix, m_terms) {
 #' @return A matrix containing the basis vectors (normalized to a sum of 1) 
 #'	in its columns.
 #' @examples
-#' data(eryth)
-#' V = polytope_basis(stochiometry(eryth))
+#' S = matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
+#' rownames(S) = c("A", "B")
+#' V = polytope_basis(S)
 polytope_basis = function(s_matrix, m_terms=rep(1, ncol(s_matrix))) {
 	mat = m_terms
 	const_matrix = rcdd::d2q(-diag(ncol(s_matrix)))
@@ -89,7 +99,7 @@ polytope_basis = function(s_matrix, m_terms=rep(1, ncol(s_matrix))) {
 	vrep = rcdd::scdd(hp)
 	vp = vrep$output[,-(1:2)]
 	
-	basis = as.matrix(apply(rcdd::q2d(t(vp)), 2, function(x) x/norm(x)))
+	basis = as.matrix(apply(rcdd::q2d(t(vp)), 2, function(x) x/enorm(x)))
 	class(basis) = append("basis", class(basis))
 	
 	return( basis)
@@ -129,7 +139,8 @@ as.stability = function(evs) {
 #'	stability along with its eigenvalues for each vector in the basis.
 #' @examples
 #' data(eryth)
-#' S = stochiometry(eryth)
+#' S = matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
+#' rownames(S) = c("A", "B")
 #' V = polytope_basis(S)
 #' concs = runif(nrow(S))
 #' names(concs) = rownames(S)
@@ -143,14 +154,16 @@ stability_analysis = function(basis, s_matrix, concs) {
 	if(!is.null(ncol(basis))) {
 		nc = ncol(basis)
 		data = lapply(1:ncol(basis), function(i) {
-			evs = t(eigen(s_matrix %*% diag(basis[,i]) %*% J)$values)
+            b = basis[,i]/enorm(basis[,i])
+			evs = t(eigen(s_matrix %*% diag(b) %*% J)$values)
 			stab = as.stability(evs)
             return(data.frame(what=stab, evs=evs))
 		})
 	}
 	else {
 		nc = 1
-		evs = t(eigen(s_matrix %*% diag(basis) %*% J)$values)
+        b = basis/enorm(basis)
+		evs = t(eigen(s_matrix %*% diag(b) %*% J)$values)
 		stab = as.stability(evs)
         data = data.frame(what=stab, evs=evs)
 	}
@@ -174,8 +187,9 @@ stability_analysis = function(basis, s_matrix, concs) {
 #' @return A vector of length nrow(basis) containing the occupation for
 #'	each dimension.
 #' @examples
-#' data(eryth)
-#' V = polytope_basis(stochiometry(eryth))
+#' S = matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
+#' rownames(S) = c("A", "B")
+#' V = polytope_basis(S)
 #' occ = occupation(V)
 occupation = function(basis) {
 	if( !("basis" %in% class(basis)) ) stop("object is not a basis!")
@@ -194,9 +208,10 @@ occupation = function(basis) {
 #'	into. NA means no clustering is performed.
 #' @param ... other arguments passed to pheatmap.
 #' @examples
-#' data(eryth)
-#' V = polytope_basis(stochiometry(eryth))
-#' plot_basis(V, n_cl=sqrt(ncol(V)/2))
+#' S = matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
+#' rownames(S) = c("A", "B")
+#' V = polytope_basis(S)
+#' plot_basis(V)
 plot_basis = function(b, n_cl=NA, ...) {	
     clustered = F
     
@@ -245,8 +260,9 @@ plot_basis = function(b, n_cl=NA, ...) {
 #'	of the convex hull (interior area of the cone) is extremely lengthy 
 #'	otherwise.
 #' @examples
-#' data(eryth)
-#' V = polytope_basis(stochiometry(eryth))
+#' S = matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
+#' rownames(S) = c("A", "B")
+#' V = polytope_basis(S)
 #' plot_red(list(V)) # A single basis is fine as long as it is a list
 plot_red = function(basis_list, arrows=TRUE, col=NULL, n_cl=NULL) {
 	if( !("list" %in% class(basis_list)) ) stop("basis_list must be a list!")
@@ -361,8 +377,8 @@ scaling = function(x, y=0:1) {
 #' @return A single boolean of vector of booleans indicating whether the
 #'	point(s) lie within the k-cone.
 #' @examples
-#' data(eryth)
-#' S = stochiometry(eryth)
+#' S = matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
+#' rownames(S) = c("A", "B")
 #' 
 #' # Check whether a random point falls within the flux cone
 #' inside(runif(ncol(S)), S, rep(1,ncol(S))) # probably not true
@@ -387,8 +403,9 @@ inside = function(x, s_matrix, m_terms, tol=sqrt(.Machine$double.eps)) {
 #' @param n The number of eigendynamics to extract. Defaults to only the first.
 #' @return A matrix containing the first k eigendynamics in its columns.
 #' @examples
-#' data(eyrth)
-#' V = polytope_basis(stochiometry(eryth))
+#' S = matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
+#' rownames(S) = c("A", "B")
+#' V = polytope_basis(S)
 #' ed = eigendynamics(V) # gets the eigenpathways
 eigendynamics = function(basis, n=1) {
 	if(is.null(dim(basis))) return(basis)

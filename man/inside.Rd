@@ -27,8 +27,8 @@ Evaluates whether a given point lies within a given k-cone. Assumes a
 pointed cone (all reactions irreversible).
 }
 \examples{
-data(eryth)
-S = stochiometry(eryth)
+S = matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
+rownames(S) = c("A", "B")
 
 # Check whether a random point falls within the flux cone
 inside(runif(ncol(S)), S, rep(1,ncol(S))) # probably not true

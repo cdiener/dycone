@@ -33,7 +33,7 @@ test_that("stability analysis works", {
 
 test_that("helper functions work", {
     x = runif(10)
-    x = x/norm(x)
+    x = x/enorm(x)
     expect_equal(sum(x*x), 1)
     B = matrix(c(0,1,1,1), ncol=2)
     class(B) = "basis"

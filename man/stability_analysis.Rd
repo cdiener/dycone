@@ -22,7 +22,8 @@ Performs a stability analysis for each basis vector in a k-cone.
 }
 \examples{
 data(eryth)
-S = stochiometry(eryth)
+S = matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
+rownames(S) = c("A", "B")
 V = polytope_basis(S)
 concs = runif(nrow(S))
 names(concs) = rownames(S)

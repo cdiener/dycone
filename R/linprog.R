@@ -45,7 +45,7 @@ closest = function(p, S, m_terms) {
         stop("This function requires the quadprog package.")
     
     if(length(p) != ncol(S)) stop("p does not have the correct dimension!")
-    dp = norm(p)
+    dp = enorm(p)
     
     A = S%*%diag(m_terms)
     A = t(rbind(A, diag(ncol(S))))

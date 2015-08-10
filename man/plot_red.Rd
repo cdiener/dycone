@@ -32,8 +32,9 @@ shaded area denotes the interior of the k-cone into which all feasible
 k vectors must fall.
 }
 \examples{
-data(eryth)
-V = polytope_basis(stochiometry(eryth))
+S = matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
+rownames(S) = c("A", "B")
+V = polytope_basis(S)
 plot_red(list(V)) # A single basis is fine as long as it is a list
 }
 \seealso{

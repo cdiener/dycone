@@ -85,8 +85,11 @@ hmdb_parse = function(nodes) {
 	tags = c("biofluid", "concentration_value", "concentration_units", 
 		"subject_age", "subject_sex", "subject_condition", 
 		"references reference pubmed_id")
+    
+    empty_or_text = function(x) {if(is.null(x)) "" else rvest::xml_text(x)}    
+    
 	vals = sapply(nodes, function(n) sapply(tags, function(ta) {
-		rvest::xml_node(n, ta) %>% {if(is.null(.)) "" else rvest::xml_text(.)}
+		rvest::xml_node(n, ta) %>% empty_or_text()
 		}) )
 	
 	vals = t(tolower(vals))

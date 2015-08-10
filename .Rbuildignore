@@ -6,3 +6,4 @@
 ^\.travis\.yml$     # Used for continuous integration testing with travis
 ^stuff				# Original raw data or sources
 ^scripts			# Specifica analysis scripts using the package
+^\.travis\.yml$
