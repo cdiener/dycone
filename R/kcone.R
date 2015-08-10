@@ -336,29 +336,6 @@ scaling = function(x, y=0:1) {
     s = sum(x * x)/sum(y * y)
     return(sqrt(s))
 }
-
-#basis_map = function(b1, b2) {
-#	n1 = ncol(b1)
-#	n2 = ncol(b2)
-#	progress = F
-#	cur = 0
-	
-#	if(n1*n2>1e5) {
-#		write("Basis are pretty large. This might take a long time!", file="")
-#		progress = T
-#	}
-#	closest = apply(b1, 2, function(x) {
-#							d = apply(b2, 2, function(y) dist(rbind(x,y)))
-#							i = which.min(d)
-#							if(progress) {
-#								cur <<- cur+1
-#								cat("\r") 
-#								cat(sprintf("Finished %.2f%%...",cur/n1*100))
-#							}
-#							return( c(i,d[i]) )
-							
-#							 })
-#	cat("\n")
 	
 #	return( data.frame(id1=1:ncol(b1), id2=closest[1,], d=closest[2,]) )
 #}
