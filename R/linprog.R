@@ -17,7 +17,7 @@
 dba = function(a, s_matrix, m_terms, lower=0, upper=1) {
 	const_matrix = rcdd::d2q( rbind(-diag(ncol(s_matrix)), diag(ncol(s_matrix))) )
 	const_b = rcdd::d2q(c(-lower*m_terms,upper*m_terms))
-	NC = rcdd::d2q( as.matrix( s_matrix%*%diag(m_terms) ) )
+	NC = rcdd::d2q( as.matrix( s_matrix ) )
 	b = rcdd::d2q(rep(0,nrow(s_matrix)))
 	
 	hp = rcdd::makeH(const_matrix, const_b, NC, b)
