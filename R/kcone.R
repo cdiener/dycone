@@ -472,7 +472,8 @@ hyp = function(normal, disease, reacts, type="transformation",
     else if(type == "optimization") {
         M = cbind(normal,disease)
         S = stochiometry(reacts)
-        if(is.null(v_opt)) v_opt = c(rep(0,ncol(S)-1),1)
+        if(length(v_opt) != ncol(S) || !is.numeric(v_opt)) stop("v_opt must be numeric and have the same length
+			as there are irreversible reactions in reacts.")
         if (requireNamespace("foreach", quietly = TRUE)) {
             i = 1:ncol(M)
             opt = foreach::"%dopar%"(foreach::foreach(i=i, .combine=cbind),  
@@ -534,6 +535,11 @@ hyp = function(normal, disease, reacts, type="transformation",
 		lfc_n = data.frame(normal=lfc_n)
 		lfc_d = data.frame(disease=lfc_d)
 		res = list(hyp=res, lfc_normal=lfc_n, lfc_disease=lfc_d)
+		if(type=="optimization") {
+			objval = v_opt%*%(opt*m_terms)
+			res = c(res, obj_normal=objval[1:ncol(normal)], 
+				obj_disease=objval[-(1:ncol(normal))])
+		}
 	}
 	
 	return(res)

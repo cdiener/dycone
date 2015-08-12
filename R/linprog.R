@@ -16,7 +16,7 @@
 #' @export
 dba = function(a, s_matrix, m_terms, lower=0, upper=1) {
 	const_matrix = rcdd::d2q( rbind(-diag(ncol(s_matrix)), diag(ncol(s_matrix))) )
-	const_b = rcdd::d2q(rep(c(-lower,upper),each=ncol(s_matrix)))
+	const_b = rcdd::d2q(c(-lower*m_terms,upper*m_terms))
 	NC = rcdd::d2q( as.matrix( s_matrix%*%diag(m_terms) ) )
 	b = rcdd::d2q(rep(0,nrow(s_matrix)))
 	
@@ -25,19 +25,24 @@ dba = function(a, s_matrix, m_terms, lower=0, upper=1) {
 	sol = rcdd::lpcdd(hp, rcdd::d2q(a), minimize=FALSE)
 	if(sol$solution.type!="Optimal") stop("Optimization is inconsistent!")
 	
-	return(rcdd::q2d(sol$primal.solution))
+	return(rcdd::q2d(rcdd::qdq(sol$primal.solution, rcdd::d2q(m_terms))))
 }
 
 #' Finds all reaction indices using the given subtrates and products.
 #'
 #' @param r A reaction list.
-#' @param S a list of substrates to be searched for or NULL.
-#' @param P a list of products to be searched for or NULL.
+#' @param S a list of substrates to be searched or empty string.
+#' @param P a list of products to be searched or empty string.
 #' @export
-which_reaction = function(r, S, P) {
+which_reaction = function(r, S="", P="") {
 	have_it = sapply(r, function(x) any(S %in% x$S) || any(P %in% x$P))
-	
-	return(which(have_it))
+	idx = which(have_it)
+    out = lapply(idx, function(i) {
+        subs = S[S %in% r[[i]]$S]
+        prods = P[P %in% r[[i]]$P]
+        data.frame(idx=i, metabolites=c(subs,prods)) })
+    
+	return(do.call(rbind, out))
 }
 
 closest = function(p, S, m_terms) {
