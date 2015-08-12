@@ -50,6 +50,49 @@ sbml_species = function(sbml_file) {
 	return( out )
 }
 
+#' Extracts mean concentrations from HMDB results using a selection of biofluids
+#' in a distinct order. 
+#' 
+#' This is useful if one prefers concentrations from one biofluid, but will also 
+#' except other biofluids if no reported measurements can be found for the 
+#' primary one. \code{priority_mean} will return the mean of the first biofluid
+#' for which measuremnts can be found.
+#' 
+#' @export
+#' @seealso \code{\link{hmdb_concentration}} to parse the concentrations used 
+#'  in this function.
+#' @param d A data frame as returned by hmdb_concentration
+#' @param biofluids Vector of valid biofluids to be checked in the order
+#'  they appear.
+#' @return The mean 
+#' @examples
+priority_mean = function(d, biofluids=c("cellular cytoplasm", "blood")) {
+	if(is.null(d)) return(NA)
+	
+	m = NULL
+    
+    for(bf in biofluids) {
+        m = d$concentration_value[d$biofluid == bf]
+        if(length(m)>0 && !all(is.na(m))) break
+	}
+    
+	return(mean(m, na.rm=T))
+}
+
+#' Wrapper for grep that returns NA if nothing was found.
+#'
+#' @export
+#' @param ... Arguments passed on to grep
+#' @return The result of grep or NA if not found.
+#' @examples
+#' grep_or_na("A", "blub")
+grep_or_na = function(...) {
+	res = grep(...)
+	
+	if( length(res)>0 ) return(res)
+	else return(NA)
+}
+
 #' Parses concentration values from HMDB.
 #'
 #' @param val The value as it appears in HMDB.
