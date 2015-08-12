@@ -4,14 +4,14 @@
 \alias{which_reaction}
 \title{Finds all reaction indices using the given subtrates and products.}
 \usage{
-which_reaction(r, S, P)
+which_reaction(r, S = "", P = "")
 }
 \arguments{
 \item{r}{A reaction list.}
 
-\item{S}{a list of substrates to be searched for or NULL.}
+\item{S}{a list of substrates to be searched or empty string.}
 
-\item{P}{a list of products to be searched for or NULL.}
+\item{P}{a list of products to be searched or empty string.}
 }
 \description{
 Finds all reaction indices using the given subtrates and products.

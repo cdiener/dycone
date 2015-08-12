@@ -11,7 +11,7 @@ test_that("k optimization works", {
     S = stochiometry(eryth)
     a = rep(0, ncol(S))
     i_pyr = which_reaction(make_irreversible(eryth), S="adp", P="pyr")
-    expect_true(16 %in% i_pyr)
+    expect_true(16 %in% i_pyr$idx)
     a[16] = 1
     opt = dba(a, S, rep(1, ncol(S)), lower=0, upper=1)
     expect_equal(length(opt), ncol(S))

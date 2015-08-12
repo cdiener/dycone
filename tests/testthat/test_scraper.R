@@ -21,6 +21,8 @@ test_that("HMDB scraping works", {
     capture.output(concs <- hmdb_concentration(ids[1]))
     expect_true("Pyruvic acid" %in% concs$name)
     expect_more_than(nrow(concs), 1)
+	expect_more_than(priority_mean(concs),0)
+	expect_true(is.na(grep_or_na("a", "bcd")))
 })
 
 test_that("patching works", {

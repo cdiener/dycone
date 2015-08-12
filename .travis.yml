@@ -1,0 +1,17 @@
+# .travis.yml for dycone
+
+language: r
+warnings_are_errors: true
+sudo: required
+
+env:
+ global:
+    - CRAN: http://cran.rstudio.com
+r_github_packages:
+    - jimhester/covr
+notifications:
+  email:
+    on_success: change
+    on_failure: change
+after_success:
+  - Rscript -e 'library(covr);codecov()'

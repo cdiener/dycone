@@ -60,7 +60,9 @@ test_that("hypothesis generation works", {
     expect_true(all(h$pval<=1))
     h_opt = hyp(mats[,1:3], mats[,4:6], eryth, type="optimization", 
         v_opt=runif(n_r), full=T)
-    expect_equal(length(h_opt), 3)
+    expect_equal(length(h_opt), 5)
+    expect_equal(length(h_opt$obj_normal),3)
+    expect_equal(length(h_opt$obj_disease),3)
     expect_equal(nrow(h_opt$hyp), n_r)
 })
 

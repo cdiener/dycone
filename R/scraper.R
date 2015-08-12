@@ -66,6 +66,8 @@ sbml_species = function(sbml_file) {
 #'  they appear.
 #' @return The mean 
 #' @examples
+#' concs = hmdb_concentration("HMDB00124") # Fructose-6-phosphate
+#' priority_mean(concs) # has measurements for cytoplasm so returns those
 priority_mean = function(d, biofluids=c("cellular cytoplasm", "blood")) {
 	if(is.null(d)) return(NA)
 	

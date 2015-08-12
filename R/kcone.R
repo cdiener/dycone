@@ -433,10 +433,11 @@ single_hyp = function(k1, k2, reacts) {
 #' normal and disease conditions.
 #'
 #' \code{hyp()} is the main driver for differential analysis. It first uses a
-#' reduction method to approximate the relative kientic constant changes. Than
-#' performs calculation of all combinatorial log-fold changes within the normal 
-#' group and between the disease and normal group and calculates the wilcoxon
-#' ranked sum statistics for each reaction.
+#' reduction method to approximate the fold-change of the kinetic constants. This
+#' is followed by calculation of all combinatorial log-fold changes within the 
+#' normal group and between the disease and normal group. Finally, the wilcoxon
+#' ranked sum statistics are obtained for each reaction and the p-values 
+#' corrected.
 #'
 #' @export
 #' @keywords hypothesis, k-cone, analysis
@@ -449,15 +450,32 @@ single_hyp = function(k1, k2, reacts) {
 #'  'optimization' or 'raw' for a pass-through option.
 #' @param sorted Whether the results should be sorted by p-value and mean log-fold
 #'  change.
-#' @param v_opt A vector defining the optimization criterion. Must have the same
-#'  length as there are irreversible reactions. 
+#' @param v_opt Only needs to be set if type=="optimization". Defines a weights
+#'  specifying the optimization criterion. If F are the steady state fluxes of
+#'  the specified system, the optimization criterion will be maximization of
+#'  sum(v_opt*F). Must be the same length as there are irreversible reactions. 
 #' @param correction_method A correction method for the multiple test p-values.
 #'	Takes the same arguments as the method argument in p.adjust.
 #' @param full If TRUE also returns the individual log fold changes along with
 #'	the differential regulation data.
-#' @return If full is TRUE returns a list of generated hypothesis and the individual
-#' 	log fold changes between all reference basis and between reference and treatments.
-#'	If full is FALSE only returns the generated hypothesis as a data frame. 
+#' @return If full is FALSE only returns the generated hypothesis as a data 
+#'  frame. If full is TRUE returns a list of generated hypothesis and the 
+#'  individual log fold changes between all reference basis and between 
+#'  reference and treatments. The full output will be a list with following 
+#'  elements:
+#'	\describe{
+#'  \item{hyp}{The generated hypotheses together with statistics and reactions.}
+#'  \item{lfc_normal}{The log2-fold changes of enzyme activity within the normal 
+#'      group for each of the irreversible reactions. Those are never sorted, so
+#'      the first entry corresponds to the first reaction, etc.}
+#'  \item{lfc_disease}{The log2-fold changes of enzyme activity within between 
+#'      the disease and normal group for each of the irreversible reactions. 
+#'      Also never sorted.}
+#'  \item{obj_normal}{Only if type=="optimization". The value of the objective
+#'      function for each of the metabolic terms in 'normal'.}
+#'  \item{obj_disease}{Only if type=="optimization". The value of the objective
+#'      function for each of the metabolic terms in 'disease'.}
+#'  }
 hyp = function(normal, disease, reacts, type="transformation", 
     correction_method="fdr", sorted=T, v_opt=NULL, full=FALSE) {
 	# Create reference data
@@ -536,9 +554,9 @@ hyp = function(normal, disease, reacts, type="transformation",
 		lfc_d = data.frame(disease=lfc_d)
 		res = list(hyp=res, lfc_normal=lfc_n, lfc_disease=lfc_d)
 		if(type=="optimization") {
-			objval = v_opt%*%(opt*m_terms)
-			res = c(res, obj_normal=objval[1:ncol(normal)], 
-				obj_disease=objval[-(1:ncol(normal))])
+			objval = v_opt%*%(opt*M)
+			res = c(res, list(obj_normal=objval[1:ncol(normal)], 
+				obj_disease=objval[-(1:ncol(normal))]))
 		}
 	}
 	
