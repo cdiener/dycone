@@ -1,15 +1,16 @@
 Package: dycone
 Title: dycone - create the dynamic landscape from metabolome data
-Version: 0.4
+Version: 0.5
 Authors@R: person("Christian", "Diener", , "ch.diener@gmail.com", role = c("aut", "cre"))
-Description: Dycone allows you to analyze the dynamic landscape of a metabolic system 
-	without knowing its kinetic parameters by using steady state and dynamic metabolome data 
-	(for instance from mass spectometry).
+Description: Dycone allows you to analyze space of kinetic activities of a 
+	biochemical system by using metabolome data (for instance from mass 
+	spectometry). Its main applications is the discovery of enzyme activities
+	that are differentially regulated between a normal and disease state.
 Depends: R (>= 3.1.2)
 URL: https://github.com/cdiener/dycone
 BugReports: https://github.com/cdiener/dycone/issues
 License: MIT + file LICENSE
 LazyData: true
-Imports: deSolve, rcdd, MASS, pheatmap, magrittr, RCurl, rvest
-Suggests: testthat, covr, igraph, knitr, doMC, foreach, quadprog
+Imports: deSolve, rcdd, MASS, pheatmap, magrittr, RCurl, rvest, foreach, quadprog
+Suggests: testthat, covr, igraph, knitr, doParallel
 VignetteBuilder: knitr

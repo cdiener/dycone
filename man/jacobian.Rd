@@ -9,7 +9,8 @@ jacobian(s_matrix, concs, deriv_func = deriv_ma)
 \arguments{
 \item{s_matrix}{The stochiometric matrix of the model.}
 
-\item{concs}{The concentrations of the substrates.}
+\item{concs}{The concentrations of the substrates. Must be a named vector with
+names being the metabolite names as used in \code{rownames(s_matrix)}.}
 
 \item{deriv_func}{The function calculating the derivative. Must be of the
 form func(idx, subs, concs) where idx is the index of the differentiation
@@ -26,7 +27,9 @@ Calculates the Jacobian matrix.
 \examples{
 data(eryth)
 S = stochiometry(eryth)
-J = jacobian(S, runif(nrow(S)))
+concs = runif(nrow(S))
+names(concs) = rownames(S)
+J = jacobian(S, concs)
 }
 \seealso{
 \code{\link{stochiometry}} to calculate the stochiometric matrix.

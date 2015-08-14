@@ -11,7 +11,7 @@ stability_analysis(basis, s_matrix, concs)
 
 \item{s_matrix}{The stochiometric matrix of the model.}
 
-\item{concs}{Vector of metabolite concentrations.}
+\item{concs}{A named vector of metabolite concentrations.}
 }
 \value{
 A data frame containing the a string describing the type of

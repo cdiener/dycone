@@ -10,12 +10,14 @@ deriv_ma(i, substrates, concs)
 \item{i}{The index of the substrate used as the differentiation variable.}
 
 \item{substrates}{The stochiometry of the subbstrates (column in the
-stochiometric matrix.}
+stochiometric matrix. Must be the same length as concs.}
 
 \item{concs}{Concentrations of the substrates.}
 }
 \description{
-Calculates derivatives of mass-action kinetics.
+\code{deriv_ma} does not check whether the
+ordering of substrates in the stochiometry and concs is corrects, so please
+make sure that the indices in \code{substrates} and \code{concs} coincide.
 }
 \examples{
 data(eryth)

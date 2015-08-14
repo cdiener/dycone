@@ -5,9 +5,9 @@ date: "`r Sys.Date()`"
 output:
   html_document:
     highlight: default
-    theme: flatly
+    theme: default
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{Dycone erythrocite example}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
@@ -19,8 +19,7 @@ In this example we will use dycone to analyze some perturbations in the
 Red blood cell model of Resendis. First we will use dycone to get its stochiometric matrix and extract the steady state from the orginial SBML file.
 
 ```{r}
-#library(dycone)
-devtools::load_all()
+library(dycone)
 data(eryth)
 reacts = make_irreversible(eryth)
 print(eryth)
@@ -54,8 +53,6 @@ flux cone. Let's calculate and look at the flux cone first...
 
 ```{r fig.width=16, fig.height=8}
 V = polytope_basis(S)
-m_terms = ma_terms(S, concs)
-K = kcone(V, m_terms)
 plot_basis(V)
 ```
 
@@ -71,6 +68,8 @@ differential k-cone analysis. We will use a faster version of the eigendynamics
 as reference parameters and perturb the steady state value of pyruvate.
 
 ```{r}
+m = ma_terms(S, concs)
+K = kcone(V, m)
 k = 1e3*eigendynamics(K)
 
 # Now we generate several new steady states coming from a disturbed ethanol 
@@ -102,7 +101,7 @@ samples to each condition to simulate an experimental measurement.
 
 ```{r}
 noise = function(x) {
-    new = pmax(0, x*rnorm(length(x),1,0.25) + rnorm(length(x),0,0.25))
+    new = pmax(0, x*rnorm(length(x),1,0.25))
     names(new) = names(x)
     return(new)
 }
@@ -121,7 +120,7 @@ We see that the most prominent change is an increased reaction rate for two reac
 which result to be the two reactions consuming Pyruvate. However, there are also some other
 changes, however, their fold_changes are much smaller than 2, indicating only slight alterations
 due to the added noise. The mean log-fold change of the alterations in pyruvate
-production are close to the actual alteration (90-fold predicted vs 100-fold truth).
+production are close to the actual alteration (96-fold predicted vs 100-fold truth).
 
 As we can see the change in Pyruvate is explained by either up-regulating the pyruvate
 consumption or (less likely) a lower production of upstream substrates which might have to act together. 
