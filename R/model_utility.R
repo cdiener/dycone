@@ -160,7 +160,7 @@ ma_terms = function(s_matrix, concs)
 	}
 	else if(is.data.frame(concs)) {
 		if("name" %in% names(concs)) {
-			o = order_by(concs$name, rownames(s_matrix))
+			o = order_by(rownames(s_matrix), concs$name)
 			concs = concs[o,]
 			name_idx = which(names(concs) == "name")
 			prods = apply(concs[,-name_idx], 2, function(co) 
@@ -409,10 +409,11 @@ make_irreversible = function(reacts) {
 #' data(eryth)
 #' print(rp(eryth, "name"))
 rp = function(r, field="KEGG_enzyme") {
+	if(length(field) != 1) stop("field must be exactly one string!")
 	prop = lapply(1:length(r), function(i) {
         ri = r[[i]]
         if(all(is.na(ri[[field]]))) return(NULL)
-        data.frame(r_idx=i, x=ri[[field]], stringsAsFactors=F)
+        data.frame(r_idx=i, x=ri[[field]], stringsAsFactors=FALSE)
     })
     prop = do.call(rbind,prop)
     names(prop)[2] = field

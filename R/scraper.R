@@ -172,7 +172,7 @@ hmdb_concentration = function(hmids, add=NULL) {
 		
 		if(!is.null(hm_entries)) {	
 			hm_entries = cbind(kegg_id, id, name, hm_entries)
-			names(hm_entries)[c(1:3,ncol(hm_entries))] = c("keggid", "hmdbid","name", "pmid")
+			names(hm_entries)[c(1:3,ncol(hm_entries))] = c("keggid", "hmdbid","hmdb_name", "pmid")
 			if(is.data.frame(add)) hm_entries = cbind(hm_entries, add[i,])
 			out = rbind(out, hm_entries)
 		}
