@@ -52,6 +52,7 @@ test_that("we can calculate all mass-action terms", {
 test_that("we can cancalculate a Jacobian", {
   S = matrix(c(-1,1,3,-2), ncol=2, byrow=TRUE)
   concs = c(2,4)
+  rownames(S) = names(concs) = c("A","B")
   J = matrix(c(1,0,0,8), ncol=2, byrow=TRUE)
   expect_equal(jacobian(S, concs), J)  
 })

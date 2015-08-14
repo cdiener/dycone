@@ -26,8 +26,9 @@ test_that("stability analysis works", {
     S = matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
     rownames(S) = c("A", "B")
     V = polytope_basis(S)
-    stab = stability_analysis(V, S, 1)
+    stab = stability_analysis(V, S, c(A=1, B=1))
     expect_true(all(stab$what=="stable"))
+    expect_equal(stab$ev1, c(0,0))
     expect_equal(stab$ev2, -0.5*rep(sqrt(2),2))
 })
 

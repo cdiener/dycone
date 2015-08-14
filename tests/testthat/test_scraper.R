@@ -19,7 +19,7 @@ test_that("SBML scraping works", {
 test_that("HMDB scraping works", {
     ids = find_hmdb("pyruvate")
     capture.output(concs <- hmdb_concentration(ids[1]))
-    expect_true("Pyruvic acid" %in% concs$name)
+    expect_true("Pyruvic acid" %in% concs$hmdb_name)
     expect_more_than(nrow(concs), 1)
 	expect_more_than(priority_mean(concs),0)
 	expect_true(is.na(grep_or_na("a", "bcd")))

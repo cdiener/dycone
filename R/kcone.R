@@ -134,7 +134,7 @@ as.stability = function(evs) {
 #' @keywords stability
 #' @param basis A basis matrix, where each column denotes a basis vector.
 #' @param s_matrix The stochiometric matrix of the model.
-#' @param concs Vector of metabolite concentrations.
+#' @param concs A named vector of metabolite concentrations.
 #' @return A data frame containing the a string describing the type of 
 #'	stability along with its eigenvalues for each vector in the basis.
 #' @examples

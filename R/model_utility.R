@@ -50,13 +50,21 @@ order_by = function(x, y) {
 	load(filename, envir=parent.frame(4)) 
 }
 
-#' Calculates the mass-action reaction rate
+#' Calculates a mass-action reaction rate
+#'
+#' \code{mass_action} is mostly used inetrnally to get mass action rates for a 
+#' single column of the stochiometric matrix. It does not check whether the 
+#' ordering of substrates in the stochiometry and concs is corrects, so please
+#' make sure that the indices in \code{substrates} and \code{concs} coincide.  
 #'
 #' @seealso \code{\link{stochiometry}} to generate the stochiometric
-#'	matrix from a reaction list.
+#'	matrix from a reaction list. \code{\link{ma_terms}} for a wrapper that
+#'	calculates all mass-action terms for a stochiometric matrix and also checks 
+#'	for correct ordering of the substrates.
 #'	\code{\link{ma_terms}} to calculate all mass-action terms at once.
 #' @export
-#' @param substrates Stochiometry of the substrates
+#' @param substrates Stochiometry of the substrates. Must have the same length
+#'	as concs.
 #' @param concs The concentrations used for the substrates
 #' @return The mass action term \deqn{\prod_{i \in N^-} S_i^|N_i|}
 #' @examples
@@ -65,6 +73,9 @@ order_by = function(x, y) {
 #' ma1 = mass_action(S[,1], runif(nrow(S)))
 mass_action = function(substrates, concs)
 {
+	if(length(substrates)!=length(concs)) 
+		stop("substrates and concs must have the same length!")
+		
 	sc = concs[substrates<0]
 	nc = abs( substrates[substrates<0] )
 	if(length(sc) == 0) return( 1 )
@@ -74,11 +85,15 @@ mass_action = function(substrates, concs)
 
 #' Calculates derivatives of mass-action kinetics.
 #'
+#' \code{deriv_ma} does not check whether the 
+#' ordering of substrates in the stochiometry and concs is corrects, so please
+#' make sure that the indices in \code{substrates} and \code{concs} coincide.
+#'
 #' @seealso \code{\link{jacobian}} to calculate the Jacobian matrix.
 #' @export
 #' @param i The index of the substrate used as the differentiation variable.
 #' @param substrates The stochiometry of the subbstrates (column in the
-#'	stochiometric matrix.
+#'	stochiometric matrix. Must be the same length as concs.
 #' @param concs Concentrations of the substrates.
 #' @examples
 #' data(eryth)
@@ -86,6 +101,9 @@ mass_action = function(substrates, concs)
 #' dma1_dS3 = deriv_ma(3, S[,1], runif(nrow(S)))
 deriv_ma = function(i, substrates, concs)
 {
+	if(length(substrates)!=length(concs)) 
+		stop("substrates and concs must have the same length!")
+	
 	f = abs( min(substrates[i], 0) )
 	substrates[i] = 0
 	if( f==0 ) return (0)
@@ -106,7 +124,8 @@ deriv_ma = function(i, substrates, concs)
 #' @export
 #' @keywords jacobian, stochiometry
 #' @param s_matrix The stochiometric matrix of the model.
-#' @param concs The concentrations of the substrates.
+#' @param concs The concentrations of the substrates. Must be a named vector with
+#'	names being the metabolite names as used in \code{rownames(s_matrix)}.
 #' @param deriv_func The function calculating the derivative. Must be of the 
 #'	form func(idx, subs, concs) where idx is the index of the differentiation 
 #'	variable, subs the stochiometry of the substrates and concs the concentration
@@ -116,9 +135,17 @@ deriv_ma = function(i, substrates, concs)
 #' @examples
 #' data(eryth)
 #' S = stochiometry(eryth)
-#' J = jacobian(S, runif(nrow(S)))
+#' concs = runif(nrow(S))
+#' names(concs) = rownames(S)
+#' J = jacobian(S, concs)
 jacobian = function(s_matrix, concs, deriv_func = deriv_ma)
 {
+	if(is.null(names(concs))) stop("Concentration vector must have names!")
+	else {
+		concs = concs[rownames(s_matrix)]
+		prods = apply( s_matrix, 2, mass_action, concs=concs)
+	}
+	
 	J = apply(s_matrix, 2, function(x) 
 			sapply(seq_along(x), deriv_func, substrates=x, concs=concs) )
 	
