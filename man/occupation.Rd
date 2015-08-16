@@ -13,7 +13,7 @@ occupation(basis)
 }
 \value{
 A vector of length nrow(basis) containing the occupation for
-	each dimension.
+\teach dimension.
 }
 \description{
 Calculates the occupation for a basis. Here, occupation denotes
@@ -22,7 +22,7 @@ is not zero.
 }
 \examples{
 S = matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
-rownames(S) = c("A", "B")
+rownames(S) = c('A', 'B')
 V = polytope_basis(S)
 occ = occupation(V)
 }

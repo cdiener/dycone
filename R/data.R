@@ -1,8 +1,5 @@
-#  data.R
-#  
-#  Copyright 2015 Christian Diener <ch.diener@gmail.com>
-#  
-#  MIT license. See LICENSE for more information.
+# data.R Copyright 2015 Christian Diener <ch.diener@gmail.com> MIT license. See
+# LICENSE for more information.
 
 #' dycone: Differential k-cone analysis for metabolome data.
 #'
@@ -21,4 +18,4 @@ NULL
 #' @format A list of reactions.
 #' @source \url{http://journals.plos.org/plosone/article/asset?unique&id=
 #' info:doi/10.1371/journal.pone.0004967.s003}
-"eryth"
+"eryth" 

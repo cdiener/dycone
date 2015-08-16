@@ -11,7 +11,7 @@ as.stability(evs)
 }
 \value{
 A single string of either stable, unstable, limit cycle or
-	zero jacobian.
+\tzero jacobian.
 }
 \description{
 Translates the eigenvectors to the corresponding stability term.
@@ -21,7 +21,7 @@ print(as.stability(c(0+2i, 0-3i)))
 }
 \seealso{
 \code{\link{stability_analysis}} for an analysis of the entire
-	basis.
+\tbasis.
 }
 \keyword{stability}
 

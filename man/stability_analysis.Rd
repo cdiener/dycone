@@ -15,7 +15,7 @@ stability_analysis(basis, s_matrix, concs)
 }
 \value{
 A data frame containing the a string describing the type of
-	stability along with its eigenvalues for each vector in the basis.
+\tstability along with its eigenvalues for each vector in the basis.
 }
 \description{
 Performs a stability analysis for each basis vector in a k-cone.
@@ -23,7 +23,7 @@ Performs a stability analysis for each basis vector in a k-cone.
 \examples{
 data(eryth)
 S = matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
-rownames(S) = c("A", "B")
+rownames(S) = c('A', 'B')
 V = polytope_basis(S)
 concs = runif(nrow(S))
 names(concs) = rownames(S)
@@ -32,7 +32,7 @@ stab = stability_analysis(K, S, concs)
 }
 \seealso{
 \code{\link{polytope_basis}} and \code{}\link{kcone} to
-	calculate the k-cone.
+\tcalculate the k-cone.
 }
 \keyword{stability}
 

@@ -13,7 +13,7 @@ ex \%c\% filename
 }
 \arguments{
 \item{ex}{The R expression to be cached. Use brackets for
-multiline statements.}
+\tmultiline statements.\t}
 
 \item{filename}{The filename of the cache file.}
 }
@@ -27,8 +27,8 @@ file.
 }
 \examples{
 # Is executed only if the file does not exist, otherwise
-# samples a and b are read from "samples.Rd"
-{ a <- rnorm(1e5) } \%c\% "samples.Rd"
+# samples a and b are read from 'samples.Rd'
+{ a <- rnorm(1e5) } \%c\% 'samples.Rd'
 }
 \keyword{caching}
 \keyword{operator,}

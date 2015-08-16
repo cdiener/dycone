@@ -11,16 +11,16 @@ plot_red(basis_list, arrows = TRUE, col = NULL, n_cl = NULL)
 \item{basis_list}{A list of basis to be reduced.}
 
 \item{arrows}{Whether to draw the individual basis vectors or just the
-interior of the cone.}
+\tinterior of the cone.}
 
 \item{col}{If NULL colors are automatically generated from a green to red
-palette. If not NULL must be of the same length as basis_list and denotes
-the colors used to draw the individual basis.}
+\tpalette. If not NULL must be of the same length as basis_list and denotes
+\tthe colors used to draw the individual basis.}
 
 \item{n_cl}{The numbers of clusters to be used. If there are more than 1000
-basis vectors per basis, clustering is always performed since calculation
-of the convex hull (interior area of the cone) is extremely lengthy
-otherwise.}
+\tbasis vectors per basis, clustering is always performed since calculation
+\tof the convex hull (interior area of the cone) is extremely lengthy
+\totherwise.}
 }
 \description{
 Plotting the reduced k-cone is a two step procedure. Where the k-cones
@@ -33,7 +33,7 @@ k vectors must fall.
 }
 \examples{
 S = matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
-rownames(S) = c("A", "B")
+rownames(S) = c('A', 'B')
 V = polytope_basis(S)
 plot_red(list(V)) # A single basis is fine as long as it is a list
 }

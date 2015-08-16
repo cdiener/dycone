@@ -8,7 +8,7 @@ find_hmdb(search_term)
 }
 \arguments{
 \item{search_term}{Can be any text search term or a different ID (for instance
-a KEGG ID}
+\ta KEGG ID}
 }
 \value{
 A single HMDB ID or list of putative IDs.

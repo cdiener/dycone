@@ -21,7 +21,7 @@ are irreversible.
 }
 \examples{
 S = matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
-rownames(S) = c("A", "B")
+rownames(S) = c('A', 'B')
 K = kcone_null(S, runif(ncol(S)))
 }
 \seealso{

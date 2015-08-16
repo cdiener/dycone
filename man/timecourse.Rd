@@ -10,7 +10,7 @@ timecourse(x0, t, k, s_matrix)
 \item{x0}{Initial concentrations of metabolites.}
 
 \item{t}{A vector of monotonously increasing times where the simulation
-is evaluated.}
+\tis evaluated.}
 
 \item{k}{The vector of kinetic constants used for simulation.}
 
@@ -18,7 +18,7 @@ is evaluated.}
 }
 \value{
 A matrix containing the time in the first column and temporal
-	concentrations of the metabolites in the following columns.
+\tconcentrations of the metabolites in the following columns.
 }
 \description{
 Simulates the time course for a given model.

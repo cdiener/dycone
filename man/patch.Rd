@@ -8,19 +8,19 @@ patch(measurements, id, normal, treatment, ref_data = NULL)
 }
 \arguments{
 \item{measurements}{A data frame with one id column, and at least one normal
-and one treatment column}
+\tand one treatment column}
 
 \item{id}{An index or column name specifying the ids}
 
 \item{normal}{A vector of indices or column names specifying the control
-group}
+\tgroup}
 
 \item{treatment}{A vector of indices or column names specifying the treatment
-group}
+\tgroup}
 
 \item{ref_data}{An optional data frame of reference data 2 or 3 columns,
-where the first column denotes the ids, the second the normal reference data
-and the (optional) third column the treatment reference data.}
+\twhere the first column denotes the ids, the second the normal reference data
+\tand the (optional) third column the treatment reference data.}
 }
 \value{
 The original measurement data frame with a maximum number of missing

@@ -16,6 +16,6 @@ The result of grep or NA if not found.
 Wrapper for grep that returns NA if nothing was found.
 }
 \examples{
-grep_or_na("A", "blub")
+grep_or_na('A', 'blub')
 }
 

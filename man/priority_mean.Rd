@@ -23,7 +23,7 @@ primary one. \code{priority_mean} will return the mean of the first biofluid
 for which measuremnts can be found.
 }
 \examples{
-concs = hmdb_concentration("HMDB00124") # Fructose-6-phosphate
+concs = hmdb_concentration('HMDB00124') # Fructose-6-phosphate
 priority_mean(concs) # has measurements for cytoplasm so returns those
 }
 \seealso{

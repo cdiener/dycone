@@ -10,7 +10,7 @@ plot_basis(b, n_cl = NA, ...)
 \item{b}{The basis matrix, containing the basis vectors in the columns.}
 
 \item{n_cl}{The number of clusters individual basis vectors are grouped
-into. NA means no clustering is performed.}
+\tinto. NA means no clustering is performed.}
 
 \item{...}{other arguments passed to pheatmap.}
 }
@@ -19,7 +19,7 @@ Plots a heatmap of the basis.
 }
 \examples{
 S = matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
-rownames(S) = c("A", "B")
+rownames(S) = c('A', 'B')
 V = polytope_basis(S)
 plot_basis(V)
 }

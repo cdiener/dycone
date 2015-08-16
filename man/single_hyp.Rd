@@ -16,8 +16,8 @@ single_hyp(k1, k2, reacts)
 }
 \value{
 A data frame containig the reaction indices, reactions, kind of regulation
-	and log2-fold changes of k2 relative to k1. Log-fold changes where either of the
-	constants is 0 are evaluated to 0.
+\tand log2-fold changes of k2 relative to k1. Log-fold changes where either of the
+\tconstants is 0 are evaluated to 0.
 }
 \description{
 Helper function to get the differential regulation between two approximations

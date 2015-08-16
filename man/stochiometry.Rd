@@ -10,11 +10,11 @@ stochiometry(reacts, reversible = FALSE, const = NULL)
 \item{reacts}{The reaction list to be used.}
 
 \item{reversible}{Whether the stochiometric matrix can include reversible
-reactions.}
+\treactions.}
 
 \item{const}{A vector of species names that are assumed to be invariant and
-will be dropped from the stochiometric matrix. The default is not to drop
-any species.}
+\twill be dropped from the stochiometric matrix. The default is not to drop
+\tany species.}
 }
 \value{
 The stochiometric matrix with dimension n_s x n_r.

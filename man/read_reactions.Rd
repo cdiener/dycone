@@ -8,16 +8,16 @@ read_reactions(react_file)
 }
 \arguments{
 \item{react_file}{A csv file containing the reactions, where the first
-   column denotes the reaction string and additional columns contain
-annotations. A single annotation can contain several values as a
-   comma separated string. The csv file should be saved with all entries
-   quoted.}
+\tcolumn denotes the reaction string and additional columns contain
+ annotations. A single annotation can contain several values as a
+\tcomma separated string. The csv file should be saved with all entries
+\tquoted.}
 }
 \description{
 Reads a list of reactions with optional annotations from a file.
 }
 \examples{
-r_str = 'reaction,abbreviation,numbers\\nA -> B,blub,"1,2,3"\\nB <=>, bla, 3'
+r_str = 'reaction,abbreviation,numbers\\nA -> B,blub,'1,2,3'\\nB <=>, bla, 3'
 r = read_reactions(textConnection(r_str))
 }
 

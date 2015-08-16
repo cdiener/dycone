@@ -1,4 +1,4 @@
 library(testthat)
 library(dycone)
 
-test_check("dycone")
+test_check("dycone") 

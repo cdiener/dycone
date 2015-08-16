@@ -10,7 +10,7 @@ deriv_ma(i, substrates, concs)
 \item{i}{The index of the substrate used as the differentiation variable.}
 
 \item{substrates}{The stochiometry of the subbstrates (column in the
-stochiometric matrix. Must be the same length as concs.}
+\tstochiometric matrix. Must be the same length as concs.}
 
 \item{concs}{Concentrations of the substrates.}
 }

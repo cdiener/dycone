@@ -19,6 +19,6 @@ Obtains properties from a reaction list
 }
 \examples{
 data(eryth)
-print(rp(eryth, "name"))
+print(rp(eryth, 'name'))
 }
 
