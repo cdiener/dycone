@@ -184,8 +184,8 @@ ma_terms <- function(s_matrix, concs) {
             o <- order_by(rownames(s_matrix), concs$name)
             concs <- concs[o, ]
             name_idx <- which(names(concs) == "name")
-            prods <- apply(concs[, -name_idx], 2, function(co) apply(s_matrix, 2, 
-                mass_action, concs = co))
+            prods <- apply(concs[, -name_idx], 2, function(co) apply(s_matrix, 
+                2, mass_action, concs = co))
         } else stop("Concentration data frame must have a column named 'name'!")
     }
     
@@ -213,8 +213,9 @@ get_reaction_elems <- function(reaction_str) {
     prods[prods == ""] <- "1"
     n_p <- length(prods)
     
-    return(list(S = subs[seq(4, n_s, 4)], P = prods[seq(4, n_p, 4)], N_S = as.numeric(subs[seq(3, 
-        n_s, 4)]), N_P = as.numeric(prods[seq(3, n_p, 4)]), rev = reversible))
+    return(list(S = subs[seq(4, n_s, 4)], P = prods[seq(4, n_p, 4)], 
+        N_S = as.numeric(subs[seq(3, n_s, 4)]), 
+        N_P = as.numeric(prods[seq(3, n_p, 4)]), rev = reversible))
 }
 
 #' Reads a list of reactions with optional annotations from a file.
@@ -233,8 +234,8 @@ read_reactions <- function(react_file) {
     
     has_arrows <- grepl("\\s*<?\\s?=?-?\\s?>\\s*", reacts[, 1])
     if (!all(has_arrows)) {
-        stop(sprintf("The following reactions are missing reacion arrows: %s", paste(which(!has_arrows), 
-            collapse = ", ")))
+        stop(sprintf("The following reactions are missing reacion arrows: %s", 
+            paste(which(!has_arrows), collapse = ", ")))
     }
     
     res <- apply(reacts, 1, function(x) c(get_reaction_elems(x[1]), lapply(x[-1], 
@@ -354,8 +355,8 @@ stochiometry <- function(reacts, reversible = FALSE, const = NULL) {
 #' @param reversible Marks reversible reactions. FALSE denotes that
 #'  all reactions are irreversible. Otherwise a boolean vector of length
 #'  n_r defining the reversibility for each reaction.
-#' @param r_names If NA reaction names are generated as r1,...,rn. Can be a a vector
-#'  of length n_r denoting names for the reactions.
+#' @param r_names If NA reaction names are generated as r1,...,rn. Can be a 
+#'  vector of length n_r denoting names for the reactions.
 #' @return A reaction list containing the reactions from S.
 #' @examples
 #' S <- matrix(c(-1,1,1,-1), nrow=2)

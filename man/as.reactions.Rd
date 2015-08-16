@@ -13,8 +13,8 @@ as.reactions(s_matrix, reversible = F, r_names = NA)
 all reactions are irreversible. Otherwise a boolean vector of length
 n_r defining the reversibility for each reaction.}
 
-\item{r_names}{If NA reaction names are generated as r1,...,rn. Can be a a vector
-of length n_r denoting names for the reactions.}
+\item{r_names}{If NA reaction names are generated as r1,...,rn. Can be a
+vector of length n_r denoting names for the reactions.}
 }
 \value{
 A reaction list containing the reactions from S.
