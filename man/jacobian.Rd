@@ -10,26 +10,26 @@ jacobian(s_matrix, concs, deriv_func = deriv_ma)
 \item{s_matrix}{The stochiometric matrix of the model.}
 
 \item{concs}{The concentrations of the substrates. Must be a named vector with
-\tnames being the metabolite names as used in \code{rownames(s_matrix)}.}
+names being the metabolite names as used in \code{rownames(s_matrix)}.}
 
 \item{deriv_func}{The function calculating the derivative. Must be of the
-\tform func(idx, subs, concs) where idx is the index of the differentiation
-\tvariable, subs the stochiometry of the substrates and concs the concentration
-\tof substrates. See \code{\link{mass_action}} for an example.}
+form func(idx, subs, concs) where idx is the index of the differentiation
+variable, subs the stochiometry of the substrates and concs the concentration
+of substrates. See \code{\link{mass_action}} for an example.}
 }
 \value{
 The Jacobian matrix of dimension n_s x n_r where entry (i,j) denotes
-\tthe derivative dv[j]/dS[i].
+ the derivative dv[j]/dS[i].
 }
 \description{
 Calculates the Jacobian matrix.
 }
 \examples{
 data(eryth)
-S = stochiometry(eryth)
-concs = runif(nrow(S))
-names(concs) = rownames(S)
-J = jacobian(S, concs)
+S <- stochiometry(eryth)
+concs <- runif(nrow(S))
+names(concs) <- rownames(S)
+J <- jacobian(S, concs)
 }
 \seealso{
 \code{\link{stochiometry}} to calculate the stochiometric matrix.

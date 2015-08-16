@@ -10,7 +10,7 @@ deriv_ma(i, substrates, concs)
 \item{i}{The index of the substrate used as the differentiation variable.}
 
 \item{substrates}{The stochiometry of the subbstrates (column in the
-\tstochiometric matrix. Must be the same length as concs.}
+stochiometric matrix. Must be the same length as concs.}
 
 \item{concs}{Concentrations of the substrates.}
 }
@@ -21,8 +21,8 @@ make sure that the indices in \code{substrates} and \code{concs} coincide.
 }
 \examples{
 data(eryth)
-S = stochiometry(eryth)
-dma1_dS3 = deriv_ma(3, S[,1], runif(nrow(S)))
+S <- stochiometry(eryth)
+dma1_dS3 <- deriv_ma(3, S[,1], runif(nrow(S)))
 }
 \seealso{
 \code{\link{jacobian}} to calculate the Jacobian matrix.

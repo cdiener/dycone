@@ -10,27 +10,27 @@ ma_terms(s_matrix, concs)
 \item{s_matrix}{The stochiometric matrix.}
 
 \item{concs}{The concentrations of the substrates. Can be one of two
-\t\itemize{
-\t\t\item A named vector containing the concentratiions for all substrates,
-\t\twhere its names come from the same set as the rownames of S.
-\t\t\item A data frame with one column names 'name' containing the
-\t\tnames and all other columns containing multiple concentration entries.
-\t}}
+\itemize{
+\item A named vector containing the concentratiions for all substrates,
+where its names come from the same set as the rownames of S.
+\item A data frame with one column names 'name' containing the
+names and all other columns containing multiple concentration entries.
+}}
 }
 \value{
 Either vector of length n_r containing the mass-action terms, if
-\tconcs was a vector, or a matrix with n_r rows containing the mass-action
-\tin its columns.
+ concs was a vector, or a matrix with n_r rows containing the mass-action
+in its columns.
 }
 \description{
 Calculates all mass action terms \deqn{\prod_{i \in N^-} S_i^|N_i|}
 }
 \examples{
 data(eryth)
-S = stochiometry(eryth)
-concs = runif(nrow(S))
-names(concs) = rownames(S)
-mats = ma_terms(S, concs)
+S <- stochiometry(eryth)
+concs <- runif(nrow(S))
+names(concs) <- rownames(S)
+mats <- ma_terms(S, concs)
 }
 \seealso{
 \code{\link{stochiometry}} to calculate the stochiometric matrix.

@@ -10,11 +10,11 @@ stochiometry(reacts, reversible = FALSE, const = NULL)
 \item{reacts}{The reaction list to be used.}
 
 \item{reversible}{Whether the stochiometric matrix can include reversible
-\treactions.}
+reactions.}
 
 \item{const}{A vector of species names that are assumed to be invariant and
-\twill be dropped from the stochiometric matrix. The default is not to drop
-\tany species.}
+will be dropped from the stochiometric matrix. The default is not to drop
+any species.}
 }
 \value{
 The stochiometric matrix with dimension n_s x n_r.
@@ -24,7 +24,7 @@ Calculates the stochiometric matrix for a list of reactions.
 }
 \examples{
 data(eryth)
-S = stochiometry(eryth)
+S <- stochiometry(eryth)
 }
 \seealso{
 \code{\link{read_reactions}} to read a reaction list from a file.

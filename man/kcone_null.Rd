@@ -20,9 +20,9 @@ Gets the null-space for the given k-cone assuming that all reactions
 are irreversible.
 }
 \examples{
-S = matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
+S <- matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
 rownames(S) = c('A', 'B')
-K = kcone_null(S, runif(ncol(S)))
+K <- kcone_null(S, runif(ncol(S)))
 }
 \seealso{
 \code{\link{polytope_basis}} for arbitrary reversibility

@@ -16,7 +16,8 @@ Human blood cell example
 ========================
 
 In this example we will use dycone to analyze some perturbations in the 
-Red blood cell model of Resendis. First we will use dycone to get its stochiometric matrix and extract the steady state from the orginial SBML file.
+Red blood cell model of Resendis. First we will use dycone to get its 
+stochiometric matrix and extract the steady state from the orginial SBML file.
 
 ```{r}
 library(dycone)

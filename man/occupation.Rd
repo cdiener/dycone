@@ -13,7 +13,7 @@ occupation(basis)
 }
 \value{
 A vector of length nrow(basis) containing the occupation for
-\teach dimension.
+ each dimension.
 }
 \description{
 Calculates the occupation for a basis. Here, occupation denotes
@@ -21,10 +21,10 @@ the faction of basis vectors for each varibale where the variable
 is not zero.
 }
 \examples{
-S = matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
+S <- matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
 rownames(S) = c('A', 'B')
-V = polytope_basis(S)
-occ = occupation(V)
+V <- polytope_basis(S)
+occ <- occupation(V)
 }
 \seealso{
 \code{\link{polytope_basis}} to get a k-cone.

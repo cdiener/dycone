@@ -38,25 +38,25 @@ test_that("we can calculate mass-action terms", {
 })
 
 test_that("we can calculate all mass-action terms", {
-    co = c(x = 1, y = 2)
-    S = matrix(c(-1, 1, 3, -2), ncol = 2, byrow = T)
-    rownames(S) = c("x", "y")
+    co <- c(x = 1, y = 2)
+    S <- matrix(c(-1, 1, 3, -2), ncol = 2, byrow = T)
+    rownames(S) <- c("x", "y")
     expect_equal(ma_terms(S, co), c(1, 4))
     expect_error(ma_terms(S, 1:2))
     
-    rownames(S) = c("y", "x")
+    rownames(S) <- c("y", "x")
     expect_equal(ma_terms(S, co), 2:1)
     
-    co = data.frame(name = c("x", "y"), co, co)
+    co <- data.frame(name = c("x", "y"), co, co)
     expect_equal(rowSums(ma_terms(S, co)), c(4, 2))
     expect_error(ma_terms(S, co[-1]))
 })
 
 test_that("we can cancalculate a Jacobian", {
-    S = matrix(c(-1, 1, 3, -2), ncol = 2, byrow = TRUE)
-    concs = c(2, 4)
-    rownames(S) = names(concs) = c("A", "B")
-    J = matrix(c(1, 0, 0, 8), ncol = 2, byrow = TRUE)
+    S <- matrix(c(-1, 1, 3, -2), ncol = 2, byrow = TRUE)
+    concs <- c(2, 4)
+    rownames(S) <- names(concs) <- c("A", "B")
+    J <- matrix(c(1, 0, 0, 8), ncol = 2, byrow = TRUE)
     expect_equal(jacobian(S, concs), J)
 })
 
@@ -82,8 +82,8 @@ test_that("we can identify reversibility", {
 })
 
 test_that("we can read and format reactions from a file", {
-    r_str = "reaction,abbreviation,numbers\nA -> B,blub,\"1,2,3\"\nB <=>, bla, 3"
-    r = read_reactions(textConnection(r_str))
+    r_str <- "reaction,abbreviation,numbers\nA -> B,blub,\"1,2,3\"\nB <=>, bla, 3"
+    r <- read_reactions(textConnection(r_str))
     expect_equal(length(r), 2)
     expect_equal(r[[1]]$numbers, 1:3)
     expect_equal(r[[2]]$abbreviation, "bla")
@@ -93,30 +93,30 @@ test_that("we can read and format reactions from a file", {
     expect_equal(grep("1*A", format(r)), 1)
     expect_equal(grep("Model has", capture.output(print(r))), 1)
     
-    r_str = "reaction,abbreviation,numbers\nA -Z B,blub,\"1,2,3\"\nB <=>, bla, 3"
+    r_str <- "reaction,abbreviation,numbers\nA -Z B,blub,\"1,2,3\"\nB <=>, bla, 3"
     expect_error(invisible(read_reactions(textConnection(r_str))), "arrows")
 })
 
 test_that("we can get the stochiometry from reactions", {
-    r_str = "reaction,abbreviation,numbers\nA -> B,blub,\"1,2,3\"\nB <=>, bla, 3"
-    r = read_reactions(textConnection(r_str))
-    S1 = matrix(c(-1, 1, 0, -1, 0, 1), ncol = 3)
-    S2 = matrix(c(-1, 1, 0, -1), ncol = 2)
+    r_str <- "reaction,abbreviation,numbers\nA -> B,blub,\"1,2,3\"\nB <=>, bla, 3"
+    r <- read_reactions(textConnection(r_str))
+    S1 <- matrix(c(-1, 1, 0, -1, 0, 1), ncol = 3)
+    S2 <- matrix(c(-1, 1, 0, -1), ncol = 2)
     rownames(S1) <- rownames(S2) <- c("A", "B")
     expect_equal(stochiometry(r), S1)
     expect_equal(stochiometry(r, reversible = TRUE), S2)
 })
 
 test_that("we can convert to irreversible", {
-    r_str = "reaction,abbreviation,numbers\nA -> B,blub,\"1,2,3\"\nB <=>, bla, 3"
-    r = read_reactions(textConnection(r_str))
+    r_str <- "reaction,abbreviation,numbers\nA -> B,blub,\"1,2,3\"\nB <=>, bla, 3"
+    r <- read_reactions(textConnection(r_str))
     expect_equal(length(make_irreversible(r)), 3)
 })
 
 test_that("we can get info from sample model", {
     data(eryth)
-    s = species(eryth)
-    n_s = length(s)
+    s <- species(eryth)
+    n_s <- length(s)
     expect_true(all(grepl("\\d:", format(eryth))))
     expect_true(all(dim(stochiometry(eryth)) == c(n_s - 1, 68)))
     expect_true(all(dim(stochiometry(eryth, reversible = TRUE)) == c(n_s - 1, 45)))
@@ -124,7 +124,7 @@ test_that("we can get info from sample model", {
 })
 
 test_that("graph conversions", {
-    r = list(a = "throws", b = "error")
+    r <- list(a = "throws", b = "error")
     expect_error(as.graph(r))
     data(eryth)
     expect_true(class(as.graph(eryth)) %in% c("matrix", "igraph"))
@@ -136,8 +136,8 @@ test_that("graph conversions", {
 })
 
 test_that("additional helpers work", {
-    r_str = "reaction,abbreviation,numbers\nA -> B,blub,\"1,2,3\"\nB <=>, bla, 3"
-    r = read_reactions(textConnection(r_str))
+    r_str <- "reaction,abbreviation,numbers\nA -> B,blub,\"1,2,3\"\nB <=>, bla, 3"
+    r <- read_reactions(textConnection(r_str))
     expect_equal(r_order(r), c(1, 1))
     expect_equal(r_order(make_irreversible(r)), c(1, 1, 0))
     expect_false(any(constant_flux(r)))

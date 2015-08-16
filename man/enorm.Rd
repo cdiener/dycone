@@ -16,7 +16,7 @@ The norm of the vector x.
 Calculates the euclidean norm of a vector
 }
 \examples{
-x = rnorm(10)
+x <- rnorm(10)
 enorm(x)
 }
 

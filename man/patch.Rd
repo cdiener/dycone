@@ -8,23 +8,23 @@ patch(measurements, id, normal, treatment, ref_data = NULL)
 }
 \arguments{
 \item{measurements}{A data frame with one id column, and at least one normal
-\tand one treatment column}
+and one treatment column}
 
 \item{id}{An index or column name specifying the ids}
 
 \item{normal}{A vector of indices or column names specifying the control
-\tgroup}
+group}
 
 \item{treatment}{A vector of indices or column names specifying the treatment
-\tgroup}
+group}
 
 \item{ref_data}{An optional data frame of reference data 2 or 3 columns,
-\twhere the first column denotes the ids, the second the normal reference data
-\tand the (optional) third column the treatment reference data.}
+where the first column denotes the ids, the second the normal reference data
+and the (optional) third column the treatment reference data.}
 }
 \value{
 The original measurement data frame with a maximum number of missing
-data being patched.
+ data being patched.
 }
 \description{
 Biological data is only rarely complete, however k-cone analysis requires

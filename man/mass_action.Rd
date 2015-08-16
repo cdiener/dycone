@@ -8,7 +8,7 @@ mass_action(substrates, concs)
 }
 \arguments{
 \item{substrates}{Stochiometry of the substrates. Must have the same length
-\tas concs.}
+as concs.}
 
 \item{concs}{The concentrations used for the substrates}
 }
@@ -23,14 +23,14 @@ make sure that the indices in \code{substrates} and \code{concs} coincide.
 }
 \examples{
 data(eryth)
-S = stochiometry(eryth)
-ma1 = mass_action(S[,1], runif(nrow(S)))
+S <- stochiometry(eryth)
+ma1 <- mass_action(S[,1], runif(nrow(S)))
 }
 \seealso{
 \code{\link{stochiometry}} to generate the stochiometric
-\tmatrix from a reaction list. \code{\link{ma_terms}} for a wrapper that
-\tcalculates all mass-action terms for a stochiometric matrix and also checks
-\tfor correct ordering of the substrates.
-\t\code{\link{ma_terms}} to calculate all mass-action terms at once.
+ matrix from a reaction list. \code{\link{ma_terms}} for a wrapper that
+ calculates all mass-action terms for a stochiometric matrix and also checks
+ for correct ordering of the substrates.
+ \code{\link{ma_terms}} to calculate all mass-action terms at once.
 }
 

@@ -13,7 +13,7 @@ ex \%c\% filename
 }
 \arguments{
 \item{ex}{The R expression to be cached. Use brackets for
-\tmultiline statements.\t}
+multiline statements.}
 
 \item{filename}{The filename of the cache file.}
 }

@@ -8,7 +8,7 @@ sbml_species(sbml_file)
 }
 \arguments{
 \item{sbml_file}{A SBML file. This can be a file on the disk or the location
-\tto an online resource.}
+to an online resource.}
 }
 \value{
 A data frame containing the obtained data. Some entries might be NA.

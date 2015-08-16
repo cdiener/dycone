@@ -22,10 +22,10 @@ the k-cone (all entries positive), all the additional eigendynamics can
 be intepreted as fine tuning of the first eigendynamics.
 }
 \examples{
-S = matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
-rownames(S) = c('A', 'B')
-V = polytope_basis(S)
-ed = eigendynamics(V) # gets the eigenpathways
+S <- matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
+rownames(S) <- c('A', 'B')
+V <- polytope_basis(S)
+ed <- eigendynamics(V) # gets the eigenpathways
 }
 \keyword{basis}
 

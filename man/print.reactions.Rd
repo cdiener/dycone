@@ -20,6 +20,6 @@ print(eryth)
 }
 \seealso{
 \code{\link{as.reactions}} to convert a stochiometric matrix
-\tto a reaction list.
+ to a reaction list.
 }
 

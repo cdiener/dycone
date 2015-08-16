@@ -10,19 +10,19 @@ polytope_basis(s_matrix, m_terms = rep(1, ncol(s_matrix)))
 \item{s_matrix}{The stochiometric matrix.}
 
 \item{m_terms}{The metabolic terms for each reaction. Default to
-\tcalculation of flux cone.}
+calculation of flux cone.}
 }
 \value{
 A matrix containing the basis vectors (normalized to a sum of 1)
-\tin its columns.
+ in its columns.
 }
 \description{
 Gets the polytope basis of the k-cone.
 }
 \examples{
-S = matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
+S <- matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
 rownames(S) = c('A', 'B')
-V = polytope_basis(S)
+V <- polytope_basis(S)
 }
 \keyword{basis}
 \keyword{k-cone,}

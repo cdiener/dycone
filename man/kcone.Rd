@@ -25,10 +25,10 @@ of metabolic terms M by calculating \eqn{M^{-1}V}.
 }
 \examples{
 data(eryth)
-S = matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
-rownames(S) = c('A', 'B')
-V = polytope_basis(S)
-K = kcone(V, runif(ncol(S)))
+S <- matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
+rownames(S) <- c('A', 'B')
+V <- polytope_basis(S)
+K <- kcone(V, runif(ncol(S)))
 }
 \seealso{
 \code{\link{polytope_basis}} for a way to calculate the flux cone,

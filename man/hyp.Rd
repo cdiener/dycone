@@ -21,7 +21,7 @@ diseasse condition in the columns.}
 'optimization' or 'raw' for a pass-through option.}
 
 \item{correction_method}{A correction method for the multiple test p-values.
-\tTakes the same arguments as the method argument in p.adjust.}
+Takes the same arguments as the method argument in p.adjust.}
 
 \item{sorted}{Whether the results should be sorted by p-value and mean log-fold
 change.}
@@ -32,7 +32,7 @@ the specified system, the optimization criterion will be maximization of
 sum(v_opt*F). Must be the same length as there are irreversible reactions.}
 
 \item{full}{If TRUE also returns the individual log fold changes along with
-\tthe differential regulation data.}
+the differential regulation data.}
 }
 \value{
 If full is FALSE only returns the generated hypothesis as a data
@@ -40,18 +40,18 @@ If full is FALSE only returns the generated hypothesis as a data
  individual log fold changes between all reference basis and between
  reference and treatments. The full output will be a list with following
  elements:
-\t\describe{
+ \describe{
  \item{hyp}{The generated hypotheses together with statistics and reactions.}
  \item{lfc_normal}{The log2-fold changes of enzyme activity within the normal
-     group for each of the irreversible reactions. Those are never sorted, so
-     the first entry corresponds to the first reaction, etc.}
+   group for each of the irreversible reactions. Those are never sorted, so
+   the first entry corresponds to the first reaction, etc.}
  \item{lfc_disease}{The log2-fold changes of enzyme activity within between
-     the disease and normal group for each of the irreversible reactions.
-     Also never sorted.}
+   the disease and normal group for each of the irreversible reactions.
+   Also never sorted.}
  \item{obj_normal}{Only if type=='optimization'. The value of the objective
-     function for each of the metabolic terms in 'normal'.}
+   function for each of the metabolic terms in 'normal'.}
  \item{obj_disease}{Only if type=='optimization'. The value of the objective
-     function for each of the metabolic terms in 'disease'.}
+   function for each of the metabolic terms in 'disease'.}
  }
 }
 \description{
