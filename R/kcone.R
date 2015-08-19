@@ -302,6 +302,10 @@ plot_red <- function(basis_list, arrows = TRUE, col = NULL, n_cl = NULL) {
         red <- lapply(cl, function(x) x$centers)
     }
     
+    energy <- pca$sdev^2
+    write(sprintf("Total energy explained: %f%%.", sum(energy[1:2])/sum(energy) * 
+        100), file = "")
+    
     rs <- apply(do.call(rbind, red), 2, range)
     plot(NULL, xlim = rs[, 1], ylim = rs[, 2], xlab = "PC 1", ylab = "PC 2")
     
@@ -321,10 +325,6 @@ plot_red <- function(basis_list, arrows = TRUE, col = NULL, n_cl = NULL) {
                 col = pal[i])
         }
     }
-    energy <- pca$sdev^2
-    
-    write(sprintf("Total energy explained: %f%%.", sum(energy[1:2])/sum(energy) * 
-        100), file = "")
 }
 
 # Helper function to calculate angls between tow vectors
@@ -556,7 +556,9 @@ hyp <- function(normal, disease, reacts, type = "transformation", correction_met
         res <- list(hyp = res, lfc_normal = lfc_n, lfc_disease = lfc_d)
         if (type == "optimization") {
             objval <- v_opt %*% (opt * M)
-            res <- c(res, list(obj_normal = objval[1:ncol(normal)], obj_disease = objval[-(1:ncol(normal))]))
+            res <- c(res, list(obj_normal = objval[1:ncol(normal)], 
+				obj_disease = objval[-(1:ncol(normal))], k_normal = normal,
+				k_disease = disease))
         }
     }
     

@@ -44,7 +44,7 @@ order_by <- function(x, y) {
         save(list = ls(e), file = filename, envir = e)
     }
     
-    load(filename, envir = parent.frame(4))
+    load(filename, envir=.GlobalEnv)
 }
 
 #' Calculates a mass-action reaction rate
