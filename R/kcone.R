@@ -263,7 +263,7 @@ plot_basis <- function(b, n_cl = NA, ...) {
 #' rownames(S) <- c('A', 'B')
 #' V <- polytope_basis(S)
 #' plot_red(list(V)) # A single basis is fine as long as it is a list
-plot_red <- function(basis_list, arrows = TRUE, col = NULL, n_cl = NULL) {
+plot_red <- function(basis_list, arrows = TRUE, col = NULL, n_cl = NULL, r_names=NULL) {
     if (!("list" %in% class(basis_list))) 
         stop("basis_list must be a list!")
     
@@ -276,14 +276,22 @@ plot_red <- function(basis_list, arrows = TRUE, col = NULL, n_cl = NULL) {
         stop("Basis must be at least 2-dimensional!")
     n <- length(basis_list)
     
+    if (!is.null(r_names) && (length(r_names) != max(b_rows) || 
+		!is.character(r_names))) stop("r_names must be a character vector with as
+		many entries as the maximum row number in basis_list!")
+    
     all_basis <- do.call(cbind, basis_list)
     
     if (nrow(all_basis) == 2) {
         pca <- list(sdev = c(1, 1))
         red <- lapply(basis_list, t)
+        if (!is.null(r_names)) load_names <- as.matrix(r_names)
     } else {
         pca <- prcomp(t(all_basis))
         red <- lapply(basis_list, function(b) predict(pca, t(b))[, 1:2])
+        if (!is.null(r_names)) 
+			load_names <- t(apply(pca$rotation[,1:2], 2, function(l) 
+				r_names[order(-abs(l))[1:min(6,min(b_rows))]]))
     }
     
     if (max(b_cols) > 1000 || !is.null(n_cl)) {
@@ -302,12 +310,20 @@ plot_red <- function(basis_list, arrows = TRUE, col = NULL, n_cl = NULL) {
         red <- lapply(cl, function(x) x$centers)
     }
     
-    energy <- pca$sdev^2
-    write(sprintf("Total energy explained: %f%%.", sum(energy[1:2])/sum(energy) * 
+    energy <- pca$sdev
+    write(sprintf("Information captured in projection: %f%%.", sum(energy[1:2])/sum(energy) * 
         100), file = "")
     
     rs <- apply(do.call(rbind, red), 2, range)
-    plot(NULL, xlim = rs[, 1], ylim = rs[, 2], xlab = "PC 1", ylab = "PC 2")
+    
+    if (!is.null(r_names)) {
+		xl = paste0(load_names[1,], collapse=", ")
+		yl = paste0(load_names[2,], collapse=", ")
+	} else {
+		xl = "PC 1"
+		yl = "PC 2"
+	}
+    plot(NULL, xlim = rs[, 1], ylim = rs[, 2], xlab = xl, ylab = yl)
     
     if (is.null(col)) 
         pal <- DC_TRANSCOL(n) else if (length(basis_list) != length(col)) 
