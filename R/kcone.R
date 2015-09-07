@@ -546,7 +546,7 @@ hyp <- function(normal, disease, reacts, type = "transformation", correction_met
         n_data <- as.numeric(lfc_n[i, ])
         d_data <- as.numeric(lfc_d[i, ])
         test <- tryCatch({
-            wilcox.test(x = d_data, y = n_data, conf.int = T)
+            wilcox.test(x = d_data, conf.int = T)
         }, error = function(e) {
             list(p.value = 1, conf.int = rep(mean(n_data), 2))
         }, warning = function(w) {
