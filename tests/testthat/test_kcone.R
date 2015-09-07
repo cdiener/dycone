@@ -79,7 +79,7 @@ test_that("basis plotting works", {
     out <- capture.output(plot_red(list(B), n_cl = 100))
     dev.off()
     expect_true(file.exists("test-plot-42.png"))
-    expect_match(out, "energy", all = F)
+    expect_match(out, "Information", all = F)
     expect_match(out, "in-cluster", all = F)
     file.remove("test-plot-42.png")
 }) 

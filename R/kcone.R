@@ -546,10 +546,15 @@ hyp <- function(normal, disease, reacts, type = "transformation", correction_met
         n_data <- as.numeric(lfc_n[i, ])
         d_data <- as.numeric(lfc_d[i, ])
         test <- tryCatch({
-            wilcox.test(x = d_data, conf.int = T)
+            wilcox.test(x = d_data, y = n_data, conf.int = T)
         }, error = function(e) {
-            list(p.value = 1, conf.int = rep(mean(n_data), 2))
+            list(p.value = 1, conf.int = rep(mean(d_data), 2))
         }, warning = function(w) {
+            # When there only ties wilcox.test will first throw a
+            # warning followed by an error for the confidence interval
+            if(all(rank(d_data) == (length(d_data)+1)/2)) {
+                return(list(p.value=1, conf.int = rep(mean(d_data), 2)))
+            }
             suppressWarnings(wilcox.test(x = d_data, y = n_data, conf.int = T))
         })
         
