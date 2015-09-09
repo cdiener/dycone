@@ -5,8 +5,8 @@
 \title{Identifies hypothesis for differentially regulated reactions between a set of
 normal and disease conditions.}
 \usage{
-hyp(normal, disease, reacts, type = "transformation",
-  correction_method = "fdr", sorted = T, v_opt = NULL, full = FALSE)
+hyp(normal, disease, reacts, type = "bias", correction_method = "fdr",
+  sorted = T, v_opt = NULL, full = FALSE)
 }
 \arguments{
 \item{normal}{A matrix or data frame containing the metabolic terms of the
@@ -17,7 +17,7 @@ diseasse condition in the columns.}
 
 \item{reacts}{The reaction list.}
 
-\item{type}{The type of analysis to be performed. Either 'transformation',
+\item{type}{The type of analysis to be performed. Either 'bias',
 'optimization' or 'raw' for a pass-through option.}
 
 \item{correction_method}{A correction method for the multiple test p-values.

@@ -5,7 +5,8 @@
 \title{Plots a geometric visualization of the given k-cone reduced into
 two dimensions.}
 \usage{
-plot_red(basis_list, arrows = TRUE, col = NULL, n_cl = NULL)
+plot_red(basis_list, arrows = TRUE, col = NULL, n_cl = NULL,
+  r_names = NULL)
 }
 \arguments{
 \item{basis_list}{A list of basis to be reduced.}

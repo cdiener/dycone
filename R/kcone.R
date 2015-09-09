@@ -430,8 +430,10 @@ eigendynamics <- function(basis, n = 1) {
 single_hyp <- function(k1, k2, reacts) {
     reacts <- make_irreversible(reacts)
     logfold <- log(k2, 2) - log(k1, 2)
-    logfold[!is.finite(logfold)] <- 0
     
+    #if(any(!is.finite(logfold))) 
+    #    warning("Non-finite log-fold changes have been set to zero.")
+    logfold[!is.finite(logfold)] <- 0
     
     idx <- id <- r_s <- kind <- fac <- NULL
     for (i in 1:length(logfold)) {
@@ -465,7 +467,7 @@ single_hyp <- function(k1, k2, reacts) {
 #' @param disease A matrix or data frame containing the metabolic terms of the 
 #'  diseasse condition in the columns.
 #' @param reacts The reaction list.
-#' @param type The type of analysis to be performed. Either 'transformation',
+#' @param type The type of analysis to be performed. Either 'bias',
 #'  'optimization' or 'raw' for a pass-through option.
 #' @param sorted Whether the results should be sorted by p-value and mean log-fold
 #'  change.
@@ -495,34 +497,34 @@ single_hyp <- function(k1, k2, reacts) {
 #'  \item{obj_disease}{Only if type=='optimization'. The value of the objective
 #'    function for each of the metabolic terms in 'disease'.}
 #'  }
-hyp <- function(normal, disease, reacts, type = "transformation", correction_method = "fdr", 
+hyp <- function(normal, disease, reacts, type = "bias", correction_method = "fdr", 
     sorted = T, v_opt = NULL, full = FALSE) {
     # Create reference data
     cref <- combn(1:ncol(normal), 2)
     normal <- as.matrix(normal)
     disease <- as.matrix(disease)
     
-    if (type == "transformation") {
+    if (type == "bias") {
         normal <- 1/normal
         disease <- 1/disease
     } else if (type == "optimization") {
         M <- cbind(normal, disease)
         S <- stochiometry(reacts)
         if (length(v_opt) != ncol(S) || !is.numeric(v_opt)) 
-            stop("v_opt must be numeric and have the same length\n\t\t\tas there are irreversible reactions in reacts.")
+            stop("v_opt must be numeric and have the same length as there are irreversible reactions in reacts.")
         if (requireNamespace("foreach", quietly = TRUE)) {
             i <- 1:ncol(M)
             opt <- foreach::"%dopar%"(foreach::foreach(i = i, .combine = cbind), 
-                dba(v_opt, S, M[, i], lower = 0, upper = 1))
+                pba(v_opt, S, M[, i], lower = 1e-32, upper = 1))
         } else {
-            opt <- lapply(1:ncol(M), function(i) dba(v_opt, S, M[, i], lower = 0, 
+            opt <- lapply(1:ncol(M), function(i) dba(v_opt, S, M[, i], lower = 1e-32, 
                 upper = 1))
             opt <- do.call(cbind, opt)
         }
         normal <- opt[, 1:ncol(normal)]
         disease <- opt[, (ncol(normal) + 1):ncol(M)]
     } else if (type != "raw") 
-        stop("type must be either 'transformation' or 'optimization' :(")
+        stop("type must be either 'bias', 'optimization' or 'raw' :(")
     
     res <- single_hyp(normal[, 1], normal[, 1], reacts)
     res <- res[, -ncol(res)]

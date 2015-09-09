@@ -4,7 +4,7 @@
 context("Web scraping")
 
 test_that("SBML scraping works", {
-    mod42 <- "https://www.ebi.ac.uk/biomodels-main/download?mid=BIOMD0000000042"
+    mod42 <- "http://www.ebi.ac.uk/biomodels-main/download?mid=BIOMD0000000042"
     pars <- sbml_params(mod42)
     spec <- sbml_species(mod42)
     expect_equal(nrow(spec), 15)

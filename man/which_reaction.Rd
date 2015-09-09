@@ -13,6 +13,10 @@ which_reaction(r, S = "", P = "")
 
 \item{P}{a list of products to be searched or empty string.}
 }
+\value{
+A data frame with two columns, the first specifying the index
+ of the reaction and the second the metabolites found for that reaction.
+}
 \description{
 Finds all reaction indices using the given subtrates and products.
 }

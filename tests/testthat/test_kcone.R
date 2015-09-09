@@ -52,11 +52,13 @@ test_that("eigendynamics work", {
 test_that("hypothesis generation works", {
     data(eryth)
     n_r <- length(make_irreversible(eryth))
-    mats <- matrix(runif(6 * n_r), ncol = 6)
+    mats <- matrix(runif(6*n_r), ncol = 6)
     h <- hyp(mats[, 1:3], mats[, 4:6], eryth)
     expect_equal(nrow(h), n_r)
     expect_true(all(h$pval <= 1))
-    h_opt <- hyp(mats[, 1:3], mats[, 4:6], eryth, type = "optimization", v_opt = runif(n_r), 
+    a <- rep(0, length(make_irreversible(eryth)))
+    a[16] <- 1
+    h_opt <- hyp(mats[, 1:3], mats[, 4:6], eryth, type = "optimization", v_opt = a, 
         full = T)
     expect_equal(length(h_opt), 7)
     expect_equal(length(h_opt$obj_normal), 3)

@@ -2,7 +2,7 @@
 % Please edit documentation in R/linprog.R
 \name{dba}
 \alias{dba}
-\title{Maximizes a given flux within the k-cone.}
+\title{Maximizes a weighted sum of fluxes within the k-cone.}
 \usage{
 dba(a, s_matrix, m_terms, lower = 0, upper = 1)
 }
@@ -22,6 +22,6 @@ A vector with the same length as \code{a} containing the solution
  of the optimization.
 }
 \description{
-Maximizes a given flux within the k-cone.
+Maximizes a weighted sum of fluxes within the k-cone.
 }
 
