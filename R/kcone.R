@@ -258,6 +258,10 @@ plot_basis <- function(b, n_cl = NA, ...) {
 #'  basis vectors per basis, clustering is always performed since calculation 
 #'  of the convex hull (interior area of the cone) is extremely lengthy 
 #'  otherwise.
+#' @param r_names Optional vector of names for the reactions (rows of the basis).
+#'  If given those will be used to annotate the axes with the names of the six
+#'  reactions carrying the largest absolute loadings in the respective principal
+#'  component. 
 #' @examples
 #' S <- matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
 #' rownames(S) <- c('A', 'B')
@@ -431,8 +435,8 @@ single_hyp <- function(k1, k2, reacts) {
     reacts <- make_irreversible(reacts)
     logfold <- log(k2, 2) - log(k1, 2)
     
-    #if(any(!is.finite(logfold))) 
-    #    warning("Non-finite log-fold changes have been set to zero.")
+    if(any(!is.finite(logfold))) 
+        warning("Non-finite log-fold changes have been set to zero.")
     logfold[!is.finite(logfold)] <- 0
     
     idx <- id <- r_s <- kind <- fac <- NULL
@@ -471,10 +475,14 @@ single_hyp <- function(k1, k2, reacts) {
 #'  'optimization' or 'raw' for a pass-through option.
 #' @param sorted Whether the results should be sorted by p-value and mean log-fold
 #'  change.
-#' @param v_opt Only needs to be set if type=='optimization'. Defines a weights
-#'  specifying the optimization criterion. If F are the steady state fluxes of
-#'  the specified system, the optimization criterion will be maximization of
-#'  sum(v_opt*F). Must be the same length as there are irreversible reactions. 
+#' @param obj Only needs to be set if type=='optimization'. Defines the 
+#'  the objective reaction whose flux is maximized. Can be any of the acceptable
+#'  formats for \code{\link{fba}}. The, probably, easiest import format is a 
+#'  vector with entries named after metabolites in \code{reacts} and specifiying
+#'  their stochiometry (negative entries for substrates and positive for products.) 
+#' @param v_min The samllest allowed flux for each reaction for all reactions.
+#'  Must be >=0. Can be of length 1 or \code{ncol(S)}. Set larger than zero to 
+#'  enforce a non-zero flux through a set of reactions.
 #' @param correction_method A correction method for the multiple test p-values.
 #'    Takes the same arguments as the method argument in p.adjust.
 #' @param full If TRUE also returns the individual log fold changes along with
@@ -498,7 +506,7 @@ single_hyp <- function(k1, k2, reacts) {
 #'    function for each of the metabolic terms in 'disease'.}
 #'  }
 hyp <- function(normal, disease, reacts, type = "bias", correction_method = "fdr", 
-    sorted = T, v_opt = NULL, full = FALSE) {
+    sorted = T, obj = NULL, v_min = 0, full = FALSE) {
     # Create reference data
     cref <- combn(1:ncol(normal), 2)
     normal <- as.matrix(normal)
@@ -510,19 +518,19 @@ hyp <- function(normal, disease, reacts, type = "bias", correction_method = "fdr
     } else if (type == "optimization") {
         M <- cbind(normal, disease)
         S <- stochiometry(reacts)
-        if (length(v_opt) != ncol(S) || !is.numeric(v_opt)) 
-            stop("v_opt must be numeric and have the same length as there are irreversible reactions in reacts.")
+        if (!is.numeric(obj)) 
+            stop("v_opt must be numeric.")
         if (requireNamespace("foreach", quietly = TRUE)) {
             i <- 1:ncol(M)
             opt <- foreach::"%dopar%"(foreach::foreach(i = i, .combine = cbind), 
-                pba(v_opt, S, M[, i], lower = 1e-32, upper = 1))
+                pfba(obj, S, v_min = v_min, v_max = M[, i]))
         } else {
-            opt <- lapply(1:ncol(M), function(i) dba(v_opt, S, M[, i], lower = 1e-32, 
-                upper = 1))
+            opt <- lapply(1:ncol(M), function(i) pfba(obj, S, v_min = v_min, 
+                v_max = M[, i]))
             opt <- do.call(cbind, opt)
         }
-        normal <- opt[, 1:ncol(normal)]
-        disease <- opt[, (ncol(normal) + 1):ncol(M)]
+        normal <- opt[-nrow(opt), 1:ncol(normal)] / M[, 1:ncol(normal)]
+        disease <- opt[-nrow(opt), -(1:ncol(normal))] / M[, -(1:ncol(normal))]
     } else if (type != "raw") 
         stop("type must be either 'bias', 'optimization' or 'raw' :(")
     
@@ -571,17 +579,18 @@ hyp <- function(normal, disease, reacts, type = "bias", correction_method = "fdr
     res$type <- factor(reg)
     res$pval <- p.adjust(res$pval, method = correction_method)
     if (sorted) 
-        res <- res[order(res$pval, -abs(res$mean_log_fold)), ]
+        res <- res[order(res$pval, res$idx), ]
     
     if (full) {
         lfc_n <- data.frame(normal = lfc_n)
         lfc_d <- data.frame(disease = lfc_d)
         res <- list(hyp = res, lfc_normal = lfc_n, lfc_disease = lfc_d)
         if (type == "optimization") {
-            objval <- v_opt %*% (opt * M)
+            objval <- opt[nrow(opt), ]
             res <- c(res, list(obj_normal = objval[1:ncol(normal)], 
-				obj_disease = objval[-(1:ncol(normal))], k_normal = normal,
-				k_disease = disease))
+				obj_disease = objval[-(1:ncol(normal))], 
+                v_normal = opt[-nrow(opt), 1:ncol(normal)],
+				v_disease = opt[-nrow(opt), -(1:ncol(normal))]))
         }
     }
     

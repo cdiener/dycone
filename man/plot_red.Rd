@@ -22,6 +22,11 @@ the colors used to draw the individual basis.}
 basis vectors per basis, clustering is always performed since calculation
 of the convex hull (interior area of the cone) is extremely lengthy
 otherwise.}
+
+\item{r_names}{Optional vector of names for the reactions (rows of the basis).
+If given those will be used to annotate the axes with the names of the six
+reactions carrying the largest absolute loadings in the respective principal
+component.}
 }
 \description{
 Plotting the reduced k-cone is a two step procedure. Where the k-cones

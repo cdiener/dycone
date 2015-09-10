@@ -6,7 +6,7 @@
 normal and disease conditions.}
 \usage{
 hyp(normal, disease, reacts, type = "bias", correction_method = "fdr",
-  sorted = T, v_opt = NULL, full = FALSE)
+  sorted = T, obj = NULL, v_min = 0, full = FALSE)
 }
 \arguments{
 \item{normal}{A matrix or data frame containing the metabolic terms of the
@@ -26,10 +26,15 @@ Takes the same arguments as the method argument in p.adjust.}
 \item{sorted}{Whether the results should be sorted by p-value and mean log-fold
 change.}
 
-\item{v_opt}{Only needs to be set if type=='optimization'. Defines a weights
-specifying the optimization criterion. If F are the steady state fluxes of
-the specified system, the optimization criterion will be maximization of
-sum(v_opt*F). Must be the same length as there are irreversible reactions.}
+\item{obj}{Only needs to be set if type=='optimization'. Defines the
+the objective reaction whose flux is maximized. Can be any of the acceptable
+formats for \code{\link{fba}}. The, probably, easiest import format is a
+vector with entries named after metabolites in \code{reacts} and specifiying
+their stochiometry (negative entries for substrates and positive for products.)}
+
+\item{v_min}{The samllest allowed flux for each reaction for all reactions.
+Must be >=0. Can be of length 1 or \code{ncol(S)}. Set larger than zero to
+enforce a non-zero flux through a set of reactions.}
 
 \item{full}{If TRUE also returns the individual log fold changes along with
 the differential regulation data.}

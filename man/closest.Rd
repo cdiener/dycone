@@ -21,6 +21,6 @@ A vector containing the closest point to p within the k-cone.
 Finds the closest point in within the k-cone to a query point p.
 }
 \seealso{
-\code{\link{dba}} for optimization within the k-cone.
+\code{\link{fba}} for optimization within the k-cone.
 }
 
