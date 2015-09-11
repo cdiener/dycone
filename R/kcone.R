@@ -519,7 +519,7 @@ hyp <- function(normal, disease, reacts, type = "bias", correction_method = "fdr
         M <- cbind(normal, disease)
         S <- stochiometry(reacts)
         if (!is.numeric(obj)) 
-            stop("v_opt must be numeric.")
+            stop("obj must be numeric.")
         if (requireNamespace("foreach", quietly = TRUE)) {
             i <- 1:ncol(M)
             opt <- foreach::"%dopar%"(foreach::foreach(i = i, .combine = cbind), 
@@ -531,6 +531,16 @@ hyp <- function(normal, disease, reacts, type = "bias", correction_method = "fdr
         }
         normal <- opt[-nrow(opt), 1:ncol(normal)] / M[, 1:ncol(normal)]
         disease <- opt[-nrow(opt), -(1:ncol(normal))] / M[, -(1:ncol(normal))]
+    } else if (type == "min") {
+        normal <- 1/normal
+        disease <- 1/disease
+        M <- cbind(normal, disease)
+        S <- stochiometry(reacts)
+        if (!is.numeric(obj)) 
+            stop("obj must be numeric.")
+        va <- fva(obj, 1, S, v_min = v_min, v_max = 1)
+        lfc_va <- log(va$max, 2) - log(va$min, 2)
+        print(lfc_va)
     } else if (type != "raw") 
         stop("type must be either 'bias', 'optimization' or 'raw' :(")
     
@@ -542,6 +552,12 @@ hyp <- function(normal, disease, reacts, type = "bias", correction_method = "fdr
         return(h$log2_fold)
     })
     lfc_n <- cbind(lfc_n, -lfc_n)
+    if (type == "min") {
+        mod_lfc <- abs(lfc_n)
+        mod_lfc <- mod_lfc - lfc_va
+        mod_lfc[mod_lfc < 0] <- 0
+        lfc_n <- sign(lfc_n) * mod_lfc
+    }
     
     # Create differential analysis
     ctreat <- expand.grid(1:ncol(normal), 1:ncol(disease))
@@ -550,6 +566,13 @@ hyp <- function(normal, disease, reacts, type = "bias", correction_method = "fdr
         h <- single_hyp(normal[, idx[1]], disease[, idx[2]], reacts)
         return(h$log2_fold)
     })
+    
+    if (type == "min") {
+        mod_lfc <- abs(lfc_d)
+        mod_lfc <- mod_lfc - lfc_va
+        mod_lfc[mod_lfc < 0] <- 0
+        lfc_d <- sign(lfc_d) * mod_lfc
+    }
     
     # Generate statistics
     stats <- lapply(1:nrow(res), function(i) {
@@ -579,7 +602,7 @@ hyp <- function(normal, disease, reacts, type = "bias", correction_method = "fdr
     res$type <- factor(reg)
     res$pval <- p.adjust(res$pval, method = correction_method)
     if (sorted) 
-        res <- res[order(res$pval, res$idx), ]
+        res <- res[order(res$pval, -abs(res$mean_log_fold)), ]
     
     if (full) {
         lfc_n <- data.frame(normal = lfc_n)
