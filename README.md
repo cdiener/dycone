@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/cdiener/dycone.svg?branch=master)](https://travis-ci.org/cdiener/dycone)
-![dycone](stuff/logo.svg)
+
+![dycone](stuff/logo.png)
 
 ...analyze enzyme regulation with metabolome data
 
