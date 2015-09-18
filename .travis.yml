@@ -7,11 +7,10 @@ sudo: false
 env:
  global:
     - CRAN: http://cran.rstudio.com
+apt_packages:
+    - libcurl4-openssl-dev
+    - libssl-dev libgmp-dev
 r_github_packages:
     - jimhester/covr
-notifications:
-  email:
-    on_success: change
-    on_failure: change
 after_success:
   - Rscript -e 'library(covr);codecov()'
