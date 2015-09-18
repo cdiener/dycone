@@ -56,15 +56,12 @@ test_that("hypothesis generation works", {
     h <- hyp(mats[, 1:3], mats[, 4:6], eryth)
     expect_equal(nrow(h), n_r)
     expect_true(all(h$pval <= 1))
-    o <- c(atp = -1, adp = 1) 
-    h_opt <- hyp(mats[, 1:3], mats[, 4:6], eryth, type = "optimization", 
-        obj = o, full = T)
-    expect_equal(length(h_opt), 7)
-    expect_equal(length(h_opt$obj_normal), 3)
-    expect_equal(length(h_opt$obj_disease), 3)
-    expect_equal(ncol(h_opt$v_normal), 3)
-    expect_equal(ncol(h_opt$v_disease), 3)
-    expect_equal(nrow(h_opt$hyp), n_r)
+    o <- c(pyr = -1, prpp = -1, '3pg' = -1, nadph = -1, nadp = 1) 
+    h_opt <- hyp(mats[, 1:3], mats[, 4:6], eryth, type = "worst-case", 
+        v_min = 0, obj = o, full = T)
+    expect_equal(length(h_opt), 5)
+    expect_equal(dim(h_opt$fva), c(n_r, 4))
+    expect_equal(length(h_opt$lfc_va), n_r)
 })
 
 test_that("basis plotting works", {

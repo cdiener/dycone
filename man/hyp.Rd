@@ -6,7 +6,8 @@
 normal and disease conditions.}
 \usage{
 hyp(normal, disease, reacts, type = "bias", correction_method = "fdr",
-  sorted = T, obj = NULL, v_min = 0, full = FALSE)
+  cred_level = 0.95, sorted = T, obj = NULL, v_min = 0, alpha = 1,
+  full = FALSE)
 }
 \arguments{
 \item{normal}{A matrix or data frame containing the metabolic terms of the
@@ -18,45 +19,69 @@ diseasse condition in the columns.}
 \item{reacts}{The reaction list.}
 
 \item{type}{The type of analysis to be performed. Either 'bias',
-'optimization' or 'raw' for a pass-through option.}
+'worst-case' or 'raw' for a pass-through option.}
 
 \item{correction_method}{A correction method for the multiple test p-values.
 Takes the same arguments as the method argument in p.adjust.}
 
+\item{cred_level}{The confidence level for the bayes credible intervals.
+Defaults to 95\%.}
+
 \item{sorted}{Whether the results should be sorted by p-value and mean log-fold
 change.}
 
-\item{obj}{Only needs to be set if type=='optimization'. Defines the
+\item{obj}{Only needs to be set if type=='wors-case'. Defines the
 the objective reaction whose flux is maximized. Can be any of the acceptable
 formats for \code{\link{fba}}. The, probably, easiest import format is a
 vector with entries named after metabolites in \code{reacts} and specifiying
 their stochiometry (negative entries for substrates and positive for products.)}
 
-\item{v_min}{The samllest allowed flux for each reaction for all reactions.
+\item{v_min}{The smallest allowed flux for each reaction for all reactions.
 Must be >=0. Can be of length 1 or \code{ncol(S)}. Set larger than zero to
 enforce a non-zero flux through a set of reactions.}
+
+\item{alpha}{The minimum fraction of maximum objective value required during
+flux variability analysis. The default is 100\% of optimum.}
 
 \item{full}{If TRUE also returns the individual log fold changes along with
 the differential regulation data.}
 }
 \value{
 If full is FALSE only returns the generated hypothesis as a data
- frame. If full is TRUE returns a list of generated hypothesis and the
+ frame. This is a data frame with the following columns:
+ \describe{
+ \item{idx}{The index of the reaction.}
+ \item{name}{The name of the reaction/enzyme.}
+ \item{reaction}{The actual reaction, e.g. A <=> B + C.}
+ \item{type}{What type of regulation, "up", "down" or "same".}
+ \item{sd_normal}{Standard deviation of the log2-fold changes between samples
+     from the normal group.}
+ \item{sd_disease}{Standard deviation of the log2-fold changes between samples
+     of the disease vs normal group.}
+ \item{mean_log_fold}{The mean log2-fold change between the disease and
+     normal group.}
+ \item{ci_low, ci_high}{The bayesian credible interval for the confidence
+     level given by \code{cred_level}. Those are calculated using the bayesian
+     bootstrap.}
+ \item{pval}{The p-value corrected for multiple testing.}
+ }
+
+ If full is TRUE returns a list of generated hypothesis and the
  individual log fold changes between all reference basis and between
  reference and treatments. The full output will be a list with following
  elements:
  \describe{
  \item{hyp}{The generated hypotheses together with statistics and reactions.}
  \item{lfc_normal}{The log2-fold changes of enzyme activity within the normal
-   group for each of the irreversible reactions. Those are never sorted, so
-   the first entry corresponds to the first reaction, etc.}
+     group for each of the irreversible reactions. Those are never sorted, so
+     the first entry corresponds to the first reaction, etc.}
  \item{lfc_disease}{The log2-fold changes of enzyme activity within between
-   the disease and normal group for each of the irreversible reactions.
-   Also never sorted.}
- \item{obj_normal}{Only if type=='optimization'. The value of the objective
-   function for each of the metabolic terms in 'normal'.}
- \item{obj_disease}{Only if type=='optimization'. The value of the objective
-   function for each of the metabolic terms in 'disease'.}
+     the disease and normal group for each of the irreversible reactions.
+     Also never sorted.}
+ \item{lfc_va}{Only if type=='worst-case'. The maximum log2-fold changes for
+     the fluxes obtained by flux variability analysis. Also never sorted.}
+ \item{fva}{Only if type=='worst-case'. The flux bounds and respective
+     objective values obtained from flux variability analysis.}
  }
 }
 \description{
@@ -64,8 +89,8 @@ If full is FALSE only returns the generated hypothesis as a data
 reduction method to approximate the fold-change of the kinetic constants. This
 is followed by calculation of all combinatorial log-fold changes within the
 normal group and between the disease and normal group. Finally, the wilcoxon
-ranked sum statistics are obtained for each reaction and the p-values
-corrected.
+ranked sum statistics and bayesian credible intervals are obtained for each
+reaction and the p-values corrected.
 }
 \keyword{analysis}
 \keyword{hypothesis,}
