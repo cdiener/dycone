@@ -8,9 +8,10 @@
 What does it do?
 --------------
 
-Dycone allows you to analyze the dynamic landscape of a metabolic system 
-without knowing its kinetic parameters by using steady state and dynamic 
-metabolome data (for instance from proteomics).
+Dycone ("dynamic cone") allows you infer enzymatic regulation from 
+metabolome mesurements. It employs formalisms based on flux and k-cone 
+analysis to connect metabolome data to distinct regulations of enzyme activity. 
+Most of the analysis methods can be applied to genome-scale data. 
 
 Installation
 -----------
