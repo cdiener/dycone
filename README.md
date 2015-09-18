@@ -53,6 +53,12 @@ Docs
 ----
 
 Documentation can be found using the included help in R (`?function_name` for 
-instance). An example can be found in the package vignette. For an exhaustive
-example you can look at the Rmarkdown generated protocol at
+instance). An example using the Human Red Blood Cell model can be found in the 
+package vignette "eryth": 
+
+```R
+vignette("eryth")
+```
+
+For an exhaustive example you can look at the Rmarkdown generated protocol at 
 https://github.com/cdiener/kcone-paper.
