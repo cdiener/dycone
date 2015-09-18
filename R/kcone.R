@@ -93,7 +93,6 @@ polytope_basis <- function(s_matrix, m_terms = rep(1, ncol(s_matrix))) {
     
     hp <- rcdd::makeH(const_matrix, const_b, NC, b)
     hp <- rcdd::addHeq(rep(1, ncol(s_matrix)), 1, hp)
-    hp <- rcdd::redundant(hp)$output
     vrep <- rcdd::scdd(hp)
     vp <- vrep$output[, -(1:2)]
     
