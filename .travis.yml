@@ -12,5 +12,7 @@ apt_packages:
     - libssl-dev libgmp-dev
 r_github_packages:
     - jimhester/covr
+bioc_packages:
+    - limma
 after_success:
   - Rscript -e 'library(covr);codecov()'
