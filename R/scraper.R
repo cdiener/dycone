@@ -11,6 +11,10 @@ KEGG_REST <- "http://rest.kegg.jp/link/hsa/ec:%s"
 #'  to an online resource.
 #' @return A data frame containing the obtained data. Some entries might be NA.
 #' @export
+#' @examples
+#' # Not run because requires internet connection
+#' # m_url <- "http://www.ebi.ac.uk/compneur-srv/biomodels-main/MODEL1103210001"
+#' # sbml_params(m_url)
 sbml_params <- function(sbml_file) {
     attrs <- c("id", "name", "value")
     doc <- rvest::xml(sbml_file)
@@ -30,6 +34,10 @@ sbml_params <- function(sbml_file) {
 #'  to an online resource.
 #' @return A data frame containing the obtained data. Some entries might be NA.
 #' @export
+#' @examples
+#' # Not run because requires internet connection
+#' # m_url <- "http://www.ebi.ac.uk/compneur-srv/biomodels-main/MODEL1103210001"
+#' # sbml_species(m_url)
 sbml_species <- function(sbml_file) {
     attrs <- c("id", "name", "initialamount", "initialconcentration")
     doc <- rvest::xml(sbml_file)
@@ -63,8 +71,9 @@ sbml_species <- function(sbml_file) {
 #'  they appear.
 #' @return The mean 
 #' @examples
-#' concs <- hmdb_concentration('HMDB00124') # Fructose-6-phosphate
-#' priority_mean(concs) # has measurements for cytoplasm so returns those
+#' # Not run because requires internet connection
+#' # concs <- hmdb_concentration('HMDB00124') # Fructose-6-phosphate
+#' # priority_mean(concs) # has measurements for cytoplasm so returns those
 priority_mean <- function(d, biofluids = c("cellular cytoplasm", "blood")) {
     if (is.null(d)) 
         return(NA)
@@ -77,7 +86,7 @@ priority_mean <- function(d, biofluids = c("cellular cytoplasm", "blood")) {
             break
     }
     
-    return(mean(m, na.rm = T))
+    return(mean(m, na.rm = TRUE))
 }
 
 #' Wrapper for grep that returns NA if nothing was found.
@@ -114,6 +123,9 @@ parse_conc <- function(val) {
 #'  a KEGG ID
 #' @return A single HMDB ID or list of putative IDs.
 #' @export
+#' @examples
+#' # Not run because requires internet connection
+#' # find_hmdb("pyruvate")
 find_hmdb <- function(search_term) {
     hmids <- rvest::html(sprintf(HMDB_SEARCH, RCurl::curlEscape(search_term))) %>% 
         rvest::html_nodes(".result-link .btn-card") %>% rvest::html_text()
@@ -157,7 +169,9 @@ hmdb_parse <- function(nodes) {
 #'  information that will be added to the result (for instance names or ids).
 #' @return The scraped data set as a data frame or NULL if no concentrations were
 #'  found.
-#' @export
+#' @examples
+#' # Not run because requires internet connection
+#' # concs <- hmdb_concentration('HMDB00124') # Fructose-6-phosphate
 hmdb_concentration <- function(hmids, add = NULL) {
     out <- NULL
     cat("\n")
@@ -187,6 +201,7 @@ hmdb_concentration <- function(hmids, add = NULL) {
 
 # Primitive function for group patching missing data
 group_patch <- function(x) {
+    x <- as.matrix(x)
     miss <- t(apply(x, 1, is.na))
     
     n_m <- rowSums(miss)
@@ -201,6 +216,7 @@ group_patch <- function(x) {
 
 # Primitive function for reference patching missing data
 ref_patch <- function(x, ref) {
+    x <- as.matrix(x)
     miss <- t(apply(x[, -1], 1, is.na))
     
     need_fix <- which(rowSums(miss) > 0)
@@ -209,7 +225,7 @@ ref_patch <- function(x, ref) {
         nas <- is.na(x[i, ])
         nas[1] <- FALSE
         ref_data <- as.numeric(unlist(ref[ref[, 1] == id, -1]))
-        x[i, nas] <- mean(ref_data, na.rm = T)
+        x[i, nas] <- mean(ref_data, na.rm = TRUE)
     }
     
     return(x)
@@ -238,6 +254,9 @@ ref_patch <- function(x, ref) {
 #' @return The original measurement data frame with a maximum number of missing 
 #'  data being patched.
 #' @export
+#' @examples
+#' x <- data.frame(id = 1:3, normal = c(NA, 1, 2), disease = c(2, NA, 3))
+#' patch(x, 1, 2, 3) 
 patch <- function(measurements, id, normal, treatment, ref_data = NULL) {
     out <- measurements
     data_cols <- c(normal, treatment)

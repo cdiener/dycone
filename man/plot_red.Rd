@@ -28,6 +28,9 @@ If given those will be used to annotate the axes with the names of the six
 reactions carrying the largest absolute loadings in the respective principal
 component.}
 }
+\value{
+Nothing. Just plots :O
+}
 \description{
 Plotting the reduced k-cone is a two step procedure. Where the k-cones
 are first projected into the two most informative dimensions by PCA. In

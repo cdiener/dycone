@@ -35,4 +35,8 @@ the data columns specifify control and treatment measurements.
 The optional reference data set is further used to fill up holes which cannot
 be patched by group means.
 }
+\examples{
+x <- data.frame(id = 1:3, normal = c(NA, 1, 2), disease = c(2, NA, 3))
+patch(x, 1, 2, 3)
+}
 

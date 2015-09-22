@@ -17,6 +17,9 @@ multiline statements.}
 
 \item{filename}{The filename of the cache file.}
 }
+\value{
+Nothing. Just caches all assigned variables in \code{filename}.
+}
 \description{
 %c% is a caching operator. It is used after an
 expression, detects all assigned variables and saves

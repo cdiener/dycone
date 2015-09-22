@@ -20,6 +20,12 @@ A vector containing the closest point to p within the k-cone.
 \description{
 Finds the closest point in within the k-cone to a query point p.
 }
+\examples{
+data(eryth)
+S <- stochiometry(eryth)
+mats <- runif(ncol(S))
+closest(runif(ncol(S)), S, mats)
+}
 \seealso{
 \code{\link{fba}} for optimization within the k-cone.
 }

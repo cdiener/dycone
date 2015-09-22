@@ -6,7 +6,7 @@
 normal and disease conditions.}
 \usage{
 hyp(normal, disease, reacts, type = "bias", correction_method = "BH",
-  cred_level = 0.95, sorted = T, obj = NULL, v_min = 0, alpha = 1,
+  cred_level = 0.95, sorted = TRUE, obj = NULL, v_min = 0, alpha = 1,
   full = FALSE)
 }
 \arguments{
@@ -100,6 +100,14 @@ If full is FALSE only returns the generated hypothesis as a data
  \item{If type is "fva", it will perform a flux variability analysis to
  see whether differences can be due to variation in the fluxes alone.}
  }
+}
+\examples{
+data(eryth)
+n <- length(make_irreversible(eryth))
+normal <- matrix(runif(3*n), ncol=3)
+sick <- matrix(runif(3*n), ncol=3)
+h <- hyp(normal, sick, eryth)
+head(h)
 }
 \keyword{analysis}
 \keyword{hypothesis,}

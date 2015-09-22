@@ -33,6 +33,7 @@ order_by <- function(x, y) {
 #' @param ex The R expression to be cached. Use brackets for 
 #'  multiline statements.
 #' @param filename The filename of the cache file. 
+#' @return Nothing. Just caches all assigned variables in \code{filename}.
 #' @examples
 #' # Is executed only if the file does not exist, otherwise
 #' # samples a and b are read from 'samples.Rd'
@@ -92,6 +93,8 @@ mass_action <- function(substrates, concs) {
 #' @param substrates The stochiometry of the subbstrates (column in the
 #'  stochiometric matrix. Must be the same length as concs.
 #' @param concs Concentrations of the substrates.
+#' @return Returns the derivative of the mass action kinetics for the reaction
+#'  specified by \code{subtrates} differentiated by the \code{i}th variable.
 #' @examples
 #' data(eryth)
 #' S <- stochiometry(eryth)
@@ -226,6 +229,8 @@ get_reaction_elems <- function(reaction_str) {
 #'  annotations. A single annotation can contain several values as a 
 #'  comma separated string. The csv file should be saved with all entries
 #'  quoted.
+#' @return An object of with the S3 class \code{reactions} denoting a list
+#'  of reactions.
 #' @examples
 #' r_str <- "reaction,abbreviation,numbers\nA -> B,blub,\"1,2,3'\"\nB <=>, bla, 3"
 #' r <- read_reactions(textConnection(r_str))
@@ -247,7 +252,7 @@ read_reactions <- function(react_file) {
 }
 
 # Helper function to convert a reaction entry to a clean string version
-to_string <- function(r, name = T) {
+to_string <- function(r, name = TRUE) {
     id <- paste0(r$abbreviation, ": ")
     left <- if (is.na(r$S[1])) 
         "\u2205" else paste(r$N_S, r$S, sep = "*", collapse = " + ")
@@ -274,6 +279,7 @@ format.reactions <- function(x) {
 #' @export
 #' @param x The reaction list to be output.
 #' @param ... Additional arguments passed on to write.
+#' @return Nothing. Just prints :O
 #' @examples
 #' data(eryth)
 #' print(eryth)
@@ -362,7 +368,7 @@ stochiometry <- function(reacts, reversible = FALSE, const = NULL) {
 #' S <- matrix(c(-1,1,1,-1), nrow=2)
 #' rownames(S) <- c('A', 'B')
 #' print(as.reactions(S))
-as.reactions <- function(s_matrix, reversible = F, r_names = NA) {
+as.reactions <- function(s_matrix, reversible = FALSE, r_names = NA) {
     if (class(rownames(s_matrix)) != "character") 
         stop("Not a valid stochiometric matrix (no rownames)!")
     
@@ -487,6 +493,7 @@ constant_flux <- function(reacts) {
 #' @keywords plot, reactions
 #' @param x A reaction list.
 #' @param ... Additional arguments passed to plot.igraph.
+#' @return Nothing. Just plots :O
 #' @examples
 #' data(eryth)
 #' plot(eryth)

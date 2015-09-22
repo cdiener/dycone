@@ -10,14 +10,14 @@ kcone(V, mats, normalize = FALSE)
 \item{V}{The flux cone basis. Rows denote the dimensions and columns the
 individual basis vectors.}
 
+\item{mats}{The metabolic terms. A vector with as many entries as rows in V.
+All entries hsould be larger than 0.}
+
 \item{normalize}{Whether the basis vectors should be scaled to unit length.
 Not recommened for differential analysis.}
-
-\item{m_terms}{The metabolic terms. A vector with as many entries as rows in V.
-All entries hsould be larger than 0.}
 }
 \value{
-The stuff :O
+The obtained k-cone as a matrix.
 }
 \description{
 \code{kcone()} builds the k-cone from a given flux cone basis V and a set
@@ -32,8 +32,8 @@ K <- kcone(V, runif(ncol(S)))
 }
 \seealso{
 \code{\link{polytope_basis}} for a way to calculate the flux cone,
- \code{\link{ma_terms}} to get mass action termsq
+ \code{\link{ma_terms}} to get mass action term.
 }
 \keyword{basis}
-\keyword{internal}
+\keyword{k-cone}
 

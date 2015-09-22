@@ -41,4 +41,9 @@ Here, 'parsimonous' means that from all the possible maxima we will return
 the one minimizing the overall flux sum, thus, being the most 'economic' one
 for the organism.
 }
+\examples{
+S <- matrix(c(1, 0, -2, 1), ncol = 2)
+rownames(S) <- c("A", "B")
+pfba(c(B = -1), S)
+}
 

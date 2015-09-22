@@ -63,6 +63,10 @@ expand_constraints = function(v, n) {
 #' @return A vector with the same length as columns in \code{S} containing the 
 #'  solution of the optimization.
 #' @export
+#' @examples 
+#' S <- matrix(c(1, 0, -2, 1), ncol = 2)
+#' rownames(S) <- c("A", "B")
+#' fba(c(B = -1), S) 
 fba <- function(obj, S, v_min = 0, v_max = 1) {
     v_min = expand_constraints(v_min, ncol(S))
     v_max = expand_constraints(v_max, ncol(S))
@@ -111,6 +115,10 @@ fba <- function(obj, S, v_min = 0, v_max = 1) {
 #' @return A data frame with two columns, min and max, denoting the respective 
 #'  minimum and maximum fluxes for each reaction.
 #' @export
+#' @examples 
+#' S <- matrix(c(1, 0, -2, 1), ncol = 2)
+#' rownames(S) <- c("A", "B")
+#' fva(c(B = -1), S=S) 
 fva <- function(obj, alpha = 1, S, v_min = 0, v_max = 1) {
     v_min = expand_constraints(v_min, ncol(S))
     v_max = expand_constraints(v_max, ncol(S))
@@ -189,6 +197,10 @@ fva <- function(obj, alpha = 1, S, v_min = 0, v_max = 1) {
 #' @return A vector with the same length as columns in \code{S} containing the 
 #'  solution of the optimization.
 #' @export
+#' @examples 
+#' S <- matrix(c(1, 0, -2, 1), ncol = 2)
+#' rownames(S) <- c("A", "B")
+#' pfba(c(B = -1), S) 
 pfba <- function(obj, S, v_min = 0, v_max = 1) {
     v_min = expand_constraints(v_min, ncol(S))
     v_max = expand_constraints(v_max, ncol(S))
@@ -228,6 +240,9 @@ pfba <- function(obj, S, v_min = 0, v_max = 1) {
 #' @param P a list of products to be searched or empty string.
 #' @return A data frame with two columns, the first specifying the index
 #'  of the reaction and the second the metabolites found for that reaction.
+#' @examples
+#' data(eryth)
+#' which_reaction(eryth, P = c("pyr", "atp"))
 which_reaction <- function(r, S = "", P = "") {
     have_it <- sapply(r, function(x) any(S %in% x$S) || any(P %in% x$P))
     idx <- which(have_it)
@@ -249,6 +264,11 @@ which_reaction <- function(r, S = "", P = "") {
 #' @param m_terms The metbaolic terms to be used. Must be have 
 #'  \code{ncol(S)} elements.
 #' @return A vector containing the closest point to p within the k-cone.
+#' @examples 
+#' data(eryth)
+#' S <- stochiometry(eryth)
+#' mats <- runif(ncol(S))
+#' closest(runif(ncol(S)), S, mats)
 closest <- function(p, S, m_terms) {
     if (!requireNamespace("quadprog", quietly = TRUE)) 
         stop("This function requires the quadprog package.")

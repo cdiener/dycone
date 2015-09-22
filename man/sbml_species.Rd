@@ -16,4 +16,9 @@ A data frame containing the obtained data. Some entries might be NA.
 \description{
 Obtains the list of species from a SBML model
 }
+\examples{
+# Not run because requires internet connection
+# m_url <- "http://www.ebi.ac.uk/compneur-srv/biomodels-main/MODEL1103210001"
+# sbml_species(m_url)
+}
 

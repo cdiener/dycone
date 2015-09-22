@@ -4,7 +4,7 @@
 \alias{timecourse}
 \title{Simulates the time course for a given model.}
 \usage{
-timecourse(x0, t, k, s_matrix)
+timecourse(x0, t, k, S)
 }
 \arguments{
 \item{x0}{Initial concentrations of metabolites.}
@@ -14,7 +14,7 @@ is evaluated.}
 
 \item{k}{The vector of kinetic constants used for simulation.}
 
-\item{s_matrix}{The stochiometric matrix of the model.}
+\item{S}{The stochiometric matrix of the model.}
 }
 \value{
 A matrix containing the time in the first column and temporal
@@ -22,6 +22,15 @@ A matrix containing the time in the first column and temporal
 }
 \description{
 Simulates the time course for a given model.
+}
+\examples{
+data(eryth)
+S <- stochiometry(eryth)
+x0 <- runif(nrow(S))
+names(x0) <- rownames(S)
+k <- runif(ncol(S))
+t <- seq(0, 100, by=5)
+timecourse(x0, t, k, S)
 }
 \keyword{ODE,}
 \keyword{simulation}

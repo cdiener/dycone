@@ -4,7 +4,7 @@
 \alias{as.reactions}
 \title{Converts a stochiometric matrix to a reaction list.}
 \usage{
-as.reactions(s_matrix, reversible = F, r_names = NA)
+as.reactions(s_matrix, reversible = FALSE, r_names = NA)
 }
 \arguments{
 \item{s_matrix}{The stochiometric matrix to be converted.}

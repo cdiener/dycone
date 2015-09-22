@@ -1,16 +1,19 @@
 Package: dycone
 Title: dycone - analyze the dynamic landscape of metabolome data
-Version: 0.8
+Version: 0.99.0
 Authors@R: person("Christian", "Diener", , "ch.diener@gmail.com", role = c("aut", "cre"))
 Description: Dycone ("dynamic cone") allows you infer enzymatic regulation from 
     metabolome mesurements. It employs formalisms based on flux and k-cone 
     analysis to connect metabolome data to distinct regulations of enzyme activity. 
     Most of the analysis methods can be applied to genome-scale data. 
-Depends: R (>= 3.1.2)
 URL: https://github.com/cdiener/dycone
 BugReports: https://github.com/cdiener/dycone/issues
 License: MIT + file LICENSE
 LazyData: true
-Imports: deSolve, rcdd, MASS, pheatmap, magrittr, RCurl, rvest, foreach, quadprog, limma
+Depends: R (>= 3.0)
+Imports: deSolve, rcdd, MASS, pheatmap, magrittr, RCurl, rvest, foreach, 
+    quadprog, limma
 Suggests: testthat, covr, igraph, knitr, doParallel
+biocViews: Metabolomics, Systems Biology, Pathways, Bayesian, 
+    Multiple Comparison
 VignetteBuilder: knitr

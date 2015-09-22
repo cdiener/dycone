@@ -16,4 +16,8 @@ A single HMDB ID or list of putative IDs.
 \description{
 Finds IDs of compounds from HMDB corresponding to a given search term.
 }
+\examples{
+# Not run because requires internet connection
+# find_hmdb("pyruvate")
+}
 

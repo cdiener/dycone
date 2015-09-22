@@ -14,6 +14,9 @@ into. NA means no clustering is performed.}
 
 \item{...}{other arguments passed to pheatmap.}
 }
+\value{
+Nothing. Just plots :O
+}
 \description{
 Plots a heatmap of the basis.
 }

@@ -35,4 +35,9 @@ A vector with the same length as columns in \code{S} containing the
 \description{
 Maximizes the flux through a given objective reaction.
 }
+\examples{
+S <- matrix(c(1, 0, -2, 1), ncol = 2)
+rownames(S) <- c("A", "B")
+fba(c(B = -1), S)
+}
 

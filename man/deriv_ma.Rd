@@ -14,6 +14,10 @@ stochiometric matrix. Must be the same length as concs.}
 
 \item{concs}{Concentrations of the substrates.}
 }
+\value{
+Returns the derivative of the mass action kinetics for the reaction
+ specified by \code{subtrates} differentiated by the \code{i}th variable.
+}
 \description{
 \code{deriv_ma} does not check whether the
 ordering of substrates in the stochiometry and concs is corrects, so please

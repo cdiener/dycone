@@ -13,6 +13,10 @@ annotations. A single annotation can contain several values as a
 comma separated string. The csv file should be saved with all entries
 quoted.}
 }
+\value{
+An object of with the S3 class \code{reactions} denoting a list
+ of reactions.
+}
 \description{
 Reads a list of reactions with optional annotations from a file.
 }

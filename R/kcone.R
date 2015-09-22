@@ -23,16 +23,16 @@ enorm <- function(x) sqrt(sum(x * x))
 #' of metabolic terms M by calculating \eqn{M^{-1}V}.
 #' 
 #' @seealso \code{\link{polytope_basis}} for a way to calculate the flux cone, 
-#'  \code{\link{ma_terms}} to get mass action termsq 
+#'  \code{\link{ma_terms}} to get mass action term.
 #' @export
-#' @keywords internal basis
+#' @keywords k-cone basis
 #' @param V The flux cone basis. Rows denote the dimensions and columns the
 #'  individual basis vectors.
-#' @param m_terms The metabolic terms. A vector with as many entries as rows in V.
+#' @param mats The metabolic terms. A vector with as many entries as rows in V.
 #'  All entries hsould be larger than 0.
 #' @param normalize Whether the basis vectors should be scaled to unit length.
 #'  Not recommened for differential analysis.
-#' @return The stuff :O
+#' @return The obtained k-cone as a matrix.
 #' @examples
 #' data(eryth)
 #' S <- matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
@@ -207,13 +207,14 @@ occupation <- function(basis) {
 #' @param n_cl The number of clusters individual basis vectors are grouped 
 #'  into. NA means no clustering is performed.
 #' @param ... other arguments passed to pheatmap.
+#' @return Nothing. Just plots :O
 #' @examples
 #' S <- matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
 #' rownames(S) <- c('A', 'B')
 #' V <- polytope_basis(S)
 #' plot_basis(V)
 plot_basis <- function(b, n_cl = NA, ...) {
-    clustered <- F
+    clustered <- FALSE
     
     if (!is.na(n_cl)) {
         write("Basis are very large. Reducing by clustering...", file = "")
@@ -221,7 +222,7 @@ plot_basis <- function(b, n_cl = NA, ...) {
         write(sprintf("Mean in-cluster distance: %g.", mean(sqrt(cl$withinss/cl$size))), 
             file = "")
         b <- t(cl$centers)
-        clustered <- T
+        clustered <- TRUE
     }
     
     if (clustered) {
@@ -262,6 +263,7 @@ plot_basis <- function(b, n_cl = NA, ...) {
 #'  If given those will be used to annotate the axes with the names of the six
 #'  reactions carrying the largest absolute loadings in the respective principal
 #'  component. 
+#' @return Nothing. Just plots :O
 #' @examples
 #' S <- matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
 #' rownames(S) <- c('A', 'B')
@@ -281,8 +283,8 @@ plot_red <- function(basis_list, arrows = TRUE, col = NULL, n_cl = NULL, r_names
     n <- length(basis_list)
     
     if (!is.null(r_names) && (length(r_names) != max(b_rows) || 
-		!is.character(r_names))) stop("r_names must be a character vector with as
-		many entries as the maximum row number in basis_list!")
+        !is.character(r_names))) stop("r_names must be a character vector with as
+        many entries as the maximum row number in basis_list!")
     
     all_basis <- do.call(cbind, basis_list)
     
@@ -294,8 +296,8 @@ plot_red <- function(basis_list, arrows = TRUE, col = NULL, n_cl = NULL, r_names
         pca <- prcomp(t(all_basis))
         red <- lapply(basis_list, function(b) predict(pca, t(b))[, 1:2])
         if (!is.null(r_names)) 
-			load_names <- t(apply(pca$rotation[,1:2], 2, function(l) 
-				r_names[order(-abs(l))[1:min(6,min(b_rows))]]))
+            load_names <- t(apply(pca$rotation[,1:2], 2, function(l) 
+                r_names[order(-abs(l))[1:min(6,min(b_rows))]]))
     }
     
     if (max(b_cols) > 1000 || !is.null(n_cl)) {
@@ -321,12 +323,12 @@ plot_red <- function(basis_list, arrows = TRUE, col = NULL, n_cl = NULL, r_names
     rs <- apply(do.call(rbind, red), 2, range)
     
     if (!is.null(r_names)) {
-		xl = paste0(load_names[1,], collapse=", ")
-		yl = paste0(load_names[2,], collapse=", ")
-	} else {
-		xl = "PC 1"
-		yl = "PC 2"
-	}
+        xl = paste0(load_names[1,], collapse=", ")
+        yl = paste0(load_names[2,], collapse=", ")
+    } else {
+        xl = "PC 1"
+        yl = "PC 2"
+    }
     plot(NULL, xlim = rs[, 1], ylim = rs[, 2], xlab = xl, ylab = yl)
     
     if (is.null(col)) 
@@ -348,7 +350,7 @@ plot_red <- function(basis_list, arrows = TRUE, col = NULL, n_cl = NULL, r_names
 }
 
 # Helper function to calculate angls between tow vectors
-angle <- function(x, y = 0:1, clockwise = T) {
+angle <- function(x, y = 0:1, clockwise = TRUE) {
     theta <- acos(sum(x * y)/sqrt(sum(x * x) * sum(y * y)))
     if (clockwise && x[1] < 0) 
         theta <- 2 * pi - theta
@@ -431,6 +433,12 @@ eigendynamics <- function(basis, n = 1) {
 #' @return A data frame containig the reaction indices, reactions, kind of regulation
 #'  and log2-fold changes of k2 relative to k1. Log-fold changes where either of the
 #'  constants is 0 are evaluated to 0.
+#' @examples
+#' data(eryth)
+#' n <- length(make_irreversible(eryth))
+#' k1 <- runif(n)
+#' k2 <- runif(n)
+#' single_hyp(k1, k2, eryth)
 single_hyp <- function(k1, k2, reacts) {
     reacts <- make_irreversible(reacts)
     logfold <- log(k2, 2) - log(k1, 2)
@@ -444,7 +452,7 @@ single_hyp <- function(k1, k2, reacts) {
         r <- reacts[[i]]
         idx <- c(idx, i)
         id <- c(id, r$abbreviation)
-        r_s <- c(r_s, to_string(r, name = F))
+        r_s <- c(r_s, to_string(r, name = FALSE))
         kind <- c(kind, if (logfold[i] == 0) "same" else if (logfold[i] > 0) "up" else "down")
         fac <- c(fac, logfold[i])
     }
@@ -546,8 +554,16 @@ bayes_mean_ci <- function(x, n = 256, level = 0.95) {
 #'  \item{fva}{Only if type=='fva'. The flux bounds and respective 
 #'      objective values obtained from flux variability analysis.}
 #'  }
+#' @examples
+#' data(eryth)
+#' n <- length(make_irreversible(eryth))
+#' normal <- matrix(runif(3*n), ncol=3)
+#' sick <- matrix(runif(3*n), ncol=3)
+#' h <- hyp(normal, sick, eryth)
+#' head(h)
 hyp <- function(normal, disease, reacts, type = "bias", correction_method = "BH", 
-    cred_level = 0.95, sorted = T, obj = NULL, v_min = 0, alpha = 1, full = FALSE) {
+    cred_level = 0.95, sorted = TRUE, obj = NULL, v_min = 0, alpha = 1, 
+    full = FALSE) {
     # Create reference data
     normal <- as.matrix(normal)
     disease <- as.matrix(disease)

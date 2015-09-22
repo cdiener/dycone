@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments passed on to write.}
 }
+\value{
+Nothing. Just prints :O
+}
 \description{
 Prints a nice description of the reactions.
 }

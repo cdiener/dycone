@@ -20,4 +20,8 @@ A data frame with two columns, the first specifying the index
 \description{
 Finds all reaction indices using the given subtrates and products.
 }
+\examples{
+data(eryth)
+which_reaction(eryth, P = c("pyr", "atp"))
+}
 

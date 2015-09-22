@@ -11,6 +11,9 @@
 
 \item{...}{Additional arguments passed to plot.igraph.}
 }
+\value{
+Nothing. Just plots :O
+}
 \description{
 Plots the reactions as a graph.
 }

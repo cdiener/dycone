@@ -19,4 +19,8 @@ The scraped data set as a data frame or NULL if no concentrations were
 \description{
 Scrapes measured metabolite concentration values for a given HMDB ID.
 }
+\examples{
+# Not run because requires internet connection
+# concs <- hmdb_concentration('HMDB00124') # Fructose-6-phosphate
+}
 

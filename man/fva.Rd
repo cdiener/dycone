@@ -42,4 +42,9 @@ Performs flux variance analysis for a given objective reaction. Thus, FVA
 obtains lower and upper bounds for the fluxes under a given (sub-)optimal
 solution.
 }
+\examples{
+S <- matrix(c(1, 0, -2, 1), ncol = 2)
+rownames(S) <- c("A", "B")
+fva(c(B = -1), S=S)
+}
 

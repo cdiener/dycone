@@ -12,6 +12,9 @@ info:doi/10.1371/journal.pone.0004967.s003}
 \usage{
 eryth
 }
+\value{
+Assigns the \code{eryth} reactions list to the namespace.
+}
 \description{
 Contains the reactions of the human red blood cell (erythrocite) metabolic
 model together with some randomly sampled rates k.
