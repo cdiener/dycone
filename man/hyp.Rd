@@ -5,7 +5,7 @@
 \title{Identifies hypothesis for differentially regulated reactions between a set of
 normal and disease conditions.}
 \usage{
-hyp(normal, disease, reacts, type = "bias", correction_method = "fdr",
+hyp(normal, disease, reacts, type = "bias", correction_method = "BH",
   cred_level = 0.95, sorted = T, obj = NULL, v_min = 0, alpha = 1,
   full = FALSE)
 }
@@ -19,7 +19,7 @@ diseasse condition in the columns.}
 \item{reacts}{The reaction list.}
 
 \item{type}{The type of analysis to be performed. Either 'bias',
-'worst-case' or 'raw' for a pass-through option.}
+'fva' or 'raw' for a pass-through option.}
 
 \item{correction_method}{A correction method for the multiple test p-values.
 Takes the same arguments as the method argument in p.adjust.}
@@ -63,7 +63,10 @@ If full is FALSE only returns the generated hypothesis as a data
  \item{ci_low, ci_high}{The bayesian credible interval for the confidence
      level given by \code{cred_level}. Those are calculated using the bayesian
      bootstrap.}
- \item{pval}{The p-value corrected for multiple testing.}
+ \item{pval}{The empricial Bayes estimate of the p-values.}
+ \item{corr_pval}{The p-values corrected for multiple testing.}
+ \item{fva_log_fold}{Only if type = "fva". The largest absolute log-fold
+ change that can be explained by flux variability alone.}
  }
 
  If full is TRUE returns a list of generated hypothesis and the
@@ -78,19 +81,25 @@ If full is FALSE only returns the generated hypothesis as a data
  \item{lfc_disease}{The log2-fold changes of enzyme activity within between
      the disease and normal group for each of the irreversible reactions.
      Also never sorted.}
- \item{lfc_va}{Only if type=='worst-case'. The maximum log2-fold changes for
+ \item{lfc_va}{Only if type=='fva'. The maximum log2-fold changes for
      the fluxes obtained by flux variability analysis. Also never sorted.}
- \item{fva}{Only if type=='worst-case'. The flux bounds and respective
+ \item{fva}{Only if type=='fva'. The flux bounds and respective
      objective values obtained from flux variability analysis.}
  }
 }
 \description{
-\code{hyp()} is the main driver for differential analysis. It first uses a
-reduction method to approximate the fold-change of the kinetic constants. This
-is followed by calculation of all combinatorial log-fold changes within the
-normal group and between the disease and normal group. Finally, the wilcoxon
-ranked sum statistics and bayesian credible intervals are obtained for each
-reaction and the p-values corrected.
+\code{hyp()} is the main driver for differential analysis. It will perform
+   the following steps:
+ \enumerate{
+ \item{Transform \code{normal} and \code{disease} to approximations for relative
+ enzyme activities (not if type = "raw") by inversion.}
+ \item{Calculate enzyme activity inter- and intra group log-fold changes and
+ credible intervals.}
+ \item{Estimate the dispersions with an empirical Bayes approximation and
+ use this to extract significance.}
+ \item{If type is "fva", it will perform a flux variability analysis to
+ see whether differences can be due to variation in the fluxes alone.}
+ }
 }
 \keyword{analysis}
 \keyword{hypothesis,}

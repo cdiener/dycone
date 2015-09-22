@@ -467,12 +467,18 @@ bayes_mean_ci <- function(x, n = 256, level = 0.95) {
 #' Identifies hypothesis for differentially regulated reactions between a set of
 #' normal and disease conditions.
 #'
-#' \code{hyp()} is the main driver for differential analysis. It first uses a
-#' reduction method to approximate the fold-change of the kinetic constants. This
-#' is followed by calculation of all combinatorial log-fold changes within the 
-#' normal group and between the disease and normal group. Finally, the wilcoxon
-#' ranked sum statistics and bayesian credible intervals are obtained for each 
-#' reaction and the p-values corrected.
+#' \code{hyp()} is the main driver for differential analysis. It will perform 
+#'    the following steps:
+#'  \enumerate{
+#'  \item{Transform \code{normal} and \code{disease} to approximations for relative
+#'  enzyme activities (not if type = "raw") by inversion.} 
+#'  \item{Calculate enzyme activity inter- and intra group log-fold changes and 
+#'  credible intervals.}
+#'  \item{Estimate the dispersions with an empirical Bayes approximation and
+#'  use this to extract significance.}
+#'  \item{If type is "fva", it will perform a flux variability analysis to
+#'  see whether differences can be due to variation in the fluxes alone.}
+#'  }
 #'
 #' @export
 #' @keywords hypothesis, k-cone, analysis
@@ -482,7 +488,7 @@ bayes_mean_ci <- function(x, n = 256, level = 0.95) {
 #'  diseasse condition in the columns.
 #' @param reacts The reaction list.
 #' @param type The type of analysis to be performed. Either 'bias',
-#'  'worst-case' or 'raw' for a pass-through option.
+#'  'fva' or 'raw' for a pass-through option.
 #' @param sorted Whether the results should be sorted by p-value and mean log-fold
 #'  change.
 #' @param cred_level The confidence level for the bayes credible intervals. 
@@ -517,7 +523,10 @@ bayes_mean_ci <- function(x, n = 256, level = 0.95) {
 #'  \item{ci_low, ci_high}{The bayesian credible interval for the confidence 
 #'      level given by \code{cred_level}. Those are calculated using the bayesian
 #'      bootstrap.}
-#'  \item{pval}{The p-value corrected for multiple testing.}
+#'  \item{pval}{The empricial Bayes estimate of the p-values.}
+#'  \item{corr_pval}{The p-values corrected for multiple testing.}
+#'  \item{fva_log_fold}{Only if type = "fva". The largest absolute log-fold 
+#'  change that can be explained by flux variability alone.}
 #'  }
 #'
 #'  If full is TRUE returns a list of generated hypothesis and the 
@@ -532,98 +541,79 @@ bayes_mean_ci <- function(x, n = 256, level = 0.95) {
 #'  \item{lfc_disease}{The log2-fold changes of enzyme activity within between 
 #'      the disease and normal group for each of the irreversible reactions. 
 #'      Also never sorted.}
-#'  \item{lfc_va}{Only if type=='worst-case'. The maximum log2-fold changes for
+#'  \item{lfc_va}{Only if type=='fva'. The maximum log2-fold changes for
 #'      the fluxes obtained by flux variability analysis. Also never sorted.}
-#'  \item{fva}{Only if type=='worst-case'. The flux bounds and respective 
+#'  \item{fva}{Only if type=='fva'. The flux bounds and respective 
 #'      objective values obtained from flux variability analysis.}
 #'  }
-hyp <- function(normal, disease, reacts, type = "bias", correction_method = "fdr", 
+hyp <- function(normal, disease, reacts, type = "bias", correction_method = "BH", 
     cred_level = 0.95, sorted = T, obj = NULL, v_min = 0, alpha = 1, full = FALSE) {
     # Create reference data
-    cref <- combn(1:ncol(normal), 2)
     normal <- as.matrix(normal)
     disease <- as.matrix(disease)
-    normal <- 1/normal
-    disease <- 1/disease
     
-    if (type == "worst-case") {
-        M <- cbind(normal, disease)
+    if (type != "raw") {
+        normal <- 1/normal
+        disease <- 1/disease
+    }
+    M <- log(cbind(normal, disease), 2)
+    
+    if (type == "fva") {
         S <- stochiometry(reacts)
         if (!is.numeric(obj)) 
             stop("obj must be numeric.")
         va <- fva(obj, 1, S, v_min = v_min, v_max = 1)
         lfc_va <- log(va$max, 2) - log(va$min, 2)
     } else if (!(type %in% c("raw", "bias"))) 
-        stop("type must be either 'bias', 'worst-case' or 'raw' :(")
+        stop("type must be either 'bias', 'fva' or 'raw' :(")
     
     res <- single_hyp(normal[, 1], normal[, 1], reacts)
     res <- res[, -ncol(res)]
     
+    # create internal controls
+    cref <- combn(1:ncol(normal), 2)
     lfc_n <- apply(cref, 2, function(idx) {
         h <- single_hyp(normal[, idx[1]], normal[, idx[2]], reacts)
         return(h$log2_fold)
     })
-    lfc_n <- cbind(lfc_n, -lfc_n)
-    if (type == "worst-case") {
-        mod_lfc <- abs(lfc_n)
-        mod_lfc <- mod_lfc - lfc_va
-        mod_lfc[mod_lfc < 0] <- 0
-        lfc_n <- sign(lfc_n) * mod_lfc
-        lfc_n[!is.finite(lfc_n)] <- 0
-    }
     
     # Create differential analysis
     ctreat <- expand.grid(1:ncol(normal), 1:ncol(disease))
-    
     lfc_d <- apply(ctreat, 1, function(idx) {
         h <- single_hyp(normal[, idx[1]], disease[, idx[2]], reacts)
         return(h$log2_fold)
     })
-    if (type == "worst-case") {
-        mod_lfc <- abs(lfc_d)
-        mod_lfc <- mod_lfc - lfc_va
-        mod_lfc[mod_lfc < 0] <- 0
-        lfc_d <- sign(lfc_d) * mod_lfc
-        lfc_d[!is.finite(lfc_d)] <- 0
-    }
+    
+    # Generate model fits
+    design <- model.matrix(
+        ~ 0 + factor(rep.int(1:2, times=c(ncol(normal), ncol(disease)))))
+    colnames(design) <- c("normal", "disease")
+    dfit <- limma::lmFit(M, design)
+    contrast.matrix <- limma::makeContrasts(disease - normal, levels=design)
+    cfit <- limma::contrasts.fit(dfit, contrast.matrix)
+    cfit <- limma::eBayes(cfit)
+    
+    bci <- apply(lfc_d, 1, bayes_mean_ci, level = cred_level)
+    rownames(bci) <- NULL
     
     # Generate statistics
-    stats <- lapply(1:nrow(res), function(i) {
-        n_data <- as.numeric(lfc_n[i, ])
-        d_data <- as.numeric(lfc_d[i, ])
-        test <- tryCatch({
-            # Best case no ties all data defined
-            w <- wilcox.test(x = d_data, y = n_data)
-            w$conf.int <- bayes_mean_ci(d_data, level = cred_level)
-            w
-        }, warning = function(w) {
-            # Ties or all data non-finite
-            w <- suppressWarnings(wilcox.test(x = d_data, y = n_data))
-            # If all data are tied we set the p-value to 1
-            if (is.nan(w$p.value)) w$p.value <- 1 
-            w$conf.int <- bayes_mean_ci(d_data, level = cred_level)
-            w
-        })
-        names(test$conf.int) <- NULL
-        
-        return(data.frame(sd_normal = sd(n_data), sd_disease = sd(d_data), mean_log_fold = mean(d_data), 
-            ci_low = test$conf.int[1], ci_high = test$conf.int[2], pval = test$p.value))
-    })
-    
-    res <- cbind(res, do.call(rbind, stats))
+    stats <- data.frame(sd_normal = apply(lfc_n, 1 , sd), sd_disease = 
+        apply(lfc_d, 1 , sd), mean_log_fold = cfit$coefficients[, 1], 
+        ci_low = bci[1, ], ci_high = bci[2, ], pval = cfit$p.value[, 1])
+    if (type == "fva") stats$fva_log_fold <- lfc_va
+    res <- cbind(res, stats)
     reg <- sapply(res$mean_log_fold, function(x) if (x == 0) 
-        "same" else if (x > 0) 
-        "up" else "down")
+        "same" else if (x > 0) "up" else "down")
     res$type <- factor(reg)
-    res$pval <- p.adjust(res$pval, method = correction_method)
+    res$corr_pval <- p.adjust(res$pval, method = correction_method) 
     if (sorted) 
-        res <- res[order(res$pval, -abs(res$mean_log_fold)), ]
+        res <- res[order(res$corr_pval, -abs(res$mean_log_fold)), ]
     
     if (full) {
         lfc_n <- data.frame(normal = lfc_n)
         lfc_d <- data.frame(disease = lfc_d)
         res <- list(hyp = res, lfc_normal = lfc_n, lfc_disease = lfc_d)
-        if (type == "worst-case") res <- c(res, list(fva = va, lfc_va = lfc_va))
+        if (type == "fva") res <- c(res, list(fva = va, lfc_va = lfc_va))
     }
     
     return(res)

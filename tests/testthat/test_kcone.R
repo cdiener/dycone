@@ -27,6 +27,9 @@ test_that("stability analysis works", {
     expect_true(all(stab$what == "stable"))
     expect_equal(stab$ev1, c(0, 0))
     expect_equal(stab$ev2, -0.5 * rep(sqrt(2), 2))
+    stab_one <- stability_analysis(V[,1], S, c(A = 1, B = 1))
+    expect_equal(stab_one$ev1, 0)
+    expect_equal(stab_one$ev2, -0.5 * sqrt(2))
 })
 
 test_that("helper functions work", {
@@ -57,11 +60,12 @@ test_that("hypothesis generation works", {
     expect_equal(nrow(h), n_r)
     expect_true(all(h$pval <= 1))
     o <- c(pyr = -1, prpp = -1, '3pg' = -1, nadph = -1, nadp = 1) 
-    h_opt <- hyp(mats[, 1:3], mats[, 4:6], eryth, type = "worst-case", 
+    h_opt <- hyp(mats[, 1:3], mats[, 4:6], eryth, type = "fva", 
         v_min = 0, obj = o, full = T)
     expect_equal(length(h_opt), 5)
     expect_equal(dim(h_opt$fva), c(n_r, 4))
     expect_equal(length(h_opt$lfc_va), n_r)
+    expect_true("fva_log_fold" %in% names(h_opt$hyp))
 })
 
 test_that("basis plotting works", {
@@ -75,7 +79,8 @@ test_that("basis plotting works", {
     expect_match(out, "in-cluster distance", all = F)
     f <- tempfile("plot", fileext=".png")
     png(f)
-    out <- capture.output(plot_red(list(B), n_cl = 100))
+    out <- capture.output(plot_red(list(B), n_cl = 100, 
+        r_names = as.character(1:10)))
     dev.off()
     expect_true(file.exists(f))
     expect_match(out, "Information", all = F)

@@ -11,6 +11,6 @@ URL: https://github.com/cdiener/dycone
 BugReports: https://github.com/cdiener/dycone/issues
 License: MIT + file LICENSE
 LazyData: true
-Imports: deSolve, rcdd, MASS, pheatmap, magrittr, RCurl, rvest, foreach, quadprog
+Imports: deSolve, rcdd, MASS, pheatmap, magrittr, RCurl, rvest, foreach, quadprog, limma
 Suggests: testthat, covr, igraph, knitr, doParallel
 VignetteBuilder: knitr
