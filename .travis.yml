@@ -14,5 +14,7 @@ r_github_packages:
     - jimhester/covr
 bioc_packages:
     - limma
+    - BiocCheck
 after_success:
-  - Rscript -e 'library(covr);codecov()'
+    - Rscript -e "BiocCheck::BiocCheck('.')"
+    - Rscript -e 'library(covr);codecov()'
