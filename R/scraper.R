@@ -17,9 +17,9 @@ KEGG_REST <- "http://rest.kegg.jp/link/hsa/ec:%s"
 #' # sbml_params(m_url)
 sbml_params <- function(sbml_file) {
     attrs <- c("id", "name", "value")
-    doc <- rvest::xml(sbml_file)
-    p_list <- doc %>% rvest::xml_nodes("sbml model listofparameters parameter")
-    params <- sapply(p_list, function(p) sapply(attrs, function(a) rvest::xml_attr(p, 
+    doc <- rvest::html(sbml_file)
+    p_list <- doc %>% rvest::html_nodes("sbml model listofparameters parameter")
+    params <- sapply(p_list, function(p) sapply(attrs, function(a) rvest::html_attr(p, 
         a)))
     
     out <- as.data.frame(t(params), row.names = NULL)

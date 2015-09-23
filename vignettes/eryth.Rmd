@@ -25,24 +25,15 @@ data(eryth)
 reacts = make_irreversible(eryth)
 print(eryth)
 
-concs = read.csv( system.file("extdata", "eryth_ic.csv", package="dycone") )
-ids = concs$id
-concs = concs$initial
-names(concs) = ids
-print(concs)
-```
-
-We will treat species with lacking steady state concentrations as constant.
-```{r}
 spec = species(eryth)
-no_c = !(spec %in% ids)
-constants = spec[no_c]
-concs = concs[spec[!no_c]]
+concs = runif(length(spec))
+names(concs) = spec
+print(concs)
 ```
 
 We extract the stochiometric matrix with the constant species simply by:
 ```{r}
-S = stochiometry(eryth, const=constants)
+S = stochiometry(eryth)
 ```
 
 Extracting the k-cone
