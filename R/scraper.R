@@ -17,10 +17,12 @@ KEGG_REST <- "http://rest.kegg.jp/link/hsa/ec:%s"
 #' # sbml_params(m_url)
 sbml_params <- function(sbml_file) {
     attrs <- c("id", "name", "value")
-    doc <- rvest::html(sbml_file)
-    p_list <- doc %>% rvest::html_nodes("sbml model listofparameters parameter")
-    params <- sapply(p_list, function(p) sapply(attrs, function(a) rvest::html_attr(p, 
-        a)))
+    doc <- xml2::read_xml(sbml_file)
+    p_list <- xml2::xml_find_all(doc, 
+        "./d1:model/d1:listOfParameters/d1:parameter", 
+        xml2::xml_ns(doc))
+    params <- sapply(p_list, function(p) sapply(attrs, function(a) 
+        xml2::xml_attr(p, a)))
     
     out <- as.data.frame(t(params), row.names = NULL)
     names(out) <- attrs
@@ -40,10 +42,11 @@ sbml_params <- function(sbml_file) {
 #' # sbml_species(m_url)
 sbml_species <- function(sbml_file) {
     attrs <- c("id", "name", "initialamount", "initialconcentration")
-    doc <- rvest::xml(sbml_file)
-    s_list <- doc %>% rvest::xml_nodes("sbml model listofspecies species")
-    species <- sapply(s_list, function(s) sapply(attrs, function(a) rvest::xml_attr(s, 
-        a)))
+    doc <- xml2::read_xml(sbml_file)
+    s_list <- xml2::xml_find_all(doc, 
+        "./d1:model/d1:listOfSpecies/d1:species", xml2::xml_ns(doc))
+    species <- sapply(s_list, function(s) sapply(attrs, function(a) 
+        xml2::xml_attr(s, a)))
     
     out <- as.data.frame(t(species), row.names = NULL)
     names(out) <- attrs
@@ -139,15 +142,12 @@ find_hmdb <- function(search_term) {
 #' @return The parsed data set as a data frame.
 hmdb_parse <- function(nodes) {
     tags <- c("biofluid", "concentration_value", "concentration_units", "subject_age", 
-        "subject_sex", "subject_condition", "references reference pubmed_id")
-    
-    empty_or_text <- function(x) {
-        if (is.null(x)) 
-            "" else rvest::xml_text(x)
-    }
+        "subject_sex", "subject_condition", "references/reference/pubmed_id")
     
     vals <- sapply(nodes, function(n) sapply(tags, function(ta) {
-        rvest::xml_node(n, ta) %>% empty_or_text()
+        tryCatch(n %>% xml2::xml_find_one(paste0("./", ta)) %>% 
+            xml2::xml_text(),
+            error = function(e) { "" })
     }))
     
     vals <- t(tolower(vals))
@@ -178,13 +178,15 @@ hmdb_concentration <- function(hmids, add = NULL) {
     for (i in 1:length(hmids)) {
         id <- hmids[i]
         cat(sprintf("\rScraping %d/%d...", i, length(hmids)))
-        hm_xml <- rvest::xml(sprintf(HMDB_XML, id))
+        hm_xml <- xml2::read_xml(sprintf(HMDB_XML, id))
         
-        hm_entries <- hm_xml %>% rvest::xml_nodes("normal_concentrations concentration") %>% 
+        hm_entries <- hm_xml %>% 
+            xml2::xml_find_all("./normal_concentrations/concentration") %>% 
             hmdb_parse()
         
-        kegg_id <- hm_xml %>% rvest::xml_node("kegg_id") %>% rvest::xml_text()
-        name <- hm_xml %>% rvest::xml_node("name") %>% rvest::xml_text()
+        kegg_id <- hm_xml %>% xml2::xml_find_one("./kegg_id") %>% 
+            xml2::xml_text()
+        name <- hm_xml %>% xml2::xml_find_one("./name") %>% xml2::xml_text()
         
         if (!is.null(hm_entries)) {
             hm_entries <- cbind(kegg_id, id, name, hm_entries)

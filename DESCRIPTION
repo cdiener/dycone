@@ -11,7 +11,7 @@ BugReports: https://github.com/cdiener/dycone/issues
 License: MIT + file LICENSE
 LazyData: true
 Depends: R (>= 3.0)
-Imports: deSolve, rcdd, MASS, pheatmap, magrittr, RCurl, rvest, foreach, 
+Imports: deSolve, rcdd, MASS, pheatmap, magrittr, RCurl, xml2, rvest, foreach, 
     quadprog, limma
 Suggests: testthat, covr, igraph, knitr, doParallel
 biocViews: Metabolomics, Systems Biology, Pathways, Bayesian, 
