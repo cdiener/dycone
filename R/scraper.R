@@ -10,19 +10,22 @@ KEGG_REST <- "http://rest.kegg.jp/link/hsa/ec:%s"
 #' @param sbml_file A SBML file. This can be a file on the disk or the location
 #'  to an online resource.
 #' @return A data frame containing the obtained data. Some entries might be NA.
-#' @export
 #' @examples
-#' # Not run because requires internet connection
-#' # m_url <- "http://www.ebi.ac.uk/compneur-srv/biomodels-main/MODEL1103210001"
-#' # sbml_params(m_url)
+#' # requires internet connection
+#' m_url <- "http://www.ebi.ac.uk/compneur-srv/biomodels-main/download?mid=MODEL1103210001"
+#' sbml_params(m_url)
+#'
+#' @importFrom xml2 read_xml read_html xml_find_one xml_find_all xml_ns 
+#'  xml_attr xml_text 
+#' @export
 sbml_params <- function(sbml_file) {
     attrs <- c("id", "name", "value")
-    doc <- xml2::read_xml(sbml_file)
-    p_list <- xml2::xml_find_all(doc, 
+    doc <- read_xml(sbml_file)
+    p_list <- xml_find_all(doc, 
         "./d1:model/d1:listOfParameters/d1:parameter", 
-        xml2::xml_ns(doc))
+        xml_ns(doc))
     params <- sapply(p_list, function(p) sapply(attrs, function(a) 
-        xml2::xml_attr(p, a)))
+        xml_attr(p, a)))
     
     out <- as.data.frame(t(params), row.names = NULL)
     names(out) <- attrs
@@ -35,18 +38,19 @@ sbml_params <- function(sbml_file) {
 #' @param sbml_file A SBML file. This can be a file on the disk or the location
 #'  to an online resource.
 #' @return A data frame containing the obtained data. Some entries might be NA.
-#' @export
 #' @examples
-#' # Not run because requires internet connection
-#' # m_url <- "http://www.ebi.ac.uk/compneur-srv/biomodels-main/MODEL1103210001"
-#' # sbml_species(m_url)
+#' # requires internet connection
+#' m_url <- "http://www.ebi.ac.uk/compneur-srv/biomodels-main/download?mid=MODEL1103210001"
+#' sbml_species(m_url)
+#'
+#' @export
 sbml_species <- function(sbml_file) {
     attrs <- c("id", "name", "initialamount", "initialconcentration")
-    doc <- xml2::read_xml(sbml_file)
-    s_list <- xml2::xml_find_all(doc, 
-        "./d1:model/d1:listOfSpecies/d1:species", xml2::xml_ns(doc))
+    doc <- read_xml(sbml_file)
+    s_list <- xml_find_all(doc, 
+        "./d1:model/d1:listOfSpecies/d1:species", xml_ns(doc))
     species <- sapply(s_list, function(s) sapply(attrs, function(a) 
-        xml2::xml_attr(s, a)))
+        xml_attr(s, a)))
     
     out <- as.data.frame(t(species), row.names = NULL)
     names(out) <- attrs
@@ -74,9 +78,9 @@ sbml_species <- function(sbml_file) {
 #'  they appear.
 #' @return The mean 
 #' @examples
-#' # Not run because requires internet connection
-#' # concs <- hmdb_concentration('HMDB00124') # Fructose-6-phosphate
-#' # priority_mean(concs) # has measurements for cytoplasm so returns those
+#' # requires internet connection
+#' concs <- hmdb_concentration('HMDB00124') # Fructose-6-phosphate
+#' priority_mean(concs) # has measurements for cytoplasm so returns those
 priority_mean <- function(d, biofluids = c("cellular cytoplasm", "blood")) {
     if (is.null(d)) 
         return(NA)
@@ -125,13 +129,16 @@ parse_conc <- function(val) {
 #' @param search_term Can be any text search term or a different ID (for instance
 #'  a KEGG ID
 #' @return A single HMDB ID or list of putative IDs.
-#' @export
 #' @examples
-#' # Not run because requires internet connection
-#' # find_hmdb("pyruvate")
+#' # requires internet connection
+#' find_hmdb("pyruvate")
+#'
+#' @importFrom rvest html_nodes html_text
+#' @importFrom RCurl curlEscape
+#' @export
 find_hmdb <- function(search_term) {
-    hmids <- rvest::html(sprintf(HMDB_SEARCH, RCurl::curlEscape(search_term))) %>% 
-        rvest::html_nodes(".result-link .btn-card") %>% rvest::html_text()
+    hmids <- read_html(sprintf(HMDB_SEARCH, curlEscape(search_term))) %>% 
+        html_nodes(".result-link .btn-card") %>% html_text()
     
     return(hmids)
 }
@@ -145,8 +152,7 @@ hmdb_parse <- function(nodes) {
         "subject_sex", "subject_condition", "references/reference/pubmed_id")
     
     vals <- sapply(nodes, function(n) sapply(tags, function(ta) {
-        tryCatch(n %>% xml2::xml_find_one(paste0("./", ta)) %>% 
-            xml2::xml_text(),
+        tryCatch(n %>% xml_find_one(paste0("./", ta)) %>% xml_text(),
             error = function(e) { "" })
     }))
     
@@ -170,23 +176,24 @@ hmdb_parse <- function(nodes) {
 #' @return The scraped data set as a data frame or NULL if no concentrations were
 #'  found.
 #' @examples
-#' # Not run because requires internet connection
-#' # concs <- hmdb_concentration('HMDB00124') # Fructose-6-phosphate
+#' # requires internet connection
+#' hmdb_concentration('HMDB00124') # Fructose-6-phosphate
+#'
+#' @export
 hmdb_concentration <- function(hmids, add = NULL) {
     out <- NULL
     cat("\n")
     for (i in 1:length(hmids)) {
         id <- hmids[i]
         cat(sprintf("\rScraping %d/%d...", i, length(hmids)))
-        hm_xml <- xml2::read_xml(sprintf(HMDB_XML, id))
+        hm_xml <- read_xml(sprintf(HMDB_XML, id))
         
         hm_entries <- hm_xml %>% 
-            xml2::xml_find_all("./normal_concentrations/concentration") %>% 
+            xml_find_all("./normal_concentrations/concentration") %>% 
             hmdb_parse()
         
-        kegg_id <- hm_xml %>% xml2::xml_find_one("./kegg_id") %>% 
-            xml2::xml_text()
-        name <- hm_xml %>% xml2::xml_find_one("./name") %>% xml2::xml_text()
+        kegg_id <- hm_xml %>% xml_find_one("./kegg_id") %>% xml_text()
+        name <- hm_xml %>% xml_find_one("./name") %>% xml_text()
         
         if (!is.null(hm_entries)) {
             hm_entries <- cbind(kegg_id, id, name, hm_entries)
@@ -218,17 +225,17 @@ group_patch <- function(x) {
 
 # Primitive function for reference patching missing data
 ref_patch <- function(x, ref) {
-    x <- as.matrix(x)
-    miss <- t(apply(x[, -1], 1, is.na))
+    y <- as.matrix(x[, -1])
+    miss <- t(apply(y, 1, is.na))
     
     need_fix <- which(rowSums(miss) > 0)
     for (i in need_fix) {
         id <- as.character(x[i, 1])
-        nas <- is.na(x[i, ])
-        nas[1] <- FALSE
+        nas <- is.na(y[i, ])
         ref_data <- as.numeric(unlist(ref[ref[, 1] == id, -1]))
-        x[i, nas] <- mean(ref_data, na.rm = TRUE)
+        y[i, nas] <- mean(ref_data, na.rm = TRUE)
     }
+    x[, -1] <- y
     
     return(x)
 }

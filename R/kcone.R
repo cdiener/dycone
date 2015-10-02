@@ -53,7 +53,6 @@ kcone <- function(V, mats, normalize = FALSE) {
 #' 
 #' @seealso \code{\link{polytope_basis}} for arbitrary reversibility 
 #'  constraints.
-#' @export
 #' @keywords basis, k-cone
 #' @param s_matrix The stochiometric matrix to be used.
 #' @param m_terms The metabolic terms. 
@@ -62,10 +61,13 @@ kcone <- function(V, mats, normalize = FALSE) {
 #' S <- matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
 #' rownames(S) = c('A', 'B')
 #' K <- kcone_null(S, runif(ncol(S)))
+#'
+#' @importFrom MASS Null
+#' @export
 kcone_null <- function(s_matrix, m_terms) {
     SM <- s_matrix %*% diag(m_terms)
     
-    basis <- MASS::Null(t(SM))
+    basis <- Null(t(SM))
     class(basis) <- append("basis", class(basis))
     
     return(basis)
@@ -86,18 +88,18 @@ kcone_null <- function(s_matrix, m_terms) {
 #' V <- polytope_basis(S)
 polytope_basis <- function(s_matrix, m_terms = rep(1, ncol(s_matrix))) {
     mat <- m_terms
-    const_matrix <- rcdd::d2q(-diag(ncol(s_matrix)))
-    const_b <- rcdd::d2q(rep(0, ncol(s_matrix)))
-    NC <- rcdd::d2q(as.matrix(s_matrix %*% diag(mat)))
-    b <- rcdd::d2q(rep(0, nrow(s_matrix)))
+    const_matrix <- d2q(-diag(ncol(s_matrix)))
+    const_b <- d2q(rep(0, ncol(s_matrix)))
+    NC <- d2q(as.matrix(s_matrix %*% diag(mat)))
+    b <- d2q(rep(0, nrow(s_matrix)))
     
-    hp <- rcdd::makeH(const_matrix, const_b, NC, b)
-    hp <- rcdd::addHeq(rep(1, ncol(s_matrix)), 1, hp)
-    hp <- rcdd::redundant(hp)$output
-    vrep <- rcdd::scdd(hp)
+    hp <- makeH(const_matrix, const_b, NC, b)
+    hp <- addHeq(rep(1, ncol(s_matrix)), 1, hp)
+    hp <- redundant(hp)$output
+    vrep <- scdd(hp)
     vp <- vrep$output[, -(1:2)]
     
-    basis <- as.matrix(apply(rcdd::q2d(t(vp)), 2, function(x) x/enorm(x)))
+    basis <- as.matrix(apply(q2d(t(vp)), 2, function(x) x/enorm(x)))
     class(basis) <- append("basis", class(basis))
     
     return(basis)
@@ -227,11 +229,11 @@ plot_basis <- function(b, n_cl = NA, ...) {
     
     if (clustered) {
         ann <- data.frame(n = cl$size)
-        pheatmap::pheatmap(b, border = NA, col = DC_SINGLECOL(101), labels_row = 1:nrow(b), 
-            annotation_col = ann)
+        pheatmap(b, border_color = NA, color = DC_SINGLECOL(101), labels_row = 
+            1:nrow(b), annotation_col = ann)
     } else {
-        pheatmap::pheatmap(b, border = NA, col = DC_SINGLECOL(101), labels_row = 1:nrow(b), 
-            ...)
+        pheatmap(b, border_color = NA, color = DC_SINGLECOL(101), labels_row = 
+            1:nrow(b), ...)
     }
 }
 
@@ -340,7 +342,7 @@ plot_red <- function(basis_list, arrows = TRUE, col = NULL, n_cl = NULL, r_names
         ro <- red[[i]][order(a), ]
         
         p <- rbind(ro, c(0, 0))
-        red_ids <- rcdd::redundant(rcdd::makeV(rcdd::d2q(p)))$redundant
+        red_ids <- redundant(makeV(d2q(p)))$redundant
         polygon(p[-red_ids, ], border = NA, col = adjustcolor(pal[i], alpha.f = 0.2))
         if (arrows) {
             arrows(x0 = 0, y0 = 0, x1 = ro[, 1], y1 = ro[, 2], angle = 15, length = 0.05, 
@@ -488,7 +490,6 @@ bayes_mean_ci <- function(x, n = 256, level = 0.95) {
 #'  see whether differences can be due to variation in the fluxes alone.}
 #'  }
 #'
-#' @export
 #' @keywords hypothesis, k-cone, analysis
 #' @param normal A matrix or data frame containing the metabolic terms of the 
 #'  normal condition in the columns.
@@ -561,6 +562,9 @@ bayes_mean_ci <- function(x, n = 256, level = 0.95) {
 #' sick <- matrix(runif(3*n), ncol=3)
 #' h <- hyp(normal, sick, eryth)
 #' head(h)
+#'
+#' @importFrom limma makeContrasts lmFit contrasts.fit eBayes
+#' @export
 hyp <- function(normal, disease, reacts, type = "bias", correction_method = "BH", 
     cred_level = 0.95, sorted = TRUE, obj = NULL, v_min = 0, alpha = 1, 
     full = FALSE) {
@@ -604,10 +608,10 @@ hyp <- function(normal, disease, reacts, type = "bias", correction_method = "BH"
     design <- model.matrix(
         ~ 0 + factor(rep.int(1:2, times=c(ncol(normal), ncol(disease)))))
     colnames(design) <- c("normal", "disease")
-    dfit <- limma::lmFit(M, design)
-    contrast.matrix <- limma::makeContrasts(disease - normal, levels=design)
-    cfit <- limma::contrasts.fit(dfit, contrast.matrix)
-    cfit <- limma::eBayes(cfit)
+    dfit <- lmFit(M, design)
+    contrast.matrix <- makeContrasts(disease - normal, levels=design)
+    cfit <- contrasts.fit(dfit, contrast.matrix)
+    cfit <- eBayes(cfit)
     
     bci <- apply(lfc_d, 1, bayes_mean_ci, level = cred_level)
     rownames(bci) <- NULL

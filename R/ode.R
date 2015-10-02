@@ -3,7 +3,6 @@
 
 #' Simulates the time course for a given model.
 #'
-#' @export
 #' @keywords ODE, simulation
 #' @param x0 Initial concentrations of metabolites.
 #' @param t A vector of monotonously increasing times where the simulation
@@ -20,12 +19,15 @@
 #' k <- runif(ncol(S))
 #' t <- seq(0, 100, by=5)
 #' timecourse(x0, t, k, S)
+#'
+#' @importFrom deSolve lsoda
+#' @export
 timecourse <- function(x0, t, k, S) {
     f <- function(t, y, p) {
         list(S %*% diag(p) %*% ma_terms(S, y))
     }
     
-    sol <- deSolve::lsoda(x0, t, f, k)
+    sol <- lsoda(x0, t, f, k)
     class(sol) <- append("dyconetc", class(sol))
     
     return(sol)

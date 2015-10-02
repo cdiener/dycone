@@ -23,9 +23,9 @@ primary one. \code{priority_mean} will return the mean of the first biofluid
 for which measuremnts can be found.
 }
 \examples{
-# Not run because requires internet connection
-# concs <- hmdb_concentration('HMDB00124') # Fructose-6-phosphate
-# priority_mean(concs) # has measurements for cytoplasm so returns those
+# requires internet connection
+concs <- hmdb_concentration('HMDB00124') # Fructose-6-phosphate
+priority_mean(concs) # has measurements for cytoplasm so returns those
 }
 \seealso{
 \code{\link{hmdb_concentration}} to parse the concentrations used

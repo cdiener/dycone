@@ -6,6 +6,8 @@
 #' @docType package
 #' @name dycone
 #' @importFrom magrittr '%>%'
+#' @importFrom pheatmap pheatmap
+#' @import rcdd
 NULL
 
 ### Data documentation

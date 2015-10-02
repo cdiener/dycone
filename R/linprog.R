@@ -62,11 +62,12 @@ expand_constraints = function(v, n) {
 #'  vector containing one value for each reaction.
 #' @return A vector with the same length as columns in \code{S} containing the 
 #'  solution of the optimization.
-#' @export
 #' @examples 
 #' S <- matrix(c(1, 0, -2, 1), ncol = 2)
 #' rownames(S) <- c("A", "B")
 #' fba(c(B = -1), S) 
+#'
+#' @export
 fba <- function(obj, S, v_min = 0, v_max = 1) {
     v_min = expand_constraints(v_min, ncol(S))
     v_max = expand_constraints(v_max, ncol(S))
@@ -75,18 +76,18 @@ fba <- function(obj, S, v_min = 0, v_max = 1) {
     a <- rep(0, ncol(S))
     a[ncol(S)] <- 1
     
-    const_matrix <- rcdd::d2q(rbind(-diag(ncol(S)), diag(ncol(S))[-ncol(S),]))
-    const_b <- rcdd::d2q(c(-v_min, 0, v_max))
-    NC <- rcdd::d2q(as.matrix(S))
-    b <- rcdd::d2q(rep(0, nrow(S)))
+    const_matrix <- d2q(rbind(-diag(ncol(S)), diag(ncol(S))[-ncol(S),]))
+    const_b <- d2q(c(-v_min, 0, v_max))
+    NC <-d2q(as.matrix(S))
+    b <- d2q(rep(0, nrow(S)))
     
-    hp <- rcdd::makeH(const_matrix, const_b, NC, b)
+    hp <- makeH(const_matrix, const_b, NC, b)
     
-    sol <- rcdd::lpcdd(hp, rcdd::d2q(a), minimize = FALSE)
+    sol <- lpcdd(hp, d2q(a), minimize = FALSE)
     if (sol$solution.type != "Optimal") 
         stop(sprintf("Error in optimization! (%s)", sol$solution.type))
     
-    return(rcdd::q2d(sol$primal.solution))
+    return(q2d(sol$primal.solution))
 }
 
 #' Performs flux variance analysis for a given objective reaction. Thus, FVA 
@@ -114,11 +115,12 @@ fba <- function(obj, S, v_min = 0, v_max = 1) {
 #'  vector containing one value for each reaction.
 #' @return A data frame with two columns, min and max, denoting the respective 
 #'  minimum and maximum fluxes for each reaction.
-#' @export
 #' @examples 
 #' S <- matrix(c(1, 0, -2, 1), ncol = 2)
 #' rownames(S) <- c("A", "B")
 #' fva(c(B = -1), S=S) 
+#'
+#' @export
 fva <- function(obj, alpha = 1, S, v_min = 0, v_max = 1) {
     v_min = expand_constraints(v_min, ncol(S))
     v_max = expand_constraints(v_max, ncol(S))
@@ -127,19 +129,19 @@ fva <- function(obj, alpha = 1, S, v_min = 0, v_max = 1) {
     a <- rep(0, ncol(S))
     a[ncol(S)] <- 1
     
-    const_matrix <- rcdd::d2q(rbind(-diag(ncol(S)), diag(ncol(S))[-ncol(S),]))
-    const_b <- rcdd::d2q(c(-v_min, 0, v_max))
-    NC <- rcdd::d2q(as.matrix(S))
-    b <- rcdd::d2q(rep(0, nrow(S)))
+    const_matrix <- d2q(rbind(-diag(ncol(S)), diag(ncol(S))[-ncol(S),]))
+    const_b <- d2q(c(-v_min, 0, v_max))
+    NC <- d2q(as.matrix(S))
+    b <- d2q(rep(0, nrow(S)))
     
-    hp <- rcdd::makeH(const_matrix, const_b, NC, b)
+    hp <- makeH(const_matrix, const_b, NC, b)
     
-    sol <- rcdd::lpcdd(hp, rcdd::d2q(a), minimize = FALSE)
+    sol <- lpcdd(hp, d2q(a), minimize = FALSE)
     if (sol$solution.type != "Optimal") 
         stop(sprintf("Error in optimization! (%s)", sol$solution.type))
     
-    opt_lim <- rcdd::qxq(sol$primal.solution[ncol(S)], rcdd::d2q(-alpha))
-    h_loc <- rcdd::addHin(-c(rep(0, ncol(S) - 1), 1),  opt_lim, hp)
+    opt_lim <- qxq(sol$primal.solution[ncol(S)], d2q(-alpha))
+    h_loc <- addHin(-c(rep(0, ncol(S) - 1), 1),  opt_lim, hp)
     
     if (requireNamespace("foreach", quietly = TRUE)) {
         a <- rep(0, ncol(S))
@@ -147,24 +149,24 @@ fva <- function(obj, alpha = 1, S, v_min = 0, v_max = 1) {
         opt <- foreach::"%dopar%"(foreach::foreach(i = i, .combine = rbind), {
             a_loc <- a
             a_loc[i] <- 1
-            sol_min <- rcdd::lpcdd(h_loc, rcdd::d2q(a_loc), minimize = TRUE)
-            sol_max <- rcdd::lpcdd(h_loc, rcdd::d2q(a_loc), minimize = FALSE)
-            data.frame(min = rcdd::q2d(sol_min$primal.solution[i]), 
-                max = rcdd::q2d(sol_max$primal.solution[i]), 
-                opt_min = rcdd::q2d(sol_min$primal.solution[ncol(S)]), 
-                opt_max = rcdd::q2d(sol_max$primal.solution[ncol(S)]))
+            sol_min <- lpcdd(h_loc, d2q(a_loc), minimize = TRUE)
+            sol_max <- lpcdd(h_loc, d2q(a_loc), minimize = FALSE)
+            data.frame(min = q2d(sol_min$primal.solution[i]), 
+                max = q2d(sol_max$primal.solution[i]), 
+                opt_min = q2d(sol_min$primal.solution[ncol(S)]), 
+                opt_max = q2d(sol_max$primal.solution[ncol(S)]))
         })
 
     } else {
         opt <- lapply(11:(ncol(S) - 1), function(i) {
             a_loc <- a
             a_loc[i] <- 1
-            sol_min <- rcdd::lpcdd(h_loc, rcdd::d2q(a_loc), minimize = TRUE)
-            sol_max <- rcdd::lpcdd(h_loc, rcdd::d2q(a_loc), minimize = FALSE)
-            data.frame(min = rcdd::q2d(sol_min$primal.solution[i]), 
-                max = rcdd::q2d(sol_max$primal.solution[i]), 
-                opt_min = rcdd::q2d(sol_min$primal.solution[ncol(S)]), 
-                opt_max = rcdd::q2d(sol_max$primal.solution[ncol(S)]))
+            sol_min <- lpcdd(h_loc, d2q(a_loc), minimize = TRUE)
+            sol_max <- lpcdd(h_loc, d2q(a_loc), minimize = FALSE)
+            data.frame(min = q2d(sol_min$primal.solution[i]), 
+                max = q2d(sol_max$primal.solution[i]), 
+                opt_min = q2d(sol_min$primal.solution[ncol(S)]), 
+                opt_max = q2d(sol_max$primal.solution[ncol(S)]))
         })
         opt <- do.call(rbind, opt)
     }
@@ -209,27 +211,27 @@ pfba <- function(obj, S, v_min = 0, v_max = 1) {
     a <- rep(0, ncol(S))
     a[ncol(S)] <- 1
     
-    const_matrix <- rcdd::d2q(rbind(-diag(ncol(S)), diag(ncol(S))[-ncol(S),]))
-    const_b <- rcdd::d2q(c(-v_min, 0, v_max))
-    NC <- rcdd::d2q(as.matrix(S))
-    b <- rcdd::d2q(rep(0, nrow(S)))
+    const_matrix <- d2q(rbind(-diag(ncol(S)), diag(ncol(S))[-ncol(S),]))
+    const_b <- d2q(c(-v_min, 0, v_max))
+    NC <- d2q(as.matrix(S))
+    b <- d2q(rep(0, nrow(S)))
     
-    hp <- rcdd::makeH(const_matrix, const_b, NC, b)
+    hp <- makeH(const_matrix, const_b, NC, b)
     
-    sol <- rcdd::lpcdd(hp, rcdd::d2q(a), minimize = FALSE)
+    sol <- lpcdd(hp, d2q(a), minimize = FALSE)
     if (sol$solution.type != "Optimal") 
         stop(sprintf("Error in initial optimization! (%s)", sol$solution.type))
     
     keep_idx <- which(a != 0)    
     keep_val <- sol$primal.solution[keep_idx]
     a <- diag(ncol(S))[keep_idx,]
-    pp <- rcdd::addHeq(a, keep_val, hp)
-    sol <- rcdd::lpcdd(pp, rcdd::d2q(rep(1,ncol(S))), minimize = TRUE)
+    pp <- addHeq(a, keep_val, hp)
+    sol <- lpcdd(pp, d2q(rep(1,ncol(S))), minimize = TRUE)
     
     if (sol$solution.type != "Optimal") 
         stop(sprintf("Error in parsimonous optimization! (%s)", sol$solution.type))
     
-    return(rcdd::q2d(sol$primal.solution))
+    return(q2d(sol$primal.solution))
 }
 
 #' Finds all reaction indices using the given subtrates and products.
@@ -257,7 +259,6 @@ which_reaction <- function(r, S = "", P = "") {
 
 #' Finds the closest point in within the k-cone to a query point p.
 #' 
-#' @export
 #' @seealso \code{\link{fba}} for optimization within the k-cone.
 #' @param p The query point. Can be outside or inside the k-cone.
 #' @param S The stochiometric matrix.
@@ -269,6 +270,9 @@ which_reaction <- function(r, S = "", P = "") {
 #' S <- stochiometry(eryth)
 #' mats <- runif(ncol(S))
 #' closest(runif(ncol(S)), S, mats)
+#'
+#' @importFrom quadprog solve.QP
+#' @export
 closest <- function(p, S, m_terms) {
     if (!requireNamespace("quadprog", quietly = TRUE)) 
         stop("This function requires the quadprog package.")
@@ -279,7 +283,7 @@ closest <- function(p, S, m_terms) {
     
     A <- S %*% diag(m_terms)
     A <- t(rbind(A, diag(ncol(S))))
-    qp <- quadprog::solve.QP(diag(ncol(S)), p/dp, A, meq = nrow(S))
+    qp <- solve.QP(diag(ncol(S)), p/dp, A, meq = nrow(S))
     
     
     return(qp$solution * dp)
