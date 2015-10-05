@@ -502,7 +502,7 @@ bayes_mean_ci <- function(x, n = 256, level = 0.95) {
 #'  change.
 #' @param cred_level The confidence level for the bayes credible intervals. 
 #'  Defaults to 95\%.
-#' @param obj Only needs to be set if type=='wors-case'. Defines the 
+#' @param obj Only needs to be set if type = 'fva'. Defines the 
 #'  the objective reaction whose flux is maximized. Can be any of the acceptable
 #'  formats for \code{\link{fba}}. The, probably, easiest import format is a 
 #'  vector with entries named after metabolites in \code{reacts} and specifiying

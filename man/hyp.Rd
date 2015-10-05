@@ -30,7 +30,7 @@ Defaults to 95\%.}
 \item{sorted}{Whether the results should be sorted by p-value and mean log-fold
 change.}
 
-\item{obj}{Only needs to be set if type=='wors-case'. Defines the
+\item{obj}{Only needs to be set if type = 'fva'. Defines the
 the objective reaction whose flux is maximized. Can be any of the acceptable
 formats for \code{\link{fba}}. The, probably, easiest import format is a
 vector with entries named after metabolites in \code{reacts} and specifiying
