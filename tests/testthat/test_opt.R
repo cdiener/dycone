@@ -11,7 +11,7 @@ test_that("k optimization works", {
     expect_true(16 %in% i_pyr$idx)
     opt <- fba(o, S)
     expect_equal(length(opt), ncol(S) + 1)
-    expect_true(all(opt <= 1))
+    expect_true(all(opt <= 1 + sqrt(.Machine$double.eps)))
     expect_error(fba(o, S, v_min = 0.5, v_max = 1))
     p <- opt[-length(opt)] + runif(length(opt)-1)
     cp <- closest(p, S, rep(1, ncol(S)))

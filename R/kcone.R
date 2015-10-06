@@ -73,7 +73,8 @@ kcone_null <- function(s_matrix, m_terms) {
     return(basis)
 }
 
-#' Gets the polytope basis of the k-cone.
+#' Gets the polytope basis of the k-cone. The basis will be normalized such
+#' that each vertex has a length of one.
 #' 
 #' @export
 #' @keywords k-cone, basis
@@ -88,10 +89,10 @@ kcone_null <- function(s_matrix, m_terms) {
 #' V <- polytope_basis(S)
 polytope_basis <- function(s_matrix, m_terms = rep(1, ncol(s_matrix))) {
     mat <- m_terms
-    const_matrix <- d2q(-diag(ncol(s_matrix)))
-    const_b <- d2q(rep(0, ncol(s_matrix)))
-    NC <- d2q(as.matrix(s_matrix %*% diag(mat)))
-    b <- d2q(rep(0, nrow(s_matrix)))
+    const_matrix <- -diag(ncol(s_matrix))
+    const_b <- rep(0, ncol(s_matrix))
+    NC <- as.matrix(s_matrix %*% diag(mat))
+    b <- rep(0, nrow(s_matrix))
     
     hp <- makeH(const_matrix, const_b, NC, b)
     hp <- addHeq(rep(1, ncol(s_matrix)), 1, hp)
@@ -99,7 +100,7 @@ polytope_basis <- function(s_matrix, m_terms = rep(1, ncol(s_matrix))) {
     vrep <- scdd(hp)
     vp <- vrep$output[, -(1:2)]
     
-    basis <- as.matrix(apply(q2d(t(vp)), 2, function(x) x/enorm(x)))
+    basis <- as.matrix(apply(t(vp), 2, function(x) x/enorm(x)))
     class(basis) <- append("basis", class(basis))
     
     return(basis)
