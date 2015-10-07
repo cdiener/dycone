@@ -95,7 +95,6 @@ polytope_basis <- function(s_matrix, m_terms = rep(1, ncol(s_matrix))) {
     b <- rep(0, nrow(s_matrix))
     
     hp <- makeH(const_matrix, const_b, NC, b)
-    hp <- addHeq(rep(1, ncol(s_matrix)), 1, hp)
     hp <- redundant(hp)$output
     vrep <- scdd(hp)
     vp <- vrep$output[, -(1:2)]
