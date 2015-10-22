@@ -583,7 +583,8 @@ hyp <- function(normal, disease, reacts, type = "bias", correction_method = "BH"
         if (!is.numeric(obj)) 
             stop("obj must be numeric.")
         va <- fva(obj, 1, S, v_min = v_min, v_max = 1)
-        lfc_va <- log(va$max, 2) - log(va$min, 2)
+        lfc_va <- ifelse(va$min < sqrt(.Machine$double.eps), Inf, 
+            log(va$max, 2) - log(va$min, 2))
     } else if (!(type %in% c("raw", "bias"))) 
         stop("type must be either 'bias', 'fva' or 'raw' :(")
     

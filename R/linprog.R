@@ -25,6 +25,8 @@ build_objective <- function(o, S) {
                 stop("Unnamed objective vector must have the same length as rows in S.")
             col <- o
         } else {
+            if (!all(names(o) %in% rownames(S))) 
+                stop("Some metabolites in the objective do not appear in S.")
             col <- rep(0, nrow(S))
             names(col) <- rownames(S)
             col[names(o)] <- o
@@ -282,7 +284,7 @@ closest <- function(p, S, m_terms) {
     dp <- enorm(p)
     
     A <- S %*% diag(m_terms)
-    A <- t(rbind(A, diag(ncol(S))))
+    A <- t(as.matrix(rbind(A, diag(ncol(S)))))
     qp <- solve.QP(diag(ncol(S)), p/dp, A, meq = nrow(S))
     
     

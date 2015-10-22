@@ -4,7 +4,7 @@
 \alias{stochiometry}
 \title{Calculates the stochiometric matrix for a list of reactions.}
 \usage{
-stochiometry(reacts, reversible = FALSE, const = NULL)
+stochiometry(reacts, reversible = FALSE, const = NULL, sparse = FALSE)
 }
 \arguments{
 \item{reacts}{The reaction list to be used.}
@@ -15,6 +15,9 @@ reactions.}
 \item{const}{A vector of species names that are assumed to be invariant and
 will be dropped from the stochiometric matrix. The default is not to drop
 any species.}
+
+\item{sparse}{Whether the stoichiometric matrix should saved in a sparse
+format. Reguires the \code{Matrix} package to be installed.}
 }
 \value{
 The stochiometric matrix with dimension n_s x n_r.

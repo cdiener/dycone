@@ -318,19 +318,27 @@ species <- function(reacts) {
 #' @param const A vector of species names that are assumed to be invariant and
 #'  will be dropped from the stochiometric matrix. The default is not to drop
 #'  any species.
+#' @param sparse Whether the stoichiometric matrix should saved in a sparse 
+#'  format. Reguires the \code{Matrix} package to be installed.
 #' @return The stochiometric matrix with dimension n_s x n_r.
 #' @examples
 #' data(eryth)
 #' S <- stochiometry(eryth)
-stochiometry <- function(reacts, reversible = FALSE, const = NULL) {
+stochiometry <- function(reacts, reversible = FALSE, const = NULL, 
+    sparse = FALSE) {
     if (!("reactions" %in% class(reacts))) 
         stop("Argument has wrong type!")
+    
+    if (sparse && !requireNamespace("Matrix", quietly = TRUE))
+        stop("sparse output requires the Matrix package!")
     
     spec <- species(reacts)
     n_r <- if (reversible) 
         length(reacts) else length(reacts) + sum(sapply(reacts, function(x) x$rev))
     
-    N <- matrix(0, nrow = length(spec), ncol = n_r)
+    if (sparse) N <- Matrix::Matrix(0, nrow = length(spec), ncol = n_r)
+    else N <- matrix(0, nrow = length(spec), ncol = n_r)
+
     rownames(N) <- spec
     i <- 1
     for (r in reacts) {
@@ -349,6 +357,7 @@ stochiometry <- function(reacts, reversible = FALSE, const = NULL) {
     }
     eliminate <- rownames(N) %in% c("none", const)
     N <- N[!eliminate, ]
+    colnames(N) <- NULL
     
     return(N)
 }
