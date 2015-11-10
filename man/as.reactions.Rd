@@ -28,5 +28,5 @@ rownames(S) <- c('A', 'B')
 print(as.reactions(S))
 }
 \keyword{reactions}
-\keyword{stochiometry,}
+\keyword{stoichiometry,}
 

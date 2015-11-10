@@ -506,7 +506,7 @@ bayes_mean_ci <- function(x, n = 256, level = 0.95) {
 #'  the objective reaction whose flux is maximized. Can be any of the acceptable
 #'  formats for \code{\link{fba}}. The, probably, easiest import format is a 
 #'  vector with entries named after metabolites in \code{reacts} and specifiying
-#'  their stochiometry (negative entries for substrates and positive for products.) 
+#'  their stoichiometry (negative entries for substrates and positive for products.) 
 #' @param v_min The smallest allowed flux for each reaction for all reactions.
 #'  Must be >=0. Can be of length 1 or \code{ncol(S)}. Set larger than zero to 
 #'  enforce a non-zero flux through a set of reactions.
@@ -579,7 +579,7 @@ hyp <- function(normal, disease, reacts, type = "bias", correction_method = "BH"
     M <- log(cbind(normal, disease), 2)
     
     if (type == "fva") {
-        S <- stochiometry(reacts)
+        S <- stoichiometry(reacts)
         if (!is.numeric(obj)) 
             stop("obj must be numeric.")
         va <- fva(obj, 1, S, v_min = v_min, v_max = 1)

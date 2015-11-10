@@ -34,7 +34,7 @@ change.}
 the objective reaction whose flux is maximized. Can be any of the acceptable
 formats for \code{\link{fba}}. The, probably, easiest import format is a
 vector with entries named after metabolites in \code{reacts} and specifiying
-their stochiometry (negative entries for substrates and positive for products.)}
+their stoichiometry (negative entries for substrates and positive for products.)}
 
 \item{v_min}{The smallest allowed flux for each reaction for all reactions.
 Must be >=0. Can be of length 1 or \code{ncol(S)}. Set larger than zero to

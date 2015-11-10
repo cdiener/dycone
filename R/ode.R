@@ -13,7 +13,7 @@
 #'  concentrations of the metabolites in the following columns.
 #' @examples 
 #' data(eryth)
-#' S <- stochiometry(eryth)
+#' S <- stoichiometry(eryth)
 #' x0 <- runif(nrow(S))
 #' names(x0) <- rownames(S)
 #' k <- runif(ncol(S))

@@ -25,7 +25,7 @@ Simulates the time course for a given model.
 }
 \examples{
 data(eryth)
-S <- stochiometry(eryth)
+S <- stoichiometry(eryth)
 x0 <- runif(nrow(S))
 names(x0) <- rownames(S)
 k <- runif(ncol(S))

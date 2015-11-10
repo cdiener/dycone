@@ -5,7 +5,7 @@ context("ODE solving")
 
 test_that("timecourse works", {
     data(eryth)
-    S <- stochiometry(eryth)
+    S <- stoichiometry(eryth)
     x0 <- runif(nrow(S), 0, 1)
     names(x0) <- rownames(S)
     tc <- timecourse(x0, seq(0, 10, 0.1), runif(ncol(S), 0, 1), S)

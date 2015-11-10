@@ -14,7 +14,7 @@ names being the metabolite names as used in \code{rownames(s_matrix)}.}
 
 \item{deriv_func}{The function calculating the derivative. Must be of the
 form func(idx, subs, concs) where idx is the index of the differentiation
-variable, subs the stochiometry of the substrates and concs the concentration
+variable, subs the stoichiometry of the substrates and concs the concentration
 of substrates. See \code{\link{mass_action}} for an example.}
 }
 \value{
@@ -26,14 +26,14 @@ Calculates the Jacobian matrix.
 }
 \examples{
 data(eryth)
-S <- stochiometry(eryth)
+S <- stoichiometry(eryth)
 concs <- runif(nrow(S))
 names(concs) <- rownames(S)
 J <- jacobian(S, concs)
 }
 \seealso{
-\code{\link{stochiometry}} to calculate the stochiometric matrix.
+\code{\link{stoichiometry}} to calculate the stochiometric matrix.
 }
 \keyword{jacobian,}
-\keyword{stochiometry}
+\keyword{stoichiometry}
 

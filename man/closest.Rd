@@ -22,7 +22,7 @@ Finds the closest point in within the k-cone to a query point p.
 }
 \examples{
 data(eryth)
-S <- stochiometry(eryth)
+S <- stoichiometry(eryth)
 mats <- runif(ncol(S))
 closest(runif(ncol(S)), S, mats)
 }

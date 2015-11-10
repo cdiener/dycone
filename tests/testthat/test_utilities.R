@@ -16,17 +16,16 @@ test_that("order_by works", {
 })
 
 test_that("the caching operator works", {
-    file.remove("test-42.Rd")
+    tf <- tempfile(fileext=".Rd")
     {
         x <- 1:10
         y <- x * x
-    } %c% "test-42.Rd"
+    } %c% tf
     {
         x <- 42
         y <- "bla"
-    } %c% "test-42.Rd"
-    load("test-42.Rd")
-    file.remove("test-42.Rd")
+    } %c% tf
+    load(tf)
     expect_equal(x, 1:10)
     expect_equal(y, (1:10)^2)
 })
@@ -97,14 +96,14 @@ test_that("we can read and format reactions from a file", {
     expect_error(invisible(read_reactions(textConnection(r_str))), "arrows")
 })
 
-test_that("we can get the stochiometry from reactions", {
+test_that("we can get the stoichiometry from reactions", {
     r_str <- "reaction,abbreviation,numbers\nA -> B,blub,\"1,2,3\"\nB <=>, bla, 3"
     r <- read_reactions(textConnection(r_str))
     S1 <- matrix(c(-1, 1, 0, -1, 0, 1), ncol = 3)
     S2 <- matrix(c(-1, 1, 0, -1), ncol = 2)
     rownames(S1) <- rownames(S2) <- c("A", "B")
-    expect_equal(stochiometry(r), S1)
-    expect_equal(stochiometry(r, reversible = TRUE), S2)
+    expect_equal(stoichiometry(r), S1)
+    expect_equal(stoichiometry(r, reversible = TRUE), S2)
 })
 
 test_that("we can convert to irreversible", {
@@ -118,8 +117,8 @@ test_that("we can get info from sample model", {
     s <- species(eryth)
     n_s <- length(s)
     expect_true(all(grepl("\\d:", format(eryth))))
-    expect_true(all(dim(stochiometry(eryth)) == c(n_s - 1, 68)))
-    expect_true(all(dim(stochiometry(eryth, reversible = TRUE)) == c(n_s - 1, 45)))
+    expect_true(all(dim(stoichiometry(eryth)) == c(n_s - 1, 68)))
+    expect_true(all(dim(stoichiometry(eryth, reversible = TRUE)) == c(n_s - 1, 45)))
     expect_true(all(c("atp", "23dpg", "none") %in% species(eryth)))
 })
 
@@ -142,7 +141,7 @@ test_that("additional helpers work", {
     expect_equal(r_order(make_irreversible(r)), c(1, 1, 0))
     expect_false(any(constant_flux(r)))
     expect_true(any(constant_flux(make_irreversible(r))))
-    expect_true("reactions" %in% class(as.reactions(stochiometry(r))))
+    expect_true("reactions" %in% class(as.reactions(stoichiometry(r))))
     expect_more_than(length(methods(class = "reactions")), 1)
     expect_equal(rp(r, "numbers")[, 2], c(1, 2, 3, 3))
 }) 

@@ -267,7 +267,7 @@ which_reaction <- function(r, S = "", P = "") {
 #' @return A vector containing the closest point to p within the k-cone.
 #' @examples 
 #' data(eryth)
-#' S <- stochiometry(eryth)
+#' S <- stoichiometry(eryth)
 #' mats <- runif(ncol(S))
 #' closest(runif(ncol(S)), S, mats)
 #'

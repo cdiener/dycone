@@ -52,22 +52,22 @@ order_by <- function(x, y) {
 #'
 #' \code{mass_action} is mostly used inetrnally to get mass action rates for a 
 #' single column of the stochiometric matrix. It does not check whether the 
-#' ordering of substrates in the stochiometry and concs is corrects, so please
+#' ordering of substrates in the stoichiometry and concs is corrects, so please
 #' make sure that the indices in \code{substrates} and \code{concs} coincide.  
 #'
-#' @seealso \code{\link{stochiometry}} to generate the stochiometric
+#' @seealso \code{\link{stoichiometry}} to generate the stochiometric
 #'  matrix from a reaction list. \code{\link{ma_terms}} for a wrapper that
 #'  calculates all mass-action terms for a stochiometric matrix and also checks 
 #'  for correct ordering of the substrates.
 #'  \code{\link{ma_terms}} to calculate all mass-action terms at once.
 #' @export
-#' @param substrates Stochiometry of the substrates. Must have the same length
+#' @param substrates stoichiometry of the substrates. Must have the same length
 #'  as concs.
 #' @param concs The concentrations used for the substrates
 #' @return The mass action term \deqn{\prod_{i \in N^-} S_i^|N_i|}
 #' @examples
 #' data(eryth)
-#' S <- stochiometry(eryth)
+#' S <- stoichiometry(eryth)
 #' ma1 <- mass_action(S[,1], runif(nrow(S)))
 mass_action <- function(substrates, concs) {
     if (length(substrates) != length(concs)) 
@@ -84,20 +84,20 @@ mass_action <- function(substrates, concs) {
 #' Calculates derivatives of mass-action kinetics.
 #'
 #' \code{deriv_ma} does not check whether the 
-#' ordering of substrates in the stochiometry and concs is corrects, so please
+#' ordering of substrates in the stoichiometry and concs is corrects, so please
 #' make sure that the indices in \code{substrates} and \code{concs} coincide.
 #'
 #' @seealso \code{\link{jacobian}} to calculate the Jacobian matrix.
 #' @export
 #' @param i The index of the substrate used as the differentiation variable.
-#' @param substrates The stochiometry of the subbstrates (column in the
+#' @param substrates The stoichiometry of the subbstrates (column in the
 #'  stochiometric matrix. Must be the same length as concs.
 #' @param concs Concentrations of the substrates.
 #' @return Returns the derivative of the mass action kinetics for the reaction
 #'  specified by \code{subtrates} differentiated by the \code{i}th variable.
 #' @examples
 #' data(eryth)
-#' S <- stochiometry(eryth)
+#' S <- stoichiometry(eryth)
 #' dma1_dS3 <- deriv_ma(3, S[,1], runif(nrow(S)))
 deriv_ma <- function(i, substrates, concs) {
     if (length(substrates) != length(concs)) 
@@ -120,21 +120,21 @@ deriv_ma <- function(i, substrates, concs) {
 
 #' Calculates the Jacobian matrix.
 #'
-#' @seealso \code{\link{stochiometry}} to calculate the stochiometric matrix.
+#' @seealso \code{\link{stoichiometry}} to calculate the stochiometric matrix.
 #' @export
-#' @keywords jacobian, stochiometry
+#' @keywords jacobian, stoichiometry
 #' @param s_matrix The stochiometric matrix of the model.
 #' @param concs The concentrations of the substrates. Must be a named vector with
 #'  names being the metabolite names as used in \code{rownames(s_matrix)}.
 #' @param deriv_func The function calculating the derivative. Must be of the 
 #'  form func(idx, subs, concs) where idx is the index of the differentiation 
-#'  variable, subs the stochiometry of the substrates and concs the concentration
+#'  variable, subs the stoichiometry of the substrates and concs the concentration
 #'  of substrates. See \code{\link{mass_action}} for an example.
 #' @return The Jacobian matrix of dimension n_s x n_r where entry (i,j) denotes
 #'  the derivative dv[j]/dS[i].
 #' @examples
 #' data(eryth)
-#' S <- stochiometry(eryth)
+#' S <- stoichiometry(eryth)
 #' concs <- runif(nrow(S))
 #' names(concs) <- rownames(S)
 #' J <- jacobian(S, concs)
@@ -153,7 +153,7 @@ jacobian <- function(s_matrix, concs, deriv_func = deriv_ma) {
 
 #' Calculates all mass action terms \deqn{\prod_{i \in N^-} S_i^|N_i|}
 #'
-#' @seealso \code{\link{stochiometry}} to calculate the stochiometric matrix.
+#' @seealso \code{\link{stoichiometry}} to calculate the stochiometric matrix.
 #' @export
 #' @keywords kinetics, mass-action
 #' @param s_matrix The stochiometric matrix.
@@ -169,7 +169,7 @@ jacobian <- function(s_matrix, concs, deriv_func = deriv_ma) {
 #' in its columns.
 #' @examples
 #' data(eryth)
-#' S <- stochiometry(eryth)
+#' S <- stoichiometry(eryth)
 #' concs <- runif(nrow(S))
 #' names(concs) <- rownames(S)
 #' mats <- ma_terms(S, concs)
@@ -195,7 +195,7 @@ ma_terms <- function(s_matrix, concs) {
     return(prods)
 }
 
-# Internal function to get the stochiometry from a string representation of the
+# Internal function to get the stoichiometry from a string representation of the
 # reaction
 get_reaction_elems <- function(reaction_str) {
     reversible <- grepl("\\s*<.+\\s*", reaction_str)
@@ -292,7 +292,7 @@ print.reactions <- function(x, ...) {
 #' Gets all species/metabolites from a reaction list.
 #'
 #' @export
-#' @keywords susbtrates, stochiometry
+#' @keywords susbtrates, stoichiometry
 #' @param reacts A reaction list.
 #' @return A vector containing all unique species in the model.
 #' @examples
@@ -311,7 +311,7 @@ species <- function(reacts) {
 #' 
 #' @seealso \code{\link{read_reactions}} to read a reaction list from a file.
 #' @export
-#' @keywords stochiometry
+#' @keywords stoichiometry
 #' @param reacts The reaction list to be used.
 #' @param reversible Whether the stochiometric matrix can include reversible 
 #'  reactions.
@@ -321,8 +321,8 @@ species <- function(reacts) {
 #' @return The stochiometric matrix with dimension n_s x n_r.
 #' @examples
 #' data(eryth)
-#' S <- stochiometry(eryth)
-stochiometry <- function(reacts, reversible = FALSE, const = NULL) {
+#' S <- stoichiometry(eryth)
+stoichiometry <- function(reacts, reversible = FALSE, const = NULL) {
     if (!("reactions" %in% class(reacts))) 
         stop("Argument has wrong type!")
     
@@ -356,7 +356,7 @@ stochiometry <- function(reacts, reversible = FALSE, const = NULL) {
 #' Converts a stochiometric matrix to a reaction list.
 #'
 #' @export
-#' @keywords stochiometry, reactions
+#' @keywords stoichiometry, reactions
 #' @param s_matrix The stochiometric matrix to be converted.
 #' @param reversible Marks reversible reactions. FALSE denotes that
 #'  all reactions are irreversible. Otherwise a boolean vector of length
@@ -498,7 +498,7 @@ constant_flux <- function(reacts) {
 #' data(eryth)
 #' plot(eryth)
 plot.reactions <- function(x, ...) {
-    N <- stochiometry(x, reversible = TRUE)
+    N <- stoichiometry(x, reversible = TRUE)
     
     if (requireNamespace("igraph", quietly = TRUE)) {
         g <- igraph::graph.adjacency(N %*% t(N), weighted = TRUE, diag = FALSE)
@@ -528,7 +528,7 @@ as.graph <- function(reacts) {
     if (!("reactions" %in% class(reacts))) 
         stop("Argument has wrong type!")
     
-    N <- stochiometry(reacts, reversible = TRUE)
+    N <- stoichiometry(reacts, reversible = TRUE)
     adj <- abs(N %*% t(N))
     
     if (requireNamespace("igraph", quietly = TRUE)) {

@@ -5,7 +5,7 @@ context("Optimization")
 
 test_that("k optimization works", {
     data(eryth)
-    S <- stochiometry(eryth)
+    S <- stoichiometry(eryth)
     o <- c(atp = -1, adp = 1)
     i_pyr <- which_reaction(make_irreversible(eryth), S = "adp", P = "pyr")
     expect_true(16 %in% i_pyr$idx)
@@ -22,7 +22,7 @@ test_that("k optimization works", {
 
 test_that("objective formulation work", {
     data(eryth)
-    S <- stochiometry(eryth)
+    S <- stoichiometry(eryth)
     o <- build_objective(eryth[[16]], S)
     expect_equal(length(o), nrow(S))
     expect_true("g6p" %in% names(o))
@@ -35,7 +35,7 @@ test_that("objective formulation work", {
 
 test_that("parsimonous FBA works", {
     data(eryth)
-    S <- stochiometry(eryth)
+    S <- stoichiometry(eryth)
     a <- rep(0, ncol(S))
     o <- c(atp = -1, adp = 1)
     opt <- fba(o, S)

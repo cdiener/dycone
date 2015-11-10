@@ -19,6 +19,6 @@ Gets all species/metabolites from a reaction list.
 data(eryth)
 print(species(eryth))
 }
-\keyword{stochiometry}
+\keyword{stoichiometry}
 \keyword{susbtrates,}
 

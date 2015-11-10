@@ -27,13 +27,13 @@ Calculates all mass action terms \deqn{\prod_{i \in N^-} S_i^|N_i|}
 }
 \examples{
 data(eryth)
-S <- stochiometry(eryth)
+S <- stoichiometry(eryth)
 concs <- runif(nrow(S))
 names(concs) <- rownames(S)
 mats <- ma_terms(S, concs)
 }
 \seealso{
-\code{\link{stochiometry}} to calculate the stochiometric matrix.
+\code{\link{stoichiometry}} to calculate the stochiometric matrix.
 }
 \keyword{kinetics,}
 \keyword{mass-action}

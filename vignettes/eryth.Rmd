@@ -33,7 +33,7 @@ print(concs)
 
 We extract the stochiometric matrix with the constant species simply by:
 ```{r}
-S = stochiometry(eryth)
+S = stoichiometry(eryth)
 ```
 
 Extracting the k-cone

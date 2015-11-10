@@ -2,7 +2,8 @@
 % Please edit documentation in R/kcone.R
 \name{polytope_basis}
 \alias{polytope_basis}
-\title{Gets the polytope basis of the k-cone.}
+\title{Gets the polytope basis of the k-cone. The basis will be normalized such
+that each vertex has a length of one.}
 \usage{
 polytope_basis(s_matrix, m_terms = rep(1, ncol(s_matrix)))
 }
@@ -17,7 +18,8 @@ A matrix containing the basis vectors (normalized to a sum of 1)
  in its columns.
 }
 \description{
-Gets the polytope basis of the k-cone.
+Gets the polytope basis of the k-cone. The basis will be normalized such
+that each vertex has a length of one.
 }
 \examples{
 S <- matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)

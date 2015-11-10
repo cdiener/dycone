@@ -7,7 +7,7 @@
 mass_action(substrates, concs)
 }
 \arguments{
-\item{substrates}{Stochiometry of the substrates. Must have the same length
+\item{substrates}{stoichiometry of the substrates. Must have the same length
 as concs.}
 
 \item{concs}{The concentrations used for the substrates}
@@ -18,16 +18,16 @@ The mass action term \deqn{\prod_{i \in N^-} S_i^|N_i|}
 \description{
 \code{mass_action} is mostly used inetrnally to get mass action rates for a
 single column of the stochiometric matrix. It does not check whether the
-ordering of substrates in the stochiometry and concs is corrects, so please
+ordering of substrates in the stoichiometry and concs is corrects, so please
 make sure that the indices in \code{substrates} and \code{concs} coincide.
 }
 \examples{
 data(eryth)
-S <- stochiometry(eryth)
+S <- stoichiometry(eryth)
 ma1 <- mass_action(S[,1], runif(nrow(S)))
 }
 \seealso{
-\code{\link{stochiometry}} to generate the stochiometric
+\code{\link{stoichiometry}} to generate the stochiometric
  matrix from a reaction list. \code{\link{ma_terms}} for a wrapper that
  calculates all mass-action terms for a stochiometric matrix and also checks
  for correct ordering of the substrates.
