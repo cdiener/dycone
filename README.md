@@ -1,5 +1,6 @@
 [![Build Status](https://travis-ci.org/cdiener/dycone.svg?branch=master)](https://travis-ci.org/cdiener/dycone)
 [![codecov.io](http://codecov.io/github/cdiener/dycone/coverage.svg?branch=master)](http://codecov.io/github/cdiener/dycone?branch=master)
+[![DOI](https://zenodo.org/badge/18088/cdiener/dycone.svg)](https://zenodo.org/badge/latestdoi/18088/cdiener/dycone)
 
 ![dycone](stuff/logo.png)
 
