@@ -24,7 +24,7 @@
 #' @export
 timecourse <- function(x0, t, k, S) {
     f <- function(t, y, p) {
-        list(S %*% diag(p) %*% ma_terms(S, y))
+        list(as.numeric(S %*% diag(p) %*% ma_terms(S, y)))
     }
     
     sol <- lsoda(x0, t, f, k)

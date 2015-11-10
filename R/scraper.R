@@ -1,66 +1,10 @@
-# scraper.py Copyright 2015 Christian Diener <ch.diener@gmail.com> MIT license.
+# scraper.R Copyright 2015 Christian Diener <ch.diener@gmail.com> MIT license.
 # See LICENSE for more information.
 
 HMDB_SEARCH <- "http://www.hmdb.ca/unearth/q?query=%s&searcher=metabolites"
 HMDB_XML <- "http://www.hmdb.ca/metabolites/%s.xml"
 KEGG_REST <- "http://rest.kegg.jp/link/hsa/ec:%s"
 
-#' Obtains the list of parameters from a SBML model
-#'
-#' @param sbml_file A SBML file. This can be a file on the disk or the location
-#'  to an online resource.
-#' @return A data frame containing the obtained data. Some entries might be NA.
-#' @examples
-#' # requires internet connection
-#' m_url <- "http://www.ebi.ac.uk/compneur-srv/biomodels-main/download?mid=MODEL1103210001"
-#' sbml_params(m_url)
-#'
-#' @importFrom xml2 read_xml read_html xml_find_one xml_find_all xml_ns 
-#'  xml_attr xml_text 
-#' @export
-sbml_params <- function(sbml_file) {
-    attrs <- c("id", "name", "value")
-    doc <- read_xml(sbml_file)
-    p_list <- xml_find_all(doc, 
-        "./d1:model/d1:listOfParameters/d1:parameter", 
-        xml_ns(doc))
-    params <- sapply(p_list, function(p) sapply(attrs, function(a) 
-        xml_attr(p, a)))
-    
-    out <- as.data.frame(t(params), row.names = NULL)
-    names(out) <- attrs
-    out$value <- as.numeric(as.character(out$value))
-    return(out)
-}
-
-#' Obtains the list of species from a SBML model
-#'
-#' @param sbml_file A SBML file. This can be a file on the disk or the location
-#'  to an online resource.
-#' @return A data frame containing the obtained data. Some entries might be NA.
-#' @examples
-#' # requires internet connection
-#' m_url <- "http://www.ebi.ac.uk/compneur-srv/biomodels-main/download?mid=MODEL1103210001"
-#' sbml_species(m_url)
-#'
-#' @export
-sbml_species <- function(sbml_file) {
-    attrs <- c("id", "name", "initialamount", "initialconcentration")
-    doc <- read_xml(sbml_file)
-    s_list <- xml_find_all(doc, 
-        "./d1:model/d1:listOfSpecies/d1:species", xml_ns(doc))
-    species <- sapply(s_list, function(s) sapply(attrs, function(a) 
-        xml_attr(s, a)))
-    
-    out <- as.data.frame(t(species), row.names = NULL)
-    names(out) <- attrs
-    num_cols <- grep("initial", names(out))
-    
-    for (i in num_cols) {
-        out[, i] <- as.numeric(as.character(out[, i]))
-    }
-    return(out)
-}
 
 #' Extracts mean concentrations from HMDB results using a selection of biofluids
 #' in a distinct order. 

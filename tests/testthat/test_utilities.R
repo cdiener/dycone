@@ -16,16 +16,17 @@ test_that("order_by works", {
 })
 
 test_that("the caching operator works", {
-    tf <- tempfile(fileext=".Rd")
+
+    f <- tempfile("cache", fileext=".Rd")
     {
         x <- 1:10
         y <- x * x
-    } %c% tf
+    } %c% f
     {
         x <- 42
         y <- "bla"
-    } %c% tf
-    load(tf)
+    } %c% f
+    load(f)
     expect_equal(x, 1:10)
     expect_equal(y, (1:10)^2)
 })
@@ -101,8 +102,11 @@ test_that("we can get the stoichiometry from reactions", {
     r <- read_reactions(textConnection(r_str))
     S1 <- matrix(c(-1, 1, 0, -1, 0, 1), ncol = 3)
     S2 <- matrix(c(-1, 1, 0, -1), ncol = 2)
+    S1s <- Matrix::Matrix(c(-1, 1, 0, -1, 0, 1), sparse = TRUE, ncol = 3)
+    rownames(S1s) <- c("A", "B")
     rownames(S1) <- rownames(S2) <- c("A", "B")
     expect_equal(stoichiometry(r), S1)
+    expect_equal(stoichiometry(r, sparse=TRUE), S1s)
     expect_equal(stoichiometry(r, reversible = TRUE), S2)
 })
 

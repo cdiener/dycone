@@ -59,7 +59,7 @@ test_that("hypothesis generation works", {
     h <- hyp(mats[, 1:3], mats[, 4:6], eryth)
     expect_equal(nrow(h), n_r)
     expect_true(all(h$pval <= 1))
-    o <- c(pyr = -1, prpp = -1, '3pg' = -1, nadph = -1, nadp = 1) 
+    o <- c(pyr = -1, prpp = -1, '3pg' = -1, nadph = -1) 
     h_opt <- hyp(mats[, 1:3], mats[, 4:6], eryth, type = "fva", 
         v_min = 0, obj = o, full = T)
     expect_equal(length(h_opt), 5)

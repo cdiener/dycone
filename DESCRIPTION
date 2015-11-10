@@ -13,7 +13,7 @@ LazyData: true
 Depends: R (>= 3.2)
 Imports: deSolve, rcdd, MASS, pheatmap, magrittr, RCurl, xml2, rvest, quadprog, 
     limma
-Suggests: testthat, covr, igraph, knitr, foreach, doParallel
+Suggests: testthat, covr, igraph, knitr, foreach, doParallel, Matrix
 biocViews: Metabolomics, Systems Biology, Pathways, Bayesian, 
     Multiple Comparison
 VignetteBuilder: knitr

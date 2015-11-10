@@ -3,16 +3,6 @@
 
 context("Web scraping")
 
-test_that("SBML scraping works", {
-    mod42 <- "http://www.ebi.ac.uk/biomodels-main/download?mid=BIOMD0000000042"
-    pars <- sbml_params(mod42)
-    spec <- sbml_species(mod42)
-    expect_equal(nrow(spec), 15)
-    expect_true(!is.null(grep("ATP", spec$name)))
-    expect_equal(nrow(pars), 25)
-    expect_true(!is.null(grep("k5f", pars$name)))
-})
-
 test_that("HMDB scraping works", {
     ids <- find_hmdb("pyruvate")
     capture.output(concs <- hmdb_concentration(ids[1]))

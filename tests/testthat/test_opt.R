@@ -28,6 +28,7 @@ test_that("objective formulation work", {
     expect_true("g6p" %in% names(o))
     expect_error(build_objective(list(NA), S))
     expect_error(build_objective(list(S=1:3, P=1:4, N_S=1, N_P=2), S))
+    expect_error(build_objective(c(nadp = 1), S))
     x <- runif(nrow(S))
     o <- build_objective(x, S)
     expect_equal(x, o) 
