@@ -279,6 +279,7 @@ read_sbml <- function(sbml_file) {
     
     # Map flux bounds
     p <- sbml_params(doc)
+    env <- environment()
     if(!is.null(p)) {
         cat("Mapping flux bounds to global parameters")
         fixed <- sapply(1:length(reacts), function(i) {
@@ -287,13 +288,13 @@ read_sbml <- function(sbml_file) {
             if(is.character(r$lower)) {
                 if (!(r$lower %in% p$id)) stop(paste0("There is no global parameter ",
                     r$lower, "."))
-                reacts[[i]]$lower <<- p$value[p$id == r$lower]
+                env$reacts[[i]]$lower <- p$value[p$id == r$lower]
                 fixed <- TRUE
             }
             if(is.character(r$upper)) {
                 if (!(r$lower %in% p$id)) stop(paste0("There is no global parameter ",
                     r$lower, "."))
-                reacts[[i]]$upper <<- p$value[p$id == r$upper] 
+                env$reacts[[i]]$upper <- p$value[p$id == r$upper]
                 fixed <- TRUE
             }
             fixed

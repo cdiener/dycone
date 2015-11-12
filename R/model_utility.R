@@ -16,7 +16,7 @@ str_conv <- function(str) {
     return(val)
 }
 
-order_by <- function(x, y) {
+orderby <- function(x, y) {
     o <- sapply(x, function(x) which(x == y)[1])
     return(o)
 }
@@ -184,7 +184,7 @@ ma_terms <- function(s_matrix, concs) {
         }
     } else if (is.data.frame(concs)) {
         if ("name" %in% names(concs)) {
-            o <- order_by(rownames(s_matrix), concs$name)
+            o <- orderby(rownames(s_matrix), concs$name)
             concs <- concs[o, ]
             name_idx <- which(names(concs) == "name")
             prods <- apply(concs[, -name_idx], 2, function(co) apply(s_matrix, 
