@@ -232,7 +232,7 @@ get_reaction_elems <- function(reaction_str) {
 #' @return An object of with the S3 class \code{reactions} denoting a list
 #'  of reactions.
 #' @examples
-#' r_str <- "reaction,abbreviation,numbers\nA -> B,blub,\"1,2,3'\"\nB <=>, bla, 3"
+#' r_str <- "reaction,abbreviation,numbers\nA -> B,blub,\"1,2,3\"\nB <=>, bla, 3"
 #' r <- read_reactions(textConnection(r_str))
 read_reactions <- function(react_file) {
     reacts <- read.csv(react_file, stringsAsFactors = FALSE)

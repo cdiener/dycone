@@ -11,8 +11,8 @@ test_that("we can convert extra information nicely", {
     expect_equal(str_conv("abc,gef"), c("abc", "gef"))
 })
 
-test_that("order_by works", {
-    expect_equal(order_by(1:3, 3:1), 3:1)
+test_that("orderby works", {
+    expect_equal(orderby(1:3, 3:1), 3:1)
 })
 
 test_that("the caching operator works", {
