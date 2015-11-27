@@ -32,20 +32,21 @@ orderby <- function(x, y) {
 #' @keywords operator, caching
 #' @param ex The R expression to be cached. Use brackets for 
 #'  multiline statements.
-#' @param filename The filename of the cache file. 
+#' @param filename The filename of the cache file.
+#' @param env The environment into which the cached object is loaded. 
 #' @return Nothing. Just caches all assigned variables in \code{filename}.
 #' @examples
 #' # Is executed only if the file does not exist, otherwise
 #' # samples a and b are read from 'samples.Rd'
 #' { a <- rnorm(1e5) } %c% 'samples.Rd'
-"%c%" <- function(ex, filename) {
+"%c%" <- function(ex, filename, env=parent.frame()) {
     if (!file.exists(filename)) {
         e <- new.env()
         eval(match.call()$ex, envir = e)
         save(list = ls(e), file = filename, envir = e)
     }
     
-    load(filename, envir=.GlobalEnv)
+    load(filename, envir=env)
 }
 
 #' Calculates a mass-action reaction rate
