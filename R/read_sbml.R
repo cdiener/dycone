@@ -1,5 +1,7 @@
-# sbml.R Copyright 2015 Christian Diener <ch.diener@gmail.com> MIT license.
-# See LICENSE for more information.
+# sbml.R 
+# Copyright 2016 Christian Diener <mail@cdiener.com> 
+# 
+# MIT license. See LICENSE for more information.
 
 # grep string to annotate the namespace
 RE_SBML <- "sbml/level(\\d)/version(\\d)(/core|$)"
@@ -37,6 +39,23 @@ clean_ns <- function(ns) {
     if (length(mml_idx) == 1) names(ns)[mml_idx] <- "mathml"
     
     return(ns)
+}
+
+# group a character matrix hierarchically
+group <- function(m, combine=FALSE) {
+    x <- tapply(m[2,], m[1,], identity)
+    if (combine) x <- sapply(x, paste0, collapse=", ")
+    x
+}
+
+rbind_fill <- function(l, fill=NA) {
+    nx <- unlist(lapply(l, names))
+    nx <- unique(nx)
+    m <- matrix(NA, ncol=length(nx), nrow=length(l))
+    colnames(m) <- nx
+    for(i in 1:length(l)) m[i, names(l[[i]])] <- l[[i]]
+    
+    as.data.frame(m)
 }
 
 #' Obtains the list of parameters from a SBML model
@@ -104,8 +123,26 @@ sbml_species <- function(sbml_file) {
     for (i in num_cols) {
         out[, i] <- as.numeric(as.character(out[, i]))
     }
+    
+    # Get RDF annotations
+    rdf <- NA
+    if ("rdf" %in% names(ns)) {
+        rdf_list <- lapply(s_list, function(s) {
+            rdf_links <- s %>% xml_find_all(".//rdf:Bag/rdf:li/@rdf:resource", ns) %>% xml_text()
+            if (length(rdf_links) > 0) {
+                rdf <- sapply(rdf_links, function(r) { 
+                    spl <- strsplit(r, "/", fixed=TRUE)[[1]]
+                    spl[(length(spl)-1):length(spl)]
+                    })
+                rdf <- group(rdf, combine=TRUE)
+            }
+        })
+        rdf <- rbind_fill(rdf_list)
+    }
+    
     out$boundaryCondition <- ifelse(out$boundaryCondition == "true", TRUE, FALSE)
     out$boundaryCondition[is.na(out$boundaryCondition)] <- FALSE
+    if (!is.null(ncol(rdf))) out <- cbind(out, rdf)
     return(out)
 }
 
@@ -161,26 +198,29 @@ parse_reaction <- function(r_node, ns, v) {
         "./sbml:kineticLaw/sbml:listOfParameters/sbml:parameter[@id='UPPER_BOUND']", ns) %>%
         xml_attr("value")
     }
-    if (length(lower) == 0) lower <- NA
-    if (length(upper) == 0) upper <- NA
+    if (length(lower) == 0) lower <- NA else lower <- str_conv(lower)
+    if (length(upper) == 0) upper <- NA else upper <- str_conv(upper)
     
     # Get the notes
     notes <- r_node %>% xml_find_all("./sbml:notes", ns) %>% xml_text()
     if (length(notes) == 0) notes <- NA
     
     # Get RDF annotations
-    rdf_nodes <- r_node %>% xml_find_all("./sbml:annotation/rdf:RDF/rdf:Description/*", ns)
-    rdf_qualifiers <- rdf_nodes %>% xml_name()
-    rdf_links <- sapply(rdf_nodes, function(r) { 
-        x <- r %>% xml_find_all("./rdf:Bag/rdf:li/@rdf:resource", ns) %>% xml_text()
-        if (length(x) > 1) x <- sapply(x, paste0, sep=", ")
-        x 
-        })
-    if (length(rdf_links) == 0) rdf_links <- NA
-    else names(rdf_links) <- rdf_qualifiers
+    rdf <- NA
+    if ("rdf" %in% names(ns)) {
+        rdf_links <- r_node %>% xml_find_all(".//rdf:Bag/rdf:li/@rdf:resource", ns) %>% xml_text()
+        if (length(rdf_links) > 0) {
+            rdf <- sapply(rdf_links, function(r) { 
+                spl <- strsplit(r, "/", fixed=TRUE)[[1]]
+                spl[(length(spl)-1):length(spl)]
+                })
+            rdf <- group(rdf)
+        }
+    }
     
     r <- list(abbreviation=id, name=name, S=S, N_S=N_S, P=P, N_P=N_P, rev=rev, 
-        notes=notes, rdf=rdf_links, lower=lower, upper=upper)
+        notes=notes, lower=lower, upper=upper)
+    if (!all(is.na(rdf))) r <- c(r, rdf)
     return(r) 
 }
 
@@ -207,13 +247,12 @@ sbml_reactions <- function(sbml_file, progress=TRUE) {
     
     if (progress) {
         n <- length(r_nodes)
-        trigger <- ceiling(length(r_nodes)/100)
+        pb <- txtProgressBar(min=1, max=n, style=3)
         reacts <- lapply(1:n, function(i) {
-            cat("                                                           \r")
-            cat(sprintf("Parsing reaction %d/%d", i, n))
+            setTxtProgressBar(pb, i)
             parse_reaction(r_nodes[[i]], ns, v)
         })
-        cat(" -- Done.\n")
+        close(pb)
     } else reacts <- lapply(r_nodes, parse_reaction, ns=ns, v=v)
     
     class(reacts) <- append(class(reacts), "reactions")
@@ -270,10 +309,11 @@ read_sbml <- function(sbml_file) {
     else spec_list <- specs$id 
     not_in_rs <- which(!(spec_list %in% r_specs))
     not_in_slist <- which(!(r_specs %in% spec_list))
+    print(not_in_slist)
     if (length(not_in_rs) > 0) warning(
         paste("The following species are defined but not used in reactions:",
         paste(spec_list[not_in_rs], collapse=", ")))
-    if (length(not_in_rs) > 0) stop(
+    if (length(not_in_slist) > 0) stop(
         paste("The following species used in reactions are undefined:",
         paste(r_specs[not_in_slist], collapse=", ")))
     

@@ -304,7 +304,7 @@ species <- function(reacts) {
         stop("Argument has wrong type!")
     
     species <- unlist(lapply(reacts, function(x) c(x$S, x$P)))
-    species[is.na(species)] <- "none"
+    species <- species[!is.na(species)]
     return(unique(species))
 }
 
@@ -344,9 +344,9 @@ stoichiometry <- function(reacts, reversible = FALSE, const = NULL,
     i <- 1
     for (r in reacts) {
         S <- if (is.na(r$S)[1]) 
-            "none" else r$S
+            NULL else r$S
         P <- if (is.na(r$P[1])) 
-            "none" else r$P
+            NULL else r$P
         N[S, i] <- -r$N_S
         N[P, i] <- r$N_P
         i <- i + 1
