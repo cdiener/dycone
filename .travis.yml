@@ -1,44 +1,15 @@
 # .travis.yml for dycone
     
-language: c
+language: R
 sudo: false
+cache: packages
 
-addons:
-  apt:
-    sources:
-        - r-packages-precise
-    packages:
-        - r-base-dev
-        - r-recommended
-        - pandoc
-        - libxml2-dev
-        - libcurl4-openssl-dev
-        - libssl-dev 
-        - libgmp-dev
-
-env:
-    - R_LIBS_USER=~/R/library
-
-cache:
-    directories:
-        $R_LIBS_USER
-
-before_script:
-    - mkdir -p "$R_LIBS_USER"
-    - Rscript -e 'install.packages(c("devtools", "rmarkdown", "roxygen2"), repos = "http://cran.rstudio.com")'
-    - Rscript -e 'source("http://bioconductor.org/biocLite.R"); biocLite(c("BiocInstaller", "BiocCheck"))'
-    - Rscript -e 'library(devtools);install_deps(repos = "http://cran.rstudio.com", dependencies = TRUE)'
-
-script:
-    - Rscript -e 'devtools::check()'
-
-notifications:
-    email:
-        on_success: change
-        on_failure: change
+bioc_required: true
+bioc_packages:
+  - BiocInstaller
+  - BiocCheck
 
 after_success:
-    - Rscript -e 'install.packages("covr", repos = "http://cran.rstudio.com")'
-    - Rscript -e 'covr::codecov()'
+  - Rscript -e 'covr::codecov()'
 
 
