@@ -7,3 +7,5 @@
 ^stuff				# Original raw data or sources
 ^scripts			# Specifica analysis scripts using the package
 ^\.travis\.yml$
+^wercker.yml$
+^_.*

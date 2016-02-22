@@ -1,5 +1,8 @@
-# model_utility.R Copyright 2015 Christian Diener <ch.diener@gmail.com> MIT
-# license. See LICENSE for more information.
+#  model_utility.R
+#  
+#  Copyright 2016 Christian Diener <mail[at]cdiener.com>
+#  
+#  MIT license. See LICENSE for more information.
 
 # Helper functions in order to extract the model and construct basic data
 
@@ -33,20 +36,19 @@ orderby <- function(x, y) {
 #' @param ex The R expression to be cached. Use brackets for 
 #'  multiline statements.
 #' @param filename The filename of the cache file.
-#' @param env The environment into which the cached object is loaded. 
 #' @return Nothing. Just caches all assigned variables in \code{filename}.
 #' @examples
 #' # Is executed only if the file does not exist, otherwise
 #' # samples a and b are read from 'samples.Rd'
 #' { a <- rnorm(1e5) } %c% 'samples.Rd'
-"%c%" <- function(ex, filename, env=parent.frame()) {
+"%c%" <- function(ex, filename) {
     if (!file.exists(filename)) {
         e <- new.env()
         eval(match.call()$ex, envir = e)
         save(list = ls(e), file = filename, envir = e)
     }
     
-    load(filename, envir=env)
+    load(filename, envir=parent.frame())
 }
 
 #' Calculates a mass-action reaction rate
@@ -347,12 +349,12 @@ stoichiometry <- function(reacts, reversible = FALSE, const = NULL,
             NULL else r$S
         P <- if (is.na(r$P[1])) 
             NULL else r$P
-        N[S, i] <- -r$N_S
-        N[P, i] <- r$N_P
+        if (!is.na(r$S[1])) N[S, i] <- -r$N_S
+        if (!is.na(r$P[1])) N[P, i] <- r$N_P
         i <- i + 1
         if (!reversible && r$rev) {
-            N[S, i] <- r$N_S
-            N[P, i] <- -r$N_P
+            if (!is.na(r$S[1])) N[S, i] <- r$N_S
+             if (!is.na(r$P[1])) N[P, i] <- -r$N_P
             i <- i + 1
         }
     }

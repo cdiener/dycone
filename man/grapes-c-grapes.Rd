@@ -16,8 +16,6 @@ ex \%c\% filename
 multiline statements.}
 
 \item{filename}{The filename of the cache file.}
-
-\item{env}{The environment into which the cached object is loaded.}
 }
 \value{
 Nothing. Just caches all assigned variables in \code{filename}.

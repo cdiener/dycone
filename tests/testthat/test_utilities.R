@@ -89,7 +89,7 @@ test_that("we can read and format reactions from a file", {
     expect_equal(r[[2]]$abbreviation, "bla")
     expect_false(r[[1]]$rev)
     expect_true(r[[2]]$rev)
-    expect_equal(species(r), c("A", "B", "none"))
+    expect_equal(species(r), c("A", "B"))
     expect_equal(grep("1*A", format(r)), 1)
     expect_equal(grep("Model has", capture.output(print(r))), 1)
     
@@ -121,9 +121,9 @@ test_that("we can get info from sample model", {
     s <- species(eryth)
     n_s <- length(s)
     expect_true(all(grepl("\\d:", format(eryth))))
-    expect_true(all(dim(stoichiometry(eryth)) == c(n_s - 1, 68)))
-    expect_true(all(dim(stoichiometry(eryth, reversible = TRUE)) == c(n_s - 1, 45)))
-    expect_true(all(c("atp", "23dpg", "none") %in% species(eryth)))
+    expect_true(all(dim(stoichiometry(eryth)) == c(n_s, 68)))
+    expect_true(all(dim(stoichiometry(eryth, reversible = TRUE)) == c(n_s, 45)))
+    expect_true(all(c("atp", "23dpg") %in% species(eryth)))
 })
 
 test_that("graph conversions", {

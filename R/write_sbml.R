@@ -28,7 +28,7 @@ OBJECTIVE <- '    <fbc:listOfObjectives fbc:activeObjective="obj">
       </fbc:objective>
     </fbc:listOfObjectives>'
     
-SPECIES <- '      <species boundaryCondition="false" constant="false" hasOnlySubstanceUnits="false" id="%s" name="%s" metaid="%s" compartment="cell">'
+SPECIES <- '      <species boundaryCondition="false" constant="false" hasOnlySubstanceUnits="false" id="%s" name="%s" metaid="%s" initialConcentration="0" compartment="cell">'
 
 SPEC_REF <- '          <speciesReference constant="true" species="%s" stoichiometry="%f"/>'
 
@@ -46,15 +46,31 @@ RDF_CLOSE <- '                </rdf:Bag>
         
 RDF_LI <- '                  <rdf:li rdf:resource="http://identifiers.org/%s/%s"/>'
 
-REACT <- '      <reaction fast="false" id="%s" reversible="%s" fbc:lowerFluxBound="%f" fbc:upperFluxBound="%f">'
+REACT <- '      <reaction fast="false" id="%s" reversible="%s" fbc:lowerFluxBound="%s" fbc:upperFluxBound="%s">'
+
+DPARAM <- '      <parameter constant="true" id="%s" sboTerm="SBO:0000626" units="mmol_per_gDW_per_hr" value="%f"/>'
+
+PARAM <- '      <parameter constant="true" id="%s" sboTerm="SBO:0000625" units="mmol_per_gDW_per_hr" value="%f"/>'
+
+sid <- function(id) {
+    paste0("M_", gsub("[^\\w\\d_]", "_", id, perl=T))
+}
+
+write_param <- function(r, i, con) {
+    if (!is.null(r$lower)) 
+        write(sprintf(PARAM, paste0("r", i, "_lower"), r$lower), file=con)
+    if (!is.null(r$upper)) 
+        write(sprintf(PARAM, paste0("r", i, "_upper"), r$upper), file=con)
+}
 
 write_species <- function(spec, ann, con) {
-    write(sprintf(SPECIES, spec, spec, spec), file=con)
+    s <- sid(spec)
+    write(sprintf(SPECIES, s, s, s), file=con)
     if (any(!is.na(ann))) {
-        write(sprintf(RDF_OPEN, spec), file=con)
+        write(sprintf(RDF_OPEN, s), file=con)
         for(i in 1:length(ann)) {
             if (!is.na(ann[i])) {
-                x <- as.character(str_conv(ann[i]))
+                x <- unique(as.character(str_conv(ann[i])))
                 nx <- names(ann)[i]
                 sapply(x, function(id) write(sprintf(RDF_LI, nx, id), file=con))
             }
@@ -64,23 +80,24 @@ write_species <- function(spec, ann, con) {
     write('      </species>', file=con)
 }
 
-write_reaction <- function(r, name, db, annmap, con) {
+write_reaction <- function(r, i, db, annmap, con) {
     rev_str <- c("false", "true")[r$rev+1]
-    lower <- r$lower
-    upper <- r$upper
-    if (is.null(lower)) { 
-        if (r$rev) lower <- db[1] else lower <- 0
+    name <- paste0("r", i)
+    lower <- paste0(name, "_lower")
+    upper <- paste0(name, "_upper")
+    if (is.null(r$lower)) { 
+        if (r$rev) lower <- "default_lower" else lower <- "zero_bound"
     }
-    if (is.null(upper)) upper <- db[2] 
+    if (is.null(r$upper)) upper <- "default_upper"
     write(sprintf(REACT, name, rev_str, lower, upper), file=con)
     
     # Write annotations
     val <- names(r)[names(r) %in% names(annmap)]
-    if (length(val) > 0) {
+    if (length(val) > 0 & !all(is.na(r[val]))) {
         write(sprintf(RDF_OPEN, name), file=con)
         for(v in val) {
              if (!all(is.na(r[[v]]))) {
-                x <- as.character(r[[v]])
+                x <- unique(as.character(r[[v]]))
                 nx <- annmap[v]
                 sapply(x, function(id) write(sprintf(RDF_LI, nx, id), file=con))
             }
@@ -89,20 +106,21 @@ write_reaction <- function(r, name, db, annmap, con) {
     }
     
     # Reactants/substrates
-    write('        <listOfReactants>', file=con)
     if (!is.na(r$S)[1]) {
+        write('        <listOfReactants>', file=con)
         idx <- 1:length(r$S)
-        sapply(idx, function(i) write(sprintf(SPEC_REF, r$S[i], r$N_S[i]), file=con))
+        sapply(idx, function(i) write(sprintf(SPEC_REF, sid(r$S[i]), r$N_S[i]), file=con))
+        write('        </listOfReactants>', file=con)
     }
-    write('        </listOfReactants>', file=con)
     
     # Products
-    write('        <listOfProducts>', file=con)
     if (!is.na(r$P)[1]) {
         idx <- 1:length(r$P)
-        sapply(idx, function(i) write(sprintf(SPEC_REF, r$P[i], r$N_P[i]), file=con))
+        write('        <listOfProducts>', file=con)
+        sapply(idx, function(i) write(sprintf(SPEC_REF, sid(r$P[i]), r$N_P[i]), file=con))
+        write('        </listOfProducts>', file=con)
     }
-    write('        </listOfProducts>', file=con)
+    
     write('      </reaction>', file=con)
 }
 
@@ -148,6 +166,14 @@ write_sbml <- function(reacts, spec=NA, obj=NA, default_bounds=c(-1000, 1000),
     # write the FBA objective if given
     if (!is.na(obj)) write(sprintf(OBJECTIVE, paste0("r", obj)), file=con)
     
+    # write the list of parameters
+    write('    <listOfParameters>', file=con)
+    write(sprintf(DPARAM, "zero_bound", 0), file=con)
+    write(sprintf(DPARAM, "default_lower", default_bounds[1]), file=con)
+    write(sprintf(DPARAM, "default_upper", default_bounds[2]), file=con)
+    dummy <- sapply(1:length(reacts), function(i) write_param(reacts[[i]], i, con))
+    write('    </listOfParameters>', file=con)
+    
     # write the species list
     write('    <listOfSpecies>', file=con)
     dummy <- apply(spec, 1, function(s) write_species(s[1], s[-1], con))
@@ -156,7 +182,7 @@ write_sbml <- function(reacts, spec=NA, obj=NA, default_bounds=c(-1000, 1000),
     # write the reaction list
     write('    <listOfReactions>', file=con)
     dummy <- sapply(1:length(reacts), function(i) 
-        write_reaction(reacts[[i]], paste0("r",i), default_bounds, annmap, con))
+        write_reaction(reacts[[i]], i, default_bounds, annmap, con))
     write('    </listOfReactions>', file=con)
     
     write('  </model>\n</sbml>', file=con)

@@ -1,7 +1,8 @@
-# sbml.R 
-# Copyright 2016 Christian Diener <mail@cdiener.com> 
-# 
-# MIT license. See LICENSE for more information.
+#  read_sbml.R
+#  
+#  Copyright 2016 Christian Diener <mail[at]cdiener.com>
+#  
+#  MIT license. See LICENSE for more information.
 
 # grep string to annotate the namespace
 RE_SBML <- "sbml/level(\\d)/version(\\d)(/core|$)"
@@ -285,7 +286,7 @@ sbml_reactions <- function(sbml_file, progress=TRUE) {
 #'  }
 #' @examples
 #' # requires internet connection
-#' m_url <- "http://www.ebi.ac.uk/compneur-srv/biomodels-main/download?mid=MODEL1103210001"
+#' m_url <- "http://www.ebi.ac.uk/biomodels-main/download?mid=BIOMD0000000042"
 #' read_sbml(m_url)
 #'
 #' @export
