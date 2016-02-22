@@ -17,6 +17,8 @@ bioc_required: true
 bioc_packages:
     - BiocInstaller
     - BiocCheck
+r_packages:
+    - rmarkdown
 
 after_success:
     - Rscript -e 'covr::codecov()'
