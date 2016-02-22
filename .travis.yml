@@ -1,15 +1,24 @@
 # .travis.yml for dycone
     
 language: R
+
 sudo: false
+
 cache: packages
+
+addons:
+    apt:
+        sources:
+            - r-packages-precise
+        packages:
+            - libgmp-dev
 
 bioc_required: true
 bioc_packages:
-  - BiocInstaller
-  - BiocCheck
+    - BiocInstaller
+    - BiocCheck
 
 after_success:
-  - Rscript -e 'covr::codecov()'
+    - Rscript -e 'covr::codecov()'
 
 
