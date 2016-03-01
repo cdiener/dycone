@@ -6,8 +6,8 @@
 normal and disease conditions.}
 \usage{
 hyp(normal, disease, reacts, type = "bias", correction_method = "BH",
-  cred_level = 0.95, sorted = TRUE, obj = NULL, v_min = 0, alpha = 1,
-  full = FALSE)
+  cred_level = 0.95, sorted = TRUE, obj = NULL, v_min = 1e-16,
+  alpha = 1, full = FALSE)
 }
 \arguments{
 \item{normal}{A matrix or data frame containing the metabolic terms of the 

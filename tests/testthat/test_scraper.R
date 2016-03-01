@@ -9,7 +9,8 @@ test_that("HMDB scraping works", {
     expect_true("Pyruvic acid" %in% concs$hmdb_name)
     expect_more_than(nrow(concs), 1)
     expect_more_than(priority_mean(concs), 0)
-    expect_true(is.na(grep_or_na("a", "bcd")))
+    expect_true(is.na(grep_id("a", "bcd")))
+    expect_equal(grep_id("a, b", c("bcd", "ak")), c(a=2, b=1))
 })
 
 test_that("patching works", {

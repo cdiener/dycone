@@ -40,18 +40,19 @@ priority_mean <- function(d, biofluids = c("cellular cytoplasm", "blood")) {
     return(mean(m, na.rm = TRUE))
 }
 
-#' Wrapper for grep that returns NA if nothing was found.
+#' Wrapper for grep that returns NA if nothing was found. Also splits up
+#' comma sperated arguments.
 #'
 #' @export
-#' @param ... Arguments passed on to grep
+#' @param ids ID or comma separated IDs to be searched.
+#' @param x Character in which to search.
 #' @return The result of grep or NA if not found.
 #' @examples
-#' grep_or_na('A', 'blub')
-grep_or_na <- function(...) {
-    res <- grep(...)
+#' grep_id('A, B', 'B, D')
+grep_id <- function(ids, x) {
+    res <- unlist(sapply(str_conv(ids), grep, x=x))
     
-    if (length(res) > 0) 
-        return(res) else return(NA)
+    if (length(res) > 0) return(res) else return(NA)
 }
 
 #' Parses concentration values from HMDB.
@@ -128,19 +129,25 @@ hmdb_concentration <- function(hmids, add = NULL) {
     out <- NULL
     cat("\n")
     for (i in 1:length(hmids)) {
-        id <- hmids[i]
-        cat(sprintf("\rScraping %d/%d...", i, length(hmids)))
-        hm_xml <- read_xml(sprintf(HMDB_XML, id))
+        ids <- str_conv(hmids[i])
+        hm_entries <- NULL
+        kegg_id <- NULL
+        name <- NULL
+        for(id in ids) {
+            cat(sprintf("\rScraping %d/%d...", i, length(hmids)))
+            hm_xml <- read_xml(sprintf(HMDB_XML, id))
         
-        hm_entries <- hm_xml %>% 
-            xml_find_all("./normal_concentrations/concentration") %>% 
-            hmdb_parse()
+            hm_entries <- rbind(hm_entries, hm_xml %>% 
+                xml_find_all("./normal_concentrations/concentration") %>% 
+                hmdb_parse())
         
-        kegg_id <- hm_xml %>% xml_find_one("./kegg_id") %>% xml_text()
-        name <- hm_xml %>% xml_find_one("./name") %>% xml_text()
+            kegg_id <- c(kegg_id, hm_xml %>% xml_find_one("./kegg_id") %>% 
+                xml_text())
+            name <- c(name, hm_xml %>% xml_find_one("./name") %>% xml_text())
+        }
         
         if (!is.null(hm_entries)) {
-            hm_entries <- cbind(kegg_id, id, name, hm_entries)
+            hm_entries <- cbind(kegg_id, ids, name, hm_entries)
             names(hm_entries)[c(1:3, ncol(hm_entries))] <- c("keggid", "hmdbid", 
                 "hmdb_name", "pmid")
             if (is.data.frame(add)) 

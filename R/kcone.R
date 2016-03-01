@@ -117,7 +117,7 @@ polytope_basis <- function(s_matrix, m_terms = rep(1, ncol(s_matrix))) {
 #' @examples
 #' print(as.stability(c(0+2i, 0-3i)))
 as.stability <- function(evs) {
-    evs[abs(evs) < sqrt(.Machine$double.eps)] <- 0
+    evs[abs(evs) < .Machine$double.eps] <- 0
     
     r <- evs
     if (all(Re(r) == 0) && any(Im(r) != 0)) 
@@ -197,7 +197,7 @@ occupation <- function(basis) {
     if (!("basis" %in% class(basis))) 
         stop("object is not a basis!")
     
-    return(apply(basis, 1, function(r) sum(abs(r) > sqrt(.Machine$double.eps))/length(r)))
+    return(apply(basis, 1, function(r) sum(abs(r) > .Machine$double.eps)/length(r)))
 }
 
 #' Plots a heatmap of the basis.
@@ -299,7 +299,7 @@ plot_red <- function(basis_list, arrows = TRUE, col = NULL, n_cl = NULL, r_names
         red <- lapply(basis_list, function(b) predict(pca, t(b))[, 1:2])
         if (!is.null(r_names)) 
             load_names <- t(apply(pca$rotation[,1:2], 2, function(l) 
-                r_names[order(-abs(l))[1:min(6,min(b_rows))]]))
+                r_names[order(-abs(l))[1:min(3,min(b_rows))]]))
     }
     
     if (max(b_cols) > 1000 || !is.null(n_cl)) {
@@ -566,7 +566,7 @@ bayes_mean_ci <- function(x, n = 256, level = 0.95) {
 #' @importFrom limma makeContrasts lmFit contrasts.fit eBayes
 #' @export
 hyp <- function(normal, disease, reacts, type = "bias", correction_method = "BH", 
-    cred_level = 0.95, sorted = TRUE, obj = NULL, v_min = 0, alpha = 1, 
+    cred_level = 0.95, sorted = TRUE, obj = NULL, v_min = 1e-16, alpha = 1, 
     full = FALSE) {
     # Create reference data
     normal <- as.matrix(normal)
@@ -583,8 +583,10 @@ hyp <- function(normal, disease, reacts, type = "bias", correction_method = "BH"
         if (!is.numeric(obj)) 
             stop("obj must be numeric.")
         va <- fva(obj, 1, S, v_min = v_min, v_max = 1)
-        lfc_va <- ifelse(va$min < sqrt(.Machine$double.eps), Inf, 
-            log(va$max, 2) - log(va$min, 2))
+        # Deal with numerical inaccuracies
+        va$min[va$min < v_min] <- v_min
+        va$max[va$max < v_min] <- v_min
+        lfc_va <- log(va$max, 2) - log(va$min, 2)
     } else if (!(type %in% c("raw", "bias"))) 
         stop("type must be either 'bias', 'fva' or 'raw' :(")
     
