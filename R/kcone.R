@@ -247,6 +247,9 @@ plot_basis <- function(b, n_cl = NA, ...) {
 #' the basis vectors, or 'extreme rays' of the respective k-cones and the 
 #' shaded area denotes the interior of the k-cone into which all feasible
 #' k vectors must fall.
+#'
+#' \emph{Due to the dimension reduction and clustering \code{plot_red} is not a 
+#' fast function and plotting might take a few minutes for large cones.}
 #' 
 #' @seealso \code{\link{plot_basis}} for heatmap of the basis.
 #' @export
@@ -279,9 +282,9 @@ plot_red <- function(basis_list, arrows = TRUE, col = NULL, n_cl = NULL, r_names
     b_cols <- sapply(basis_list, ncol)
     
     if (length(basis_list) > 1 && sd(b_rows) > 0) 
-        stop("All basis need to have the same dimension!")
+        stop("All bases need to have the same dimension!")
     if (any(b_rows < 2)) 
-        stop("Basis must be at least 2-dimensional!")
+        stop("Bases must be at least 2-dimensional!")
     n <- length(basis_list)
     
     if (!is.null(r_names) && (length(r_names) != max(b_rows) || 
@@ -299,18 +302,18 @@ plot_red <- function(basis_list, arrows = TRUE, col = NULL, n_cl = NULL, r_names
         red <- lapply(basis_list, function(b) predict(pca, t(b))[, 1:2])
         if (!is.null(r_names)) 
             load_names <- t(apply(pca$rotation[,1:2], 2, function(l) 
-                r_names[order(-abs(l))[1:min(3,min(b_rows))]]))
+                r_names[order(-abs(l))[1:min(4,min(b_rows))]]))
     }
     
     if (max(b_cols) > 1000 || !is.null(n_cl)) {
         if (is.null(n_cl)) 
-            n_cl <- floor(min(1000, sqrt(mean(b_cols)/2)))
+            n_cl <- ceiling(min(1000, sqrt(mean(b_cols)/2)))
         
-        write(sprintf("Basis are very large. Reducing to %d clusters...", n_cl), 
+        write(sprintf("Bases are very large. Reducing to %d clusters...", n_cl), 
             file = "")
         
         cl <- lapply(red, function(b) suppressWarnings(kmeans(b, centers = n_cl, 
-            iter.max = 100, nstart = 3)))
+            iter.max = 1000, nstart = 11)))
         
         dists <- sapply(cl, function(x) mean(sqrt(x$withinss/x$size)))
         write(sprintf("Mean in-cluster distance: %g.", mean(dists)), file = "")
