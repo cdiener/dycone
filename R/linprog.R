@@ -8,9 +8,9 @@ build_objective <- function(o, S) {
         if (!all(c("S", "P", "N_S", "N_P") %in% names(o)))
             stop("objective list must contain entries for S, P, N_S and N_P.")
         l <- sapply(c("S", "P", "N_S", "N_P"), function(i) length(o[[i]]))
-        if (l[1] - l[3] != 0) 
+        if (l[1] - l[3] != 0)
             stop("S and N_S must have the same length")
-        if (l[2] - l[4] != 0) 
+        if (l[2] - l[4] != 0)
             stop("P and N_P must have the same length")
         valid_S <- !is.na(o$S)
         valid_P <- !is.na(o$P)
@@ -21,18 +21,18 @@ build_objective <- function(o, S) {
         col[mets] <- sto
     } else if (is.vector(o)) {
         if (is.null(names(o))) {
-            if (length(o) != nrow(S)) 
+            if (length(o) != nrow(S))
                 stop("Unnamed objective vector must have the same length as rows in S.")
             col <- o
         } else {
-            if (!all(names(o) %in% rownames(S))) 
+            if (!all(names(o) %in% rownames(S)))
                 stop("Some metabolites in the objective do not appear in S.")
             col <- rep(0, nrow(S))
             names(col) <- rownames(S)
             col[names(o)] <- o
         }
     } else stop("objective must be a list or vector.")
-    
+
     return(col)
 }
 
@@ -45,134 +45,133 @@ expand_constraints = function(v, n) {
 
 #' Maximizes the flux through a given objective reaction.
 #'
-#' @param obj The objective reaction, whose flux will be be maximized. Can 
+#' @param obj The objective reaction, whose flux will be be maximized. Can
 #'  be any of the following three:
 #'  \itemize{
 #'  \item{A list containing at least the four vectors S, P, N_S, and N_P, which
 #'      which contain the names of substrates and products and their respective
 #'      stochiometries.}
-#'  \item{A unnamed vector containing the corresponding column in the 
+#'  \item{A unnamed vector containing the corresponding column in the
 #'      stochiometric matrix.}
 #'  \item{A named vector containing only the non-zero entries in the respective
-#'      column of the stochiometric matrix bein named by their respective 
+#'      column of the stochiometric matrix bein named by their respective
 #'      metabolite.}
 #'  }
 #' @param S The stochiometrix matrix to be used (must be irreversible).
-#' @param v_min Lower bounds for the reaction fluxes. Can be a single value or a 
+#' @param v_min Lower bounds for the reaction fluxes. Can be a single value or a
 #'  vector containing one value for each reaction.
-#' @param v_max Upper bounds for the reaction fluxes. Can be a single value or a 
+#' @param v_max Upper bounds for the reaction fluxes. Can be a single value or a
 #'  vector containing one value for each reaction.
-#' @return A vector with the same length as columns in \code{S} containing the 
+#' @return A vector with the same length as columns in \code{S} containing the
 #'  solution of the optimization.
-#' @examples 
+#' @examples
 #' S <- matrix(c(1, 0, -2, 1), ncol = 2)
 #' rownames(S) <- c("A", "B")
-#' fba(c(B = -1), S) 
+#' fba(c(B = -1), S)
 #'
 #' @export
 fba <- function(obj, S, v_min = 0, v_max = 1) {
     v_min = expand_constraints(v_min, ncol(S))
     v_max = expand_constraints(v_max, ncol(S))
-    
+
     S <- cbind(S, build_objective(obj, S))
     a <- rep(0, ncol(S))
     a[ncol(S)] <- 1
-    
+
     const_matrix <- rbind(-diag(ncol(S)), diag(ncol(S))[-ncol(S),])
     const_b <- c(-v_min, 0, v_max)
     NC <-as.matrix(S)
     b <- rep(0, nrow(S))
-    
+
     hp <- makeH(const_matrix, const_b, NC, b)
-    
+
     sol <- lpcdd(hp, a, minimize = FALSE)
-    if (sol$solution.type != "Optimal") 
+    if (sol$solution.type != "Optimal")
         stop(sprintf("Error in optimization! (%s)", sol$solution.type))
-    
+
     return(sol$primal.solution)
 }
 
-#' Performs flux variance analysis for a given objective reaction. Thus, FVA 
+#' Performs flux variance analysis for a given objective reaction. Thus, FVA
 #' obtains lower and upper bounds for the fluxes under a given (sub-)optimal
 #' solution.
 #'
-#' @param obj The objective reaction, whose flux will be be maximized. Can 
+#' @param obj The objective reaction, whose flux will be be maximized. Can
 #'  be any of the following three:
 #'  \itemize{
 #'  \item{A list containing at least the four vectors S, P, N_S, and N_P, which
 #'      which contain the names of substrates and products and their respective
 #'      stochiometries.}
-#'  \item{A unnamed vector containing the corresponding column in the 
+#'  \item{A unnamed vector containing the corresponding column in the
 #'      stochiometric matrix.}
 #'  \item{A named vector containing only the non-zero entries in the respective
-#'      column of the stochiometric matrix bein named by their respective 
+#'      column of the stochiometric matrix bein named by their respective
 #'      metabolite.}
 #'  }
-#' @param alpha A positive scalar <=1. FVA is performed assuming that the 
+#' @param alpha A positive scalar <=1. FVA is performed assuming that the
 #'  optimal solution can not be less than alpha*opt.
 #' @param S The stochiometrix matrix to be used (must be irreversible).
-#' @param v_min Lower bounds for the reaction fluxes. Can be a single value or a 
+#' @param v_min Lower bounds for the reaction fluxes. Can be a single value or a
 #'  vector containing one value for each reaction.
-#' @param v_max Upper bounds for the reaction fluxes. Can be a single value or a 
+#' @param v_max Upper bounds for the reaction fluxes. Can be a single value or a
 #'  vector containing one value for each reaction.
-#' @return A data frame with two columns, min and max, denoting the respective 
+#' @return A data frame with two columns, min and max, denoting the respective
 #'  minimum and maximum fluxes for each reaction.
-#' @examples 
+#' @examples
 #' S <- matrix(c(1, 0, -2, 1), ncol = 2)
 #' rownames(S) <- c("A", "B")
-#' fva(c(B = -1), S=S) 
+#' fva(c(B = -1), S=S)
 #'
 #' @export
-fva <- function(obj, alpha = 1, S, v_min = 0, v_max = 1) {
+fva <- function(obj, S, alpha=1, v_min = 0, v_max = 1) {
     v_min = expand_constraints(v_min, ncol(S))
     v_max = expand_constraints(v_max, ncol(S))
-    
+
     S <- cbind(S, build_objective(obj, S))
     a <- rep(0, ncol(S))
     a[ncol(S)] <- 1
-    
+
     const_matrix <- rbind(-diag(ncol(S)), diag(ncol(S))[-ncol(S),])
     const_b <- c(-v_min, 0, v_max)
     NC <- as.matrix(S)
     b <- rep(0, nrow(S))
-    
+
     hp <- makeH(const_matrix, const_b, NC, b)
-    
+
     sol <- lpcdd(hp, a, minimize = FALSE)
-    if (sol$solution.type != "Optimal") 
+    if (sol$solution.type != "Optimal")
         stop(sprintf("Error in optimization! (%s)", sol$solution.type))
-    
+
     opt_lim <- -alpha*sol$primal.solution[ncol(S)]
     h_loc <- addHin(-c(rep(0, ncol(S) - 1), 1),  opt_lim, hp)
-    
+
+    a <- rep(0, ncol(S))
     if (requireNamespace("foreach", quietly = TRUE)) {
-        a <- rep(0, ncol(S))
         i <- 1:(ncol(S) - 1)
         opt <- foreach::"%dopar%"(foreach::foreach(i = i, .combine = rbind), {
             a_loc <- a
             a_loc[i] <- 1
             sol_min <- lpcdd(h_loc, a_loc, minimize = TRUE)
             sol_max <- lpcdd(h_loc, a_loc, minimize = FALSE)
-            data.frame(min = sol_min$primal.solution[i], 
-                max = sol_max$primal.solution[i], 
-                opt_min = sol_min$primal.solution[ncol(S)], 
+            data.frame(min = sol_min$primal.solution[i],
+                max = sol_max$primal.solution[i],
+                opt_min = sol_min$primal.solution[ncol(S)],
                 opt_max = sol_max$primal.solution[ncol(S)])
         })
-
     } else {
         opt <- lapply(11:(ncol(S) - 1), function(i) {
             a_loc <- a
             a_loc[i] <- 1
             sol_min <- lpcdd(h_loc, a_loc, minimize = TRUE)
             sol_max <- lpcdd(h_loc, a_loc, minimize = FALSE)
-            data.frame(min = sol_min$primal.solution[i], 
-                max = sol_max$primal.solution[i], 
-                opt_min = sol_min$primal.solution[ncol(S)], 
+            data.frame(min = sol_min$primal.solution[i],
+                max = sol_max$primal.solution[i],
+                opt_min = sol_min$primal.solution[ncol(S)],
                 opt_max = sol_max$primal.solution[ncol(S)])
         })
         opt <- do.call(rbind, opt)
     }
-    
+
     return(opt)
 }
 
@@ -181,58 +180,58 @@ fva <- function(obj, alpha = 1, S, v_min = 0, v_max = 1) {
 #' the one minimizing the overall flux sum, thus, being the most 'economic' one
 #' for the organism.
 #'
-#' @param obj The objective reaction, whose flux will be be maximized. Can 
+#' @param obj The objective reaction, whose flux will be be maximized. Can
 #'  be any of the following three:
 #'  \itemize{
 #'  \item{A list containing at least the four vectors S, P, N_S, and N_P, which
 #'      which contain the names of substrates and products and their respective
 #'      stochiometries.}
-#'  \item{A unnamed vector containing the corresponding column in the 
+#'  \item{A unnamed vector containing the corresponding column in the
 #'      stochiometric matrix.}
 #'  \item{A named vector containing only the non-zero entries in the respective
-#'      column of the stochiometric matrix bein named by their respective 
+#'      column of the stochiometric matrix bein named by their respective
 #'      metabolite.}
 #'  }
 #' @param S The stochiometrix matrix to be used (must be irreversible).
-#' @param v_min Lower bounds for the reaction fluxes. Can be a single value or a 
+#' @param v_min Lower bounds for the reaction fluxes. Can be a single value or a
 #'  vector containing one value for each reaction.
-#' @param v_max Upper bounds for the reaction fluxes. Can be a single value or a 
+#' @param v_max Upper bounds for the reaction fluxes. Can be a single value or a
 #'  vector containing one value for each reaction.
-#' @return A vector with the same length as columns in \code{S} containing the 
+#' @return A vector with the same length as columns in \code{S} containing the
 #'  solution of the optimization.
 #' @export
-#' @examples 
+#' @examples
 #' S <- matrix(c(1, 0, -2, 1), ncol = 2)
 #' rownames(S) <- c("A", "B")
-#' pfba(c(B = -1), S) 
+#' pfba(c(B = -1), S)
 pfba <- function(obj, S, v_min = 0, v_max = 1) {
     v_min = expand_constraints(v_min, ncol(S))
     v_max = expand_constraints(v_max, ncol(S))
-    
+
     S <- cbind(S, build_objective(obj, S))
     a <- rep(0, ncol(S))
     a[ncol(S)] <- 1
-    
+
     const_matrix <- rbind(-diag(ncol(S)), diag(ncol(S))[-ncol(S),])
     const_b <- c(-v_min, 0, v_max)
     NC <- as.matrix(S)
     b <- rep(0, nrow(S))
-    
+
     hp <- makeH(const_matrix, const_b, NC, b)
-    
+
     sol <- lpcdd(hp, a, minimize = FALSE)
-    if (sol$solution.type != "Optimal") 
+    if (sol$solution.type != "Optimal")
         stop(sprintf("Error in initial optimization! (%s)", sol$solution.type))
-    
-    keep_idx <- which(a != 0)    
+
+    keep_idx <- which(a != 0)
     keep_val <- sol$primal.solution[keep_idx]
     a <- diag(ncol(S))[keep_idx,]
     pp <- addHeq(a, keep_val, hp)
     sol <- lpcdd(pp, rep(1,ncol(S)), minimize = TRUE)
-    
-    if (sol$solution.type != "Optimal") 
+
+    if (sol$solution.type != "Optimal")
         stop(sprintf("Error in parsimonous optimization! (%s)", sol$solution.type))
-    
+
     return(sol$primal.solution)
 }
 
@@ -255,19 +254,19 @@ which_reaction <- function(r, S = "", P = "") {
         prods <- P[P %in% r[[i]]$P]
         data.frame(idx = i, metabolites = c(subs, prods))
     })
-    
+
     return(do.call(rbind, out))
 }
 
 #' Finds the closest point in within the k-cone to a query point p.
-#' 
+#'
 #' @seealso \code{\link{fba}} for optimization within the k-cone.
 #' @param p The query point. Can be outside or inside the k-cone.
 #' @param S The stochiometric matrix.
-#' @param m_terms The metbaolic terms to be used. Must be have 
+#' @param m_terms The metbaolic terms to be used. Must be have
 #'  \code{ncol(S)} elements.
 #' @return A vector containing the closest point to p within the k-cone.
-#' @examples 
+#' @examples
 #' data(eryth)
 #' S <- stoichiometry(eryth)
 #' mats <- runif(ncol(S))
@@ -276,17 +275,17 @@ which_reaction <- function(r, S = "", P = "") {
 #' @importFrom quadprog solve.QP
 #' @export
 closest <- function(p, S, m_terms) {
-    if (!requireNamespace("quadprog", quietly = TRUE)) 
+    if (!requireNamespace("quadprog", quietly = TRUE))
         stop("This function requires the quadprog package.")
-    
-    if (length(p) != ncol(S)) 
+
+    if (length(p) != ncol(S))
         stop("p does not have the correct dimension!")
     dp <- enorm(p)
-    
+
     A <- S %*% diag(m_terms)
     A <- t(as.matrix(rbind(A, diag(ncol(S)))))
     qp <- solve.QP(diag(ncol(S)), p/dp, A, meq = nrow(S))
-    
-    
+
+
     return(qp$solution * dp)
-} 
+}

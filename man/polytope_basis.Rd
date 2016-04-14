@@ -2,29 +2,33 @@
 % Please edit documentation in R/kcone.R
 \name{polytope_basis}
 \alias{polytope_basis}
-\title{Gets the polytope basis of the k-cone. The basis will be normalized such
-that each vertex has a length of one.}
+\title{Gets the polytope basis for a reaction system. The basis will be normalized
+such that each vertex has a length of one.}
 \usage{
-polytope_basis(s_matrix, m_terms = rep(1, ncol(s_matrix)))
+polytope_basis(s_matrix, m_terms = rep(1, ncol(s_matrix)), zero_eq = NA)
 }
 \arguments{
 \item{s_matrix}{The stochiometric matrix.}
 
 \item{m_terms}{The metabolic terms for each reaction. Default to
 calculation of flux cone.}
+
+\item{zero_eq}{An optional matrix of additional equality contraints. Must
+have as many columns as reactions in `s_matrix`.}
 }
 \value{
-A matrix containing the basis vectors (normalized to a sum of 1) 
+A matrix containing the basis vectors (normalized to a sum of 1)
  in its columns.
 }
 \description{
-Gets the polytope basis of the k-cone. The basis will be normalized such
-that each vertex has a length of one.
+Gets the polytope basis for a reaction system. The basis will be normalized
+such that each vertex has a length of one.
 }
 \examples{
 S <- matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
 rownames(S) = c('A', 'B')
 V <- polytope_basis(S)
+
 }
 \keyword{basis}
 \keyword{k-cone,}

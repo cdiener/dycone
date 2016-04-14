@@ -14,7 +14,7 @@ stability_analysis(basis, s_matrix, concs)
 \item{concs}{A named vector of metabolite concentrations.}
 }
 \value{
-A data frame containing the a string describing the type of 
+A data frame containing the a string describing the type of
  stability along with its eigenvalues for each vector in the basis.
 }
 \description{
@@ -31,7 +31,7 @@ K <- kcone(V, ma_terms(S, concs))
 stab <- stability_analysis(K, S, concs)
 }
 \seealso{
-\code{\link{polytope_basis}} and \code{}\link{kcone} to 
+\code{\link{polytope_basis}} and \code{}\link{kcone} to
  calculate the k-cone.
 }
 \keyword{stability}

@@ -2,8 +2,8 @@
 % Please edit documentation in R/kcone.R
 \name{occupation}
 \alias{occupation}
-\title{Calculates the occupation for a basis. Here, occupation denotes 
-the faction of basis vectors for each varibale where the variable 
+\title{Calculates the occupation for a basis. Here, occupation denotes
+the faction of basis vectors for each varibale where the variable
 is not zero.}
 \usage{
 occupation(basis)
@@ -16,8 +16,8 @@ A vector of length nrow(basis) containing the occupation for
  each dimension.
 }
 \description{
-Calculates the occupation for a basis. Here, occupation denotes 
-the faction of basis vectors for each varibale where the variable 
+Calculates the occupation for a basis. Here, occupation denotes
+the faction of basis vectors for each varibale where the variable
 is not zero.
 }
 \examples{

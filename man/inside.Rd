@@ -2,7 +2,7 @@
 % Please edit documentation in R/kcone.R
 \name{inside}
 \alias{inside}
-\title{Evaluates whether a given point lies within a given k-cone. Assumes a 
+\title{Evaluates whether a given point lies within a given k-cone. Assumes a
 pointed cone (all reactions irreversible).}
 \usage{
 inside(x, s_matrix, m_terms, tol = sqrt(.Machine$double.eps))
@@ -23,7 +23,7 @@ A single boolean of vector of booleans indicating whether the
  point(s) lie within the k-cone.
 }
 \description{
-Evaluates whether a given point lies within a given k-cone. Assumes a 
+Evaluates whether a given point lies within a given k-cone. Assumes a
 pointed cone (all reactions irreversible).
 }
 \examples{

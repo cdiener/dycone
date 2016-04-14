@@ -10,7 +10,7 @@ as.stability(evs)
 \item{evs}{A vector of (complex) eigenvalues.}
 }
 \value{
-A single string of either stable, unstable, limit cycle or 
+A single string of either stable, unstable, limit cycle or
  zero jacobian.
 }
 \description{

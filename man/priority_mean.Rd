@@ -17,8 +17,8 @@ they appear.}
 The mean
 }
 \description{
-This is useful if one prefers concentrations from one biofluid, but will also 
-except other biofluids if no reported measurements can be found for the 
+This is useful if one prefers concentrations from one biofluid, but will also
+except other biofluids if no reported measurements can be found for the
 primary one. \code{priority_mean} will return the mean of the first biofluid
 for which measuremnts can be found.
 }
@@ -28,7 +28,7 @@ concs <- hmdb_concentration('HMDB00124') # Fructose-6-phosphate
 priority_mean(concs) # has measurements for cytoplasm so returns those
 }
 \seealso{
-\code{\link{hmdb_concentration}} to parse the concentrations used 
+\code{\link{hmdb_concentration}} to parse the concentrations used
  in this function.
 }
 

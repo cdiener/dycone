@@ -9,7 +9,7 @@ plot_basis(b, n_cl = NA, ...)
 \arguments{
 \item{b}{The basis matrix, containing the basis vectors in the columns.}
 
-\item{n_cl}{The number of clusters individual basis vectors are grouped 
+\item{n_cl}{The number of clusters individual basis vectors are grouped
 into. NA means no clustering is performed.}
 
 \item{...}{other arguments passed to pheatmap.}

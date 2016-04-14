@@ -26,7 +26,7 @@ K <- kcone_null(S, runif(ncol(S)))
 
 }
 \seealso{
-\code{\link{polytope_basis}} for arbitrary reversibility 
+\code{\link{polytope_basis}} for arbitrary reversibility
  constraints.
 }
 \keyword{basis,}

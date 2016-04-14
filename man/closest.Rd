@@ -11,7 +11,7 @@ closest(p, S, m_terms)
 
 \item{S}{The stochiometric matrix.}
 
-\item{m_terms}{The metbaolic terms to be used. Must be have 
+\item{m_terms}{The metbaolic terms to be used. Must be have
 \code{ncol(S)} elements.}
 }
 \value{

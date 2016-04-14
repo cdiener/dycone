@@ -7,29 +7,29 @@
 fba(obj, S, v_min = 0, v_max = 1)
 }
 \arguments{
-\item{obj}{The objective reaction, whose flux will be be maximized. Can 
+\item{obj}{The objective reaction, whose flux will be be maximized. Can
 be any of the following three:
 \itemize{
 \item{A list containing at least the four vectors S, P, N_S, and N_P, which
     which contain the names of substrates and products and their respective
     stochiometries.}
-\item{A unnamed vector containing the corresponding column in the 
+\item{A unnamed vector containing the corresponding column in the
     stochiometric matrix.}
 \item{A named vector containing only the non-zero entries in the respective
-    column of the stochiometric matrix bein named by their respective 
+    column of the stochiometric matrix bein named by their respective
     metabolite.}
 }}
 
 \item{S}{The stochiometrix matrix to be used (must be irreversible).}
 
-\item{v_min}{Lower bounds for the reaction fluxes. Can be a single value or a 
+\item{v_min}{Lower bounds for the reaction fluxes. Can be a single value or a
 vector containing one value for each reaction.}
 
-\item{v_max}{Upper bounds for the reaction fluxes. Can be a single value or a 
+\item{v_max}{Upper bounds for the reaction fluxes. Can be a single value or a
 vector containing one value for each reaction.}
 }
 \value{
-A vector with the same length as columns in \code{S} containing the 
+A vector with the same length as columns in \code{S} containing the
  solution of the optimization.
 }
 \description{
@@ -38,7 +38,7 @@ Maximizes the flux through a given objective reaction.
 \examples{
 S <- matrix(c(1, 0, -2, 1), ncol = 2)
 rownames(S) <- c("A", "B")
-fba(c(B = -1), S) 
+fba(c(B = -1), S)
 
 }
 

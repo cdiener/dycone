@@ -31,7 +31,7 @@ V <- polytope_basis(S)
 K <- kcone(V, runif(ncol(S)))
 }
 \seealso{
-\code{\link{polytope_basis}} for a way to calculate the flux cone, 
+\code{\link{polytope_basis}} for a way to calculate the flux cone,
  \code{\link{ma_terms}} to get mass action term.
 }
 \keyword{basis}
