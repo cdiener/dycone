@@ -43,10 +43,10 @@ test_that("we can calculate all mass-action terms", {
     rownames(S) <- c("x", "y")
     expect_equal(ma_terms(S, co), c(1, 4))
     expect_error(ma_terms(S, 1:2))
-    
+
     rownames(S) <- c("y", "x")
     expect_equal(ma_terms(S, co), 2:1)
-    
+
     co <- data.frame(name = c("x", "y"), co, co)
     expect_equal(rowSums(ma_terms(S, co)), c(4, 2))
     expect_error(ma_terms(S, co[-1]))
@@ -92,7 +92,7 @@ test_that("we can read and format reactions from a file", {
     expect_equal(species(r), c("A", "B"))
     expect_equal(grep("1*A", format(r)), 1)
     expect_equal(grep("Model has", capture.output(print(r))), 1)
-    
+
     r_str <- "reaction,abbreviation,numbers\nA -Z B,blub,\"1,2,3\"\nB <=>, bla, 3"
     expect_error(invisible(read_reactions(textConnection(r_str))), "arrows")
 })
@@ -146,6 +146,6 @@ test_that("additional helpers work", {
     expect_false(any(constant_flux(r)))
     expect_true(any(constant_flux(make_irreversible(r))))
     expect_true("reactions" %in% class(as.reactions(stoichiometry(r))))
-    expect_more_than(length(methods(class = "reactions")), 1)
+    expect_gt(length(methods(class = "reactions")), 1)
     expect_equal(rp(r, "numbers")[, 2], c(1, 2, 3, 3))
-}) 
+})

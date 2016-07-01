@@ -7,18 +7,18 @@
 #' @name dycone
 #' @importFrom magrittr '%>%'
 #' @importFrom pheatmap pheatmap
-#' @import rcdd
+#' @import rcdd stats utils graphics grDevices
 NULL
 
 ### Data documentation
 
 #' Metabolic network of human red blood cell.
 #'
-#' Contains the reactions of the human red blood cell (erythrocite) metabolic 
+#' Contains the reactions of the human red blood cell (erythrocite) metabolic
 #' model together with some randomly sampled rates k.
 #'
 #' @return Assigns the \code{eryth} reactions list to the namespace.
 #' @format A list of reactions.
 #' @source \url{http://journals.plos.org/plosone/article/asset?unique&id=
 #' info:doi/10.1371/journal.pone.0004967.s003}
-"eryth" 
+"eryth"

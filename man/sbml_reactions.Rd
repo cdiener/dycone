@@ -14,7 +14,7 @@ to an online resource.}
 }
 \value{
 A list with additional class "reactions" describing the reactions in
- the model. RDF annotations, notes and flux bounds are saved along with the 
+ the model. RDF annotations, notes and flux bounds are saved along with the
  reactions
 }
 \description{

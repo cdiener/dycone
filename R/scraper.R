@@ -97,7 +97,7 @@ hmdb_parse <- function(nodes) {
         "subject_sex", "subject_condition", "references/reference/pubmed_id")
 
     vals <- sapply(nodes, function(n) sapply(tags, function(ta) {
-        tryCatch(n %>% xml_find_one(paste0("./", ta)) %>% xml_text(),
+        tryCatch(n %>% xml_find_first(paste0("./", ta)) %>% xml_text(),
             error = function(e) { "" })
     }))
 
@@ -141,9 +141,9 @@ hmdb_concentration <- function(hmids, add = NULL) {
                 xml_find_all("./normal_concentrations/concentration") %>%
                 hmdb_parse())
 
-            kegg_id <- c(kegg_id, hm_xml %>% xml_find_one("./kegg_id") %>%
+            kegg_id <- c(kegg_id, hm_xml %>% xml_find_first("./kegg_id") %>%
                 xml_text())
-            name <- c(name, hm_xml %>% xml_find_one("./name") %>% xml_text())
+            name <- c(name, hm_xml %>% xml_find_first("./name") %>% xml_text())
         }
         cat("\n")
 

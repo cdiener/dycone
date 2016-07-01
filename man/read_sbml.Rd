@@ -16,11 +16,11 @@ A list containing three elements:
  \item{species}{The species (metabolites or molecules) in the model in a data
  frame. Boundary metabolites are removed automatically.}
  \item{params}{The global parameters defined for the model.}
- \item{reactions}{The reactions in the model as an "reactions" object.} 
+ \item{reactions}{The reactions in the model as an "reactions" object.}
  }
 }
 \description{
-This function wraps around \code{sbml_*} functions but also performs some 
+This function wraps around \code{sbml_*} functions but also performs some
 basic sanity checks and adjustments which are:
 \itemize{
 \item{Gives information about the used level and version and whether the FBC
@@ -38,7 +38,7 @@ read_sbml(m_url)
 
 }
 \seealso{
-\code{\link{sbml_species}}, \code{\link{sbml_params}} and 
+\code{\link{sbml_species}}, \code{\link{sbml_params}} and
  \code{\link{sbml_reactions}} to read only parts of an SBML model.
 }
 

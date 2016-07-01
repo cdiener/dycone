@@ -16,7 +16,7 @@ eryth
 Assigns the \code{eryth} reactions list to the namespace.
 }
 \description{
-Contains the reactions of the human red blood cell (erythrocite) metabolic 
+Contains the reactions of the human red blood cell (erythrocite) metabolic
 model together with some randomly sampled rates k.
 }
 \keyword{datasets}
