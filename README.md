@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/cdiener/dycone.svg?branch=master)](https://travis-ci.org/cdiener/dycone)
 [![wercker status](https://app.wercker.com/status/b8b682f3278fd21b27afab12fb050db7/s "wercker status")](https://app.wercker.com/project/bykey/b8b682f3278fd21b27afab12fb050db7)
-[![codecov.io](http://codecov.io/github/cdiener/dycone/coverage.svg?branch=master)](http://codecov.io/github/cdiener/dycone?branch=master)
+[![codecov](https://codecov.io/gh/cdiener/dycone/branch/master/graph/badge.svg)](https://codecov.io/gh/cdiener/dycone)
 [![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.49987.svg)](http://dx.doi.org/10.5281/zenodo.49987)
 
 ![dycone](stuff/logo.png)
