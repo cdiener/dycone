@@ -15,6 +15,15 @@ metabolome mesurements. It employs formalisms based on flux and k-cone
 analysis to connect metabolome data to distinct regulations of enzyme activity. 
 Most of the analysis methods can be applied to genome-scale data. 
 
+Attribution
+-----------
+
+If you use dycone in your academic work you may use the following paper for a citation
+
+> Diener C, Muñoz-Gonzalez F, Encarnación S, Resendis-Antonio O.     
+> The space of enzyme regulation in HeLa cells can be inferred from its intracellular metabolome.      
+> Sci Rep. 2016 Jun 23;6:28415. doi: 10.1038/srep28415. PubMed PMID: 27335086.
+
 Installation
 -----------
 
@@ -64,3 +73,8 @@ vignette("eryth")
 
 For an exhaustive example you can look at the Rmarkdown generated protocol at 
 https://github.com/cdiener/kcone-paper.
+
+Roadmap
+-------
+
+To see planned changes to dycone please consult the [project milestones](https://github.com/cdiener/dycone/milestones).
