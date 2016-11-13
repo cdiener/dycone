@@ -62,7 +62,7 @@ NumericVector glpk_fva(IntegerVector ridx, IntegerVector cidx,
     for(int col=0; col<2; col++) {
         for(int i=1; i <= ncols; i++) {
             if (i == objidx) {
-                ranges(i, col) = objf*obj_sol;
+                ranges(i-1, col) = objf*obj_sol;
                 continue;
             }
             glp_set_obj_coef(lp, i, 1.0);
@@ -71,7 +71,7 @@ NumericVector glpk_fva(IntegerVector ridx, IntegerVector cidx,
             if (res != 0) return res;
             res = glp_get_status(lp);
             if (res != GLP_OPT) return res;
-            ranges(i, col) = glp_get_obj_val(lp);
+            ranges(i-1, col) = glp_get_obj_val(lp);
             glp_set_obj_coef(lp, i, 0.0);
         }
     }
