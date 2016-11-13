@@ -1,6 +1,11 @@
 box: rocker/hadleyverse
 build:
   steps:
+    - script:
+        name: Install glpk lib
+        code: |
+            apt-get update
+            apt-get install -y -t testing libglpk-dev 
     - jimhester/r-dependencies
     - jimhester/r-check
     - jimhester/r-coverage
