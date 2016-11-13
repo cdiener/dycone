@@ -16,7 +16,7 @@ be any of the following three:
 \item{A unnamed vector containing the corresponding column in the
     stochiometric matrix.}
 \item{A named vector containing only the non-zero entries in the respective
-    column of the stochiometric matrix bein named by their respective
+    column of the stochiometric matrix being named by their respective
     metabolite.}
 }}
 
