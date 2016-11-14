@@ -23,7 +23,7 @@ KEGG_REST <- "http://rest.kegg.jp/link/hsa/ec:%s"
 #' @return The mean
 #' @examples
 #' # requires internet connection
-#' concs <- hmdb_concentration('HMDB00124') # Fructose-6-phosphate
+#' concs <- hmdb_concentration('HMDB00124')
 #' priority_mean(concs) # has measurements for cytoplasm so returns those
 priority_mean <- function(d, biofluids = c("cellular cytoplasm", "blood")) {
     if (is.null(d))
@@ -50,7 +50,7 @@ priority_mean <- function(d, biofluids = c("cellular cytoplasm", "blood")) {
 #' @examples
 #' grep_id('A, B', 'B, D')
 grep_id <- function(ids, x) {
-    res <- unlist(sapply(str_conv(ids), grep, x=x))
+    res <- unlist(sapply(str_conv(ids), grep, x = x))
 
     if (length(res) > 0) return(res) else return(NA)
 }
@@ -93,12 +93,13 @@ find_hmdb <- function(search_term) {
 #' @param nodes A list of XML nodes.
 #' @return The parsed data set as a data frame.
 hmdb_parse <- function(nodes) {
-    tags <- c("biofluid", "concentration_value", "concentration_units", "subject_age",
-        "subject_sex", "subject_condition", "references/reference/pubmed_id")
+    tags <- c("biofluid", "concentration_value", "concentration_units",
+              "subject_age", "subject_sex", "subject_condition",
+              "references/reference/pubmed_id")
 
     vals <- sapply(nodes, function(n) sapply(tags, function(ta) {
         tryCatch(n %>% xml_find_first(paste0("./", ta)) %>% xml_text(),
-            error = function(e) { "" })
+            error = function(e) return(""))
     }))
 
     vals <- t(tolower(vals))
@@ -122,7 +123,7 @@ hmdb_parse <- function(nodes) {
 #'  found.
 #' @examples
 #' # requires internet connection
-#' hmdb_concentration('HMDB00124') # Fructose-6-phosphate
+#' hmdb_concentration('HMDB00124')
 #'
 #' @export
 #' @importFrom xml2 xml_find_first xml_find_all
@@ -134,7 +135,7 @@ hmdb_concentration <- function(hmids, add = NULL) {
         hm_entries <- NULL
         kegg_id <- NULL
         name <- NULL
-        for(id in ids) {
+        for (id in ids) {
             cat(sprintf("\rScraping %d/%d...", i, length(hmids)))
             hm_xml <- read_xml(sprintf(HMDB_XML, id))
 
@@ -223,8 +224,10 @@ patch <- function(measurements, id, normal, treatment, ref_data = NULL) {
     out <- measurements
     data_cols <- c(normal, treatment)
 
-    out[, normal] <- group_patch(out[, normal])  # patch grouped by normal
-    out[, treatment] <- group_patch(out[, treatment])  # patch grouped by treatment
+    # patch grouped by normal
+    out[, normal] <- group_patch(out[, normal])
+    # patch grouped by treatment
+    out[, treatment] <- group_patch(out[, treatment])
 
     out[, data_cols] <- group_patch(out[, data_cols])  # patch between groups
 

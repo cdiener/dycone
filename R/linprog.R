@@ -27,8 +27,14 @@ build_objective <- function(o, S) {
         col[mets] <- sto
     } else if (is.vector(o)) {
         if (is.null(names(o))) {
-            if (length(o) != nrow(S))
-                stop("Unnamed objective vector must have the same length as rows in S.")
+            if (length(o) == 1) {
+                if (o > ncol(S)) {
+                    stop("Not a valid column index in S!")
+                }
+                return(o)
+            } else if (length(o) != nrow(S))
+                stop(paste0("Unnamed objective vector must have ",
+                            "the same length as rows in S."))
             col <- o
         } else {
             if (!all(names(o) %in% rownames(S)))
@@ -43,10 +49,11 @@ build_objective <- function(o, S) {
 }
 
 # Helper function to allow single or multi-value constraints
-expand_constraints = function(v, n) {
+expand_constraints <- function(v, n) {
     if (length(v) == n) return(v)
-    else if (length(v) == 1) return(rep(v,n))
-    else stop("There must be a single flux constraint or one for each reaction.")
+    else if (length(v) == 1) return(rep(v, n))
+    else stop(paste0("There must be a single flux constraint ",
+                     "or one for each reaction."))
 }
 
 #' Maximizes the flux through a given objective reaction.
@@ -62,6 +69,8 @@ expand_constraints = function(v, n) {
 #'  \item{A named vector containing only the non-zero entries in the respective
 #'      column of the stochiometric matrix being named by their respective
 #'      metabolite.}
+#'  \item{A single integer indicating which column of the stoichiometric
+#'      contains the objective reaction.}
 #'  }
 #' @param S The stochiometrix matrix to be used (must be irreversible).
 #' @param v_min Lower bounds for the reaction fluxes. Can be a single value or a
@@ -82,11 +91,17 @@ fba <- function(obj, S, v_min = 0, v_max = 1) {
     v_min <- expand_constraints(v_min, ncol(S))
     v_max <- expand_constraints(v_max, ncol(S))
 
-    S <- Matrix(cbind(S, build_objective(obj, S)), sparse = TRUE)
+    obj <- build_objective(obj, S)
+    if (length(obj) == 1) {
+        optidx <- obj
+    } else {
+        S <- Matrix(cbind(S, build_objective(obj, S)), sparse = TRUE)
+        optidx <- ncol(S)
+    }
     sp <- summary(S)
 
     glpk_res <- glpk_fba(gf(sp[, 1]), gf(sp[, 2]), gf(sp[, 3]), nrow(S),
-                         ncol(S), gf(v_min), gf(v_max), ncol(S))
+                         ncol(S), gf(v_min), gf(v_max), optidx)
 
     if (length(glpk_res) < ncol(S)) {
         stop(paste0("GLPK failed with error code ", glpk_res, "."))
@@ -110,8 +125,10 @@ fba <- function(obj, S, v_min = 0, v_max = 1) {
 #'  \item{A unnamed vector containing the corresponding column in the
 #'      stochiometric matrix.}
 #'  \item{A named vector containing only the non-zero entries in the respective
-#'      column of the stochiometric matrix bein named by their respective
+#'      column of the stochiometric matrix being named by their respective
 #'      metabolite.}
+#'  \item{A single integer indicating which column of the stoichiometric
+#'      contains the objective reaction.}
 #'  }
 #' @param alpha A positive scalar <=1. FVA is performed assuming that the
 #'  optimal solution can not be less than alpha*opt.
@@ -132,11 +149,17 @@ fva <- function(obj, S, alpha=1, v_min = 0, v_max = 1) {
     v_min <- expand_constraints(v_min, ncol(S))
     v_max <- expand_constraints(v_max, ncol(S))
 
-    S <- Matrix(cbind(S, build_objective(obj, S)), sparse = TRUE)
+    obj <- build_objective(obj, S)
+    if (length(obj) == 1) {
+        optidx <- obj
+    } else {
+        S <- Matrix(cbind(S, build_objective(obj, S)), sparse = TRUE)
+        optidx <- ncol(S)
+    }
     sp <- summary(S)
 
     glpk_res <- glpk_fva(gf(sp[, 1]), gf(sp[, 2]), gf(sp[, 3]), nrow(S),
-                         ncol(S), gf(v_min), gf(v_max), ncol(S), alpha)
+                         ncol(S), gf(v_min), gf(v_max), optidx, alpha)
 
     if (length(glpk_res) == 1) {
         stop(paste0("GLPK failed with error code ", glpk_res, "."))
@@ -161,8 +184,10 @@ fva <- function(obj, S, alpha=1, v_min = 0, v_max = 1) {
 #'  \item{A unnamed vector containing the corresponding column in the
 #'      stochiometric matrix.}
 #'  \item{A named vector containing only the non-zero entries in the respective
-#'      column of the stochiometric matrix bein named by their respective
+#'      column of the stochiometric matrix being named by their respective
 #'      metabolite.}
+#'  \item{A single integer indicating which column of the stoichiometric
+#'      contains the objective reaction.}
 #'  }
 #' @param S The stochiometrix matrix to be used (must be irreversible).
 #' @param alpha Fraction of optimum value. Objective must be at least
@@ -182,11 +207,17 @@ pfba <- function(obj, S, alpha = 1, v_min = 0, v_max = 1) {
     v_min <- expand_constraints(v_min, ncol(S))
     v_max <- expand_constraints(v_max, ncol(S))
 
-    S <- Matrix(cbind(S, build_objective(obj, S)), sparse = TRUE)
+    obj <- build_objective(obj, S)
+    if (length(obj) == 1) {
+        optidx <- obj
+    } else {
+        S <- Matrix(cbind(S, build_objective(obj, S)), sparse = TRUE)
+        optidx <- ncol(S)
+    }
     sp <- summary(S)
 
     glpk_res <- glpk_pfba(gf(sp[, 1]), gf(sp[, 2]), gf(sp[, 3]), nrow(S),
-                         ncol(S), gf(v_min), gf(v_max), ncol(S), alpha)
+                         ncol(S), gf(v_min), gf(v_max), optidx, alpha)
 
     if (length(glpk_res) < ncol(S)) {
         stop(paste0("GLPK failed with error code ", glpk_res, "."))
@@ -246,7 +277,7 @@ closest <- function(p, S, m_terms) {
 
     A <- S %*% diag(m_terms)
     A <- t(as.matrix(rbind(A, diag(ncol(S)))))
-    qp <- solve.QP(diag(ncol(S)), p/dp, A, meq = nrow(S))
+    qp <- solve.QP(diag(ncol(S)), p / dp, A, meq = nrow(S))
 
 
     return(qp$solution * dp)

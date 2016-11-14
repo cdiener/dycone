@@ -40,9 +40,9 @@ enorm <- function(x) sqrt(sum(x * x))
 #' V <- polytope_basis(S)
 #' K <- kcone(V, runif(ncol(S)))
 kcone <- function(V, mats, normalize = FALSE) {
-    K <- diag(1/mats) %*% V
+    K <- diag(1 / mats) %*% V
     if (normalize)
-        K <- apply(K, 2, function(x) x/enorm(x))
+        K <- apply(K, 2, function(x) x / enorm(x))
     K <- as.matrix(K)
     class(K) <- append(c("basis", "kcone"), class(K))
     return(K)
@@ -105,8 +105,8 @@ constrain_by_Keq <- function(r, name="Keq", mats=NULL) {
         if (valid) valid <- is.finite(keq)
         if (ri$rev && valid) {
             x <- rep(0, n_r)
-            x[i] <- mats[i+1]
-            x[i+1] <- -mats[i] / keq
+            x[i] <- mats[i + 1]
+            x[i + 1] <- -mats[i] / keq
             constraints <- rbind(constraints, x)
             i <- i + 2
         } else i <- i + 1
@@ -148,9 +148,9 @@ polytope_basis <- function(s_matrix, m_terms = rep(1, ncol(s_matrix)),
     hp <- makeH(d2q(const_matrix), d2q(const_b), d2q(NC), d2q(b))
     hp <- redundant(hp)$output
     vrep <- scdd(hp)
-    vp <- q2d(vrep$output[, -(1:2)])
+    vp <- q2d(vrep$output[, -1:-2])
 
-    basis <- as.matrix(apply(t(vp), 2, function(x) x/enorm(x)))
+    basis <- as.matrix(apply(t(vp), 2, function(x) x / enorm(x)))
     class(basis) <- append("basis", class(basis))
 
     return(basis)
@@ -207,14 +207,14 @@ stability_analysis <- function(basis, s_matrix, concs) {
     if (!is.null(ncol(basis))) {
         nc <- ncol(basis)
         data <- lapply(1:ncol(basis), function(i) {
-            b <- basis[, i]/enorm(basis[, i])
+            b <- basis[, i] / enorm(basis[, i])
             evs <- t(eigen(s_matrix %*% diag(b) %*% J)$values)
             stab <- as.stability(evs)
             return(data.frame(what = stab, evs = evs))
         })
     } else {
         nc <- 1
-        b <- basis/enorm(basis)
+        b <- basis / enorm(basis)
         evs <- t(eigen(s_matrix %*% diag(b) %*% J)$values)
         stab <- as.stability(evs)
         data <- data.frame(what = stab, evs = evs)
@@ -248,7 +248,8 @@ occupation <- function(basis) {
     if (!("basis" %in% class(basis)))
         stop("object is not a basis!")
 
-    return(apply(basis, 1, function(r) sum(abs(r) > .Machine$double.eps)/length(r)))
+    return(apply(basis, 1, function(r)
+        sum(abs(r) > .Machine$double.eps) / length(r)))
 }
 
 #' Plots a heatmap of the basis.
@@ -272,7 +273,9 @@ plot_basis <- function(b, n_cl = NA, ...) {
     if (!is.na(n_cl)) {
         write("Basis are very large. Reducing by clustering...", file = "")
         cl <- kmeans(t(b), centers = n_cl, iter.max = 100, nstart = 3)
-        write(sprintf("Mean in-cluster distance: %g.", mean(sqrt(cl$withinss/cl$size))),
+        write(sprintf(
+            "Mean in-cluster distance: %g.",
+            mean(sqrt(cl$withinss / cl$size))),
             file = "")
         b <- t(cl$centers)
         clustered <- TRUE
@@ -329,7 +332,8 @@ plot_basis <- function(b, n_cl = NA, ...) {
 #' @importFrom stats sd prcomp predict kmeans
 #' @importFrom graphics plot polygon
 #' @importFrom grDevices adjustcolor
-plot_red <- function(basis_list, arrows = TRUE, col = NULL, n_cl = NULL, r_names=NULL) {
+plot_red <- function(basis_list, arrows = TRUE, col = NULL,
+                     n_cl = NULL, r_names=NULL) {
     if (!("list" %in% class(basis_list)))
         stop("basis_list must be a list!")
 
@@ -343,8 +347,9 @@ plot_red <- function(basis_list, arrows = TRUE, col = NULL, n_cl = NULL, r_names
     n <- length(basis_list)
 
     if (!is.null(r_names) && (length(r_names) != max(b_rows) ||
-        !is.character(r_names))) stop("r_names must be a character vector with as
-        many entries as the maximum row number in basis_list!")
+        !is.character(r_names))) stop(paste0(
+            "r_names must be a character vector with as many entries",
+            "as the maximum row number in basis_list!"))
 
     all_basis <- do.call(cbind, basis_list)
 
@@ -356,13 +361,13 @@ plot_red <- function(basis_list, arrows = TRUE, col = NULL, n_cl = NULL, r_names
         pca <- prcomp(t(all_basis))
         red <- lapply(basis_list, function(b) predict(pca, t(b))[, 1:2])
         if (!is.null(r_names))
-            load_names <- t(apply(pca$rotation[,1:2], 2, function(l)
-                r_names[order(-abs(l))[1:min(4,min(b_rows))]]))
+            load_names <- t(apply(pca$rotation[, 1:2], 2, function(l)
+                r_names[order(-abs(l))[1:min(4, min(b_rows))]]))
     }
 
     if (max(b_cols) > 1000 || !is.null(n_cl)) {
         if (is.null(n_cl))
-            n_cl <- ceiling(min(1000, sqrt(mean(b_cols)/2)))
+            n_cl <- ceiling(min(1000, sqrt(mean(b_cols) / 2)))
 
         write(sprintf("Bases are very large. Reducing to %d clusters...", n_cl),
             file = "")
@@ -370,24 +375,24 @@ plot_red <- function(basis_list, arrows = TRUE, col = NULL, n_cl = NULL, r_names
         cl <- lapply(red, function(b) suppressWarnings(kmeans(b, centers = n_cl,
             iter.max = 1000, nstart = 11)))
 
-        dists <- sapply(cl, function(x) mean(sqrt(x$withinss/x$size)))
+        dists <- sapply(cl, function(x) mean(sqrt(x$withinss / x$size)))
         write(sprintf("Mean in-cluster distance: %g.", mean(dists)), file = "")
 
         red <- lapply(cl, function(x) x$centers)
     }
 
     energy <- pca$sdev
-    write(sprintf("Information captured in projection: %f%%.", sum(energy[1:2])/sum(energy) *
-        100), file = "")
+    write(sprintf("Information captured in projection: %f%%.",
+                  sum(energy[1:2]) / sum(energy) * 100), file = "")
 
     rs <- apply(do.call(rbind, red), 2, range)
 
     if (!is.null(r_names)) {
-        xl = paste0(load_names[1,], collapse=", ")
-        yl = paste0(load_names[2,], collapse=", ")
+        xl <- paste0(load_names[1, ], collapse = ", ")
+        yl <- paste0(load_names[2, ], collapse = ", ")
     } else {
-        xl = "PC 1"
-        yl = "PC 2"
+        xl <- "PC 1"
+        yl <- "PC 2"
     }
     plot(NULL, xlim = rs[, 1], ylim = rs[, 2], xlab = xl, ylab = yl)
 
@@ -401,17 +406,18 @@ plot_red <- function(basis_list, arrows = TRUE, col = NULL, n_cl = NULL, r_names
 
         p <- rbind(ro, c(0, 0))
         red_ids <- redundant(makeV(d2q(p)))$redundant
-        polygon(p[-red_ids, ], border = NA, col = adjustcolor(pal[i], alpha.f = 0.2))
+        polygon(p[-red_ids, ], border = NA,
+                col = adjustcolor(pal[i], alpha.f = 0.2))
         if (arrows) {
-            arrows(x0 = 0, y0 = 0, x1 = ro[, 1], y1 = ro[, 2], angle = 15, length = 0.05,
-                col = pal[i])
+            arrows(x0 = 0, y0 = 0, x1 = ro[, 1], y1 = ro[, 2],
+                   angle = 15, length = 0.05, col = pal[i])
         }
     }
 }
 
-# Helper function to calculate angls between tow vectors
+# Helper function to calculate angles between tow vectors
 angle <- function(x, y = 0:1, clockwise = TRUE) {
-    theta <- acos(sum(x * y)/sqrt(sum(x * x) * sum(y * y)))
+    theta <- acos(sum(x * y) / sqrt(sum(x * x) * sum(y * y)))
     if (clockwise && x[1] < 0)
         theta <- 2 * pi - theta
     return(theta)
@@ -419,7 +425,7 @@ angle <- function(x, y = 0:1, clockwise = TRUE) {
 
 # Helper function to calculate the length ratio of two vectors
 scaling <- function(x, y = 0:1) {
-    s <- sum(x * x)/sum(y * y)
+    s <- sum(x * x) / sum(y * y)
     return(sqrt(s))
 }
 
@@ -503,7 +509,7 @@ single_hyp <- function(k1, k2, reacts) {
     reacts <- make_irreversible(reacts)
     logfold <- log(k2, 2) - log(k1, 2)
 
-    if(any(!is.finite(logfold)))
+    if (any(!is.finite(logfold)))
         warning("Non-finite log-fold changes have been set to zero.")
     logfold[!is.finite(logfold)] <- 0
 
@@ -513,21 +519,23 @@ single_hyp <- function(k1, k2, reacts) {
         idx <- c(idx, i)
         id <- c(id, r$abbreviation)
         r_s <- c(r_s, to_string(r, name = FALSE))
-        kind <- c(kind, if (logfold[i] == 0) "same" else if (logfold[i] > 0) "up" else "down")
+        kind <- c(kind, if (logfold[i] == 0) "same" else
+                        if (logfold[i] > 0) "up" else "down")
         fac <- c(fac, logfold[i])
     }
 
-    res <- data.frame(idx = idx, name = id, reaction = r_s, type = kind, log2_fold = fac)
+    res <- data.frame(idx = idx, name = id, reaction = r_s,
+                      type = kind, log2_fold = fac)
 
     return(res)
 }
 
 # Internal function to estimate credible intervals by bayes bootstrap
 bayes_mean_ci <- function(x, n = 256, level = 0.95) {
-    iv <- c(0.5*(1 - level), 0.5*(1 + level))
+    iv <- c(0.5 * (1 - level), 0.5 * (1 + level))
     w <- matrix(rexp(length(x) * n), nrow = n)
-    w <- w/rowSums(w)
-    m <- apply(w, 1, weighted.mean, x=x)
+    w <- w / rowSums(w)
+    m <- apply(w, 1, weighted.mean, x = x)
 
     return(quantile(m, iv))
 }
@@ -626,16 +634,16 @@ bayes_mean_ci <- function(x, n = 256, level = 0.95) {
 #' @importFrom stats model.matrix sd p.adjust
 #' @importFrom stats rexp weighted.mean quantile
 #' @export
-hyp <- function(normal, disease, reacts, type = "bias", correction_method = "BH",
-    cred_level = 0.95, sorted = TRUE, obj = NULL, v_min = 1e-16, alpha = 1,
-    full = FALSE) {
+hyp <- function(normal, disease, reacts, type = "bias",
+                correction_method = "BH", cred_level = 0.95, sorted = TRUE,
+                obj = NULL, v_min = 1e-16, alpha = 1, full = FALSE) {
     # Create reference data
     normal <- as.matrix(normal)
     disease <- as.matrix(disease)
 
     if (type != "raw") {
-        normal <- 1/normal
-        disease <- 1/disease
+        normal <- 1 / normal
+        disease <- 1 / disease
     }
     M <- log(cbind(normal, disease), 2)
 
@@ -670,10 +678,10 @@ hyp <- function(normal, disease, reacts, type = "bias", correction_method = "BH"
 
     # Generate model fits
     design <- model.matrix(
-        ~ 0 + factor(rep.int(1:2, times=c(ncol(normal), ncol(disease)))))
+        ~ 0 + factor(rep.int(1:2, times = c(ncol(normal), ncol(disease)))))
     colnames(design) <- c("normal", "disease")
     dfit <- lmFit(M, design)
-    contrast.matrix <- makeContrasts(disease - normal, levels=design)
+    contrast.matrix <- makeContrasts(disease - normal, levels = design)
     cfit <- contrasts.fit(dfit, contrast.matrix)
     cfit <- eBayes(cfit)
 
@@ -681,8 +689,8 @@ hyp <- function(normal, disease, reacts, type = "bias", correction_method = "BH"
     rownames(bci) <- NULL
 
     # Generate statistics
-    stats <- data.frame(sd_normal = apply(lfc_n, 1 , sd), sd_disease =
-        apply(lfc_d, 1 , sd), mean_log_fold = cfit$coefficients[, 1],
+    stats <- data.frame(sd_normal = apply(lfc_n, 1, sd), sd_disease =
+        apply(lfc_d, 1, sd), mean_log_fold = cfit$coefficients[, 1],
         ci_low = bci[1, ], ci_high = bci[2, ], pval = cfit$p.value[, 1])
     nd <- is.na(stats$mean_log_fold)
     stats$mean_log_fold[nd] <- 0

@@ -8,6 +8,7 @@
 RE_SBML <- "sbml/level(\\d)/version(\\d)(/core|$)"
 RE_FBC <- "sbml/level\\d/version\\d/fbc/version(\\d)"
 RE_MATHML <- "Math/MathML"
+BOUND_XPATH <- "./sbml:kineticLaw/sbml:listOfParameters/sbml:parameter"
 
 get_xml <- function(obj) {
     if ("xml_node" %in% class(obj)) return(obj)
@@ -24,8 +25,10 @@ sbml_version <- function(ns) {
         re <- regexec(RE_FBC, fbc_ns)
         m_fbc <- regmatches(fbc_ns, re)
     } else m_fbc <- list(c(NA, NA))
-    return(c(level=as.numeric(m_sbml[[1]][2]), version=as.numeric(m_sbml[[1]][3]),
-        fbc=as.numeric(m_fbc[[1]][2])))
+    return(c(
+        level = as.numeric(m_sbml[[1]][2]),
+        version = as.numeric(m_sbml[[1]][3]),
+        fbc = as.numeric(m_fbc[[1]][2])))
 }
 
 # Clean up the namespace
@@ -44,17 +47,17 @@ clean_ns <- function(ns) {
 
 # group a character matrix hierarchically
 group <- function(m, combine=FALSE) {
-    x <- tapply(m[2,], m[1,], identity)
-    if (combine) x <- sapply(x, paste0, collapse=", ")
+    x <- tapply(m[2, ], m[1, ], identity)
+    if (combine) x <- sapply(x, paste0, collapse = ", ")
     x
 }
 
 rbind_fill <- function(l, fill=NA) {
     nx <- unlist(lapply(l, names))
     nx <- unique(nx)
-    m <- matrix(NA, ncol=length(nx), nrow=length(l))
+    m <- matrix(NA, ncol = length(nx), nrow = length(l))
     colnames(m) <- nx
-    for(i in 1:length(l)) m[i, names(l[[i]])] <- l[[i]]
+    for (i in 1:length(l)) m[i, names(l[[i]])] <- l[[i]]
 
     as.data.frame(m)
 }
@@ -76,7 +79,8 @@ sbml_params <- function(sbml_file) {
     attrs <- c("id", "name", "value")
     doc <- get_xml(sbml_file)
     ns <- clean_ns(xml_ns(doc))
-    p_list <- doc %>% xml_find_all("./sbml:model/sbml:listOfParameters/sbml:parameter", ns)
+    p_list <- doc %>% xml_find_all(
+        "./sbml:model/sbml:listOfParameters/sbml:parameter", ns)
     params <- sapply(p_list, function(p) sapply(attrs, function(a)
         xml_attr(p, a)))
 
@@ -84,7 +88,8 @@ sbml_params <- function(sbml_file) {
     if (ncol(out) == 3) {
         names(out) <- attrs
         out$value <- as.numeric(as.character(out$value))
-        if (any(duplicated(out$id))) stop("There are duplicated parameters IDs!")
+        if (any(duplicated(out$id)))
+            stop("There are duplicated parameters IDs!")
     } else return(NULL)
     return(out)
 }
@@ -105,7 +110,7 @@ sbml_species <- function(sbml_file) {
     ns <- clean_ns(xml_ns(doc))
     v <- sbml_version(ns)
 
-    if(is.na(v[3])) {
+    if (is.na(v[3])) {
         attrs <- c("id", "name", "initialAmount", "initialConcentration",
             "boundaryCondition", "charge")
     } else {
@@ -113,7 +118,8 @@ sbml_species <- function(sbml_file) {
             "boundaryCondition", "fbc:charge", "fbc:chemicalFormula")
     }
 
-    s_list <- doc %>% xml_find_all("./sbml:model/sbml:listOfSpecies/sbml:species", ns)
+    s_list <- doc %>% xml_find_all(
+        "./sbml:model/sbml:listOfSpecies/sbml:species", ns)
     species <- sapply(s_list, function(s) sapply(attrs, function(a)
         xml_attr(s, a, ns)))
 
@@ -129,19 +135,21 @@ sbml_species <- function(sbml_file) {
     rdf <- NA
     if ("rdf" %in% names(ns)) {
         rdf_list <- lapply(s_list, function(s) {
-            rdf_links <- s %>% xml_find_all(".//rdf:Bag/rdf:li/@rdf:resource", ns) %>% xml_text()
+            rdf_links <- s %>% xml_find_all(
+                ".//rdf:Bag/rdf:li/@rdf:resource", ns) %>% xml_text()
             if (length(rdf_links) > 0) {
                 rdf <- sapply(rdf_links, function(r) {
-                    spl <- strsplit(r, "/", fixed=TRUE)[[1]]
-                    spl[(length(spl)-1):length(spl)]
+                    spl <- strsplit(r, "/", fixed = TRUE)[[1]]
+                    spl[(length(spl) - 1):length(spl)]
                     })
-                rdf <- group(rdf, combine=TRUE)
+                rdf <- group(rdf, combine = TRUE)
             }
         })
         rdf <- rbind_fill(rdf_list)
     }
 
-    out$boundaryCondition <- ifelse(out$boundaryCondition == "true", TRUE, FALSE)
+    out$boundaryCondition <- ifelse(
+        out$boundaryCondition == "true", TRUE, FALSE)
     out$boundaryCondition[is.na(out$boundaryCondition)] <- FALSE
     if (!is.null(ncol(rdf))) out <- cbind(out, rdf)
     return(out)
@@ -164,8 +172,10 @@ parse_reaction <- function(r_node, ns, v) {
         N_S <- 1
     }
     if (any(is.na(N_S))) {
-        if(v[1] > 2) {
-            stop(sprintf("At least one substrate in reaction %s has no stoichiometry!", id))
+        if (v[1] > 2) {
+            stop(sprintf(
+                "At least one substrate in reaction %s has no stoichiometry!",
+                id))
         } else N_S[is.na(N_S)] <- 1
     }
     names(S) <- NULL
@@ -180,8 +190,10 @@ parse_reaction <- function(r_node, ns, v) {
         N_P <- 1
     }
     if (any(is.na(N_P))) {
-        if(v[1] > 2) {
-            stop(sprintf("At least one product in reaction %s has no stoichiometry!", id))
+        if (v[1] > 2) {
+            stop(sprintf(
+                "At least one product in reaction %s has no stoichiometry!",
+                id))
         } else N_P[is.na(N_P)] <- 1
     }
     names(P) <- NULL
@@ -193,11 +205,11 @@ parse_reaction <- function(r_node, ns, v) {
         upper <- r_node %>% xml_attr("fbc:upperFluxBound", ns)
     } else {
         lower <- r_node %>% xml_find_all(
-        "./sbml:kineticLaw/sbml:listOfParameters/sbml:parameter[@id='LOWER_BOUND']", ns) %>%
-        xml_attr("value")
+            paste0(BOUND_XPATH, "[@id='LOWER_BOUND']"), ns) %>%
+            xml_attr("value")
         upper <- r_node %>% xml_find_all(
-        "./sbml:kineticLaw/sbml:listOfParameters/sbml:parameter[@id='UPPER_BOUND']", ns) %>%
-        xml_attr("value")
+            paste0(BOUND_XPATH, "[@id='UPPER_BOUND']"), ns) %>%
+            xml_attr("value")
     }
     if (length(lower) == 0) lower <- NA else lower <- str_conv(lower)
     if (length(upper) == 0) upper <- NA else upper <- str_conv(upper)
@@ -209,18 +221,20 @@ parse_reaction <- function(r_node, ns, v) {
     # Get RDF annotations
     rdf <- NA
     if ("rdf" %in% names(ns)) {
-        rdf_links <- r_node %>% xml_find_all(".//rdf:Bag/rdf:li/@rdf:resource", ns) %>% xml_text()
+        rdf_links <- r_node %>% xml_find_all(
+            ".//rdf:Bag/rdf:li/@rdf:resource", ns) %>% xml_text()
         if (length(rdf_links) > 0) {
             rdf <- sapply(rdf_links, function(r) {
-                spl <- strsplit(r, "/", fixed=TRUE)[[1]]
-                spl[(length(spl)-1):length(spl)]
+                spl <- strsplit(r, "/", fixed = TRUE)[[1]]
+                spl[(length(spl) - 1):length(spl)]
                 })
             rdf <- group(rdf)
         }
     }
 
-    r <- list(abbreviation=id, name=name, S=S, N_S=N_S, P=P, N_P=N_P, rev=rev,
-        notes=notes, lower=lower, upper=upper)
+    r <- list(abbreviation = id, name = name, S = S, N_S = N_S,
+              P = P, N_P = N_P, rev = rev, notes = notes,
+              lower = lower, upper = upper)
     if (!all(is.na(rdf))) r <- c(r, rdf)
     return(r)
 }
@@ -245,17 +259,18 @@ sbml_reactions <- function(sbml_file, progress=TRUE) {
     ns <- clean_ns(xml_ns(doc))
     v <- sbml_version(ns)
 
-    r_nodes <- doc %>% xml_find_all("./sbml:model/sbml:listOfReactions/sbml:reaction", ns)
+    r_nodes <- doc %>% xml_find_all(
+        "./sbml:model/sbml:listOfReactions/sbml:reaction", ns)
 
     if (progress) {
         n <- length(r_nodes)
-        pb <- txtProgressBar(min=1, max=n, style=3)
+        pb <- txtProgressBar(min = 1, max = n, style = 3)
         reacts <- lapply(1:n, function(i) {
             setTxtProgressBar(pb, i)
             parse_reaction(r_nodes[[i]], ns, v)
         })
         close(pb)
-    } else reacts <- lapply(r_nodes, parse_reaction, ns=ns, v=v)
+    } else reacts <- lapply(r_nodes, parse_reaction, ns = ns, v = v)
 
     class(reacts) <- append(class(reacts), "reactions")
     return(reacts)
@@ -296,14 +311,14 @@ read_sbml <- function(sbml_file) {
     ns <- clean_ns(xml_ns(doc))
     v <- sbml_version(ns)
     write(sprintf("Reading SBML level %d version %d %s FBC.", v[1], v[2],
-        ifelse(is.na(v[3]), "without", "with")), file="")
+        ifelse(is.na(v[3]), "without", "with")), file = "")
 
     specs <- sbml_species(doc)
     bc <- specs$boundaryCondition
     if (sum(bc) > 0) warning("Boundary species will be ignored!")
     specs <- specs[!specs$boundaryCondition, ]
 
-    reacts <- sbml_reactions(doc, progress=TRUE)
+    reacts <- sbml_reactions(doc, progress = TRUE)
 
     # Check for species sanity
     r_specs <- species(reacts)
@@ -314,35 +329,35 @@ read_sbml <- function(sbml_file) {
     print(not_in_slist)
     if (length(not_in_rs) > 0) warning(
         paste("The following species are defined but not used in reactions:",
-        paste(spec_list[not_in_rs], collapse=", ")))
+        paste(spec_list[not_in_rs], collapse = ", ")))
     if (length(not_in_slist) > 0) stop(
         paste("The following species used in reactions are undefined:",
-        paste(r_specs[not_in_slist], collapse=", ")))
+        paste(r_specs[not_in_slist], collapse = ", ")))
 
     # Map flux bounds
     p <- sbml_params(doc)
     env <- environment()
-    if(!is.null(p)) {
+    if (!is.null(p)) {
         cat("Mapping flux bounds to global parameters")
         fixed <- sapply(1:length(reacts), function(i) {
             r <- reacts[[i]]
             fixed <- FALSE
-            if(is.character(r$lower)) {
-                if (!(r$lower %in% p$id)) stop(paste0("There is no global parameter ",
-                    r$lower, "."))
+            if (is.character(r$lower)) {
+                if (!(r$lower %in% p$id)) stop(
+                    paste0("There is no global parameter ", r$lower, "."))
                 env$reacts[[i]]$lower <- p$value[p$id == r$lower]
                 fixed <- TRUE
             }
-            if(is.character(r$upper)) {
-                if (!(r$lower %in% p$id)) stop(paste0("There is no global parameter ",
-                    r$lower, "."))
+            if (is.character(r$upper)) {
+                if (!(r$lower %in% p$id)) stop(
+                    paste0("There is no global parameter ", r$lower, "."))
                 env$reacts[[i]]$upper <- p$value[p$id == r$upper]
                 fixed <- TRUE
             }
             fixed
         })
-        write(paste(" --", sum(fixed), "reactions mapped."), file="")
-    } else write("No global parameters defined.", file="")
+        write(paste(" --", sum(fixed), "reactions mapped."), file = "")
+    } else write("No global parameters defined.", file = "")
 
-    return(list(species=specs, reactions=reacts, params=p))
+    return(list(species = specs, reactions = reacts, params = p))
 }

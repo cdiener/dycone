@@ -11,7 +11,7 @@
 #' @param S The stochiometric matrix of the model.
 #' @return A matrix containing the time in the first column and temporal
 #'  concentrations of the metabolites in the following columns.
-#' @examples 
+#' @examples
 #' data(eryth)
 #' S <- stoichiometry(eryth)
 #' x0 <- runif(nrow(S))
@@ -26,9 +26,9 @@ timecourse <- function(x0, t, k, S) {
     f <- function(t, y, p) {
         list(as.numeric(S %*% diag(p) %*% ma_terms(S, y)))
     }
-    
+
     sol <- lsoda(x0, t, f, k)
     class(sol) <- append("dyconetc", class(sol))
-    
+
     return(sol)
-} 
+}

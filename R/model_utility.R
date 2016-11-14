@@ -48,7 +48,7 @@ orderby <- function(x, y) {
         save(list = ls(e), file = filename, envir = e)
     }
 
-    load(filename, envir=parent.frame())
+    load(filename, envir = parent.frame())
 }
 
 #' Calculates a mass-action reaction rate
@@ -81,7 +81,7 @@ mass_action <- function(substrates, concs) {
     if (length(sc) == 0)
         return(1)
 
-    return(prod(sc^nc))
+    return(prod(sc ^ nc))
 }
 
 #' Calculates derivatives of mass-action kinetics.
@@ -114,9 +114,7 @@ deriv_ma <- function(i, substrates, concs) {
     sc <- concs[substrates < 0]
     nc <- abs(substrates[substrates < 0])
 
-    # if( length(sc) == 0 ) return( 0 )
-
-    pd <- prod(sc^nc) * f * concs[i]^(f - 1)
+    pd <- prod(sc ^ nc) * f * concs[i] ^ (f - 1)
 
     return(pd)
 }
@@ -214,7 +212,8 @@ get_reaction_elems <- function(reaction_str) {
 
     if (length(sides) == 1)
         prods <- c(NA, NA, "1", NA) else {
-        prods <- unlist(regmatches(sides[[2]], regexec(sub_pattern, sides[[2]])))
+        prods <- unlist(regmatches(sides[[2]],
+                        regexec(sub_pattern, sides[[2]])))
     }
     prods[prods == ""] <- "1"
     n_p <- length(prods)
@@ -246,8 +245,9 @@ read_reactions <- function(react_file) {
             paste(which(!has_arrows), collapse = ", ")))
     }
 
-    res <- apply(reacts, 1, function(x) c(get_reaction_elems(x[1]), lapply(x[-1],
-        str_conv)))
+    res <- apply(reacts, 1,
+                 function(x) c(get_reaction_elems(x[1]), lapply(x[-1],
+                               str_conv)))
 
     class(res) <- append(class(res), "reactions")
 
@@ -287,8 +287,8 @@ format.reactions <- function(x) {
 #' data(eryth)
 #' print(eryth)
 print.reactions <- function(x, ...) {
-    write(sprintf("Model has %d reactions (%d reversible)", length(x), sum(sapply(x,
-        function(a) a$rev))), file = "")
+    write(sprintf("Model has %d reactions (%d reversible)",
+                  length(x), sum(sapply(x, function(a) a$rev))), file = "")
     write(format(x), file = "", ...)
 }
 
@@ -336,8 +336,8 @@ stoichiometry <- function(reacts, reversible = FALSE, const = NULL,
         stop("sparse output requires the Matrix package!")
 
     spec <- species(reacts)
-    n_r <- if (reversible)
-        length(reacts) else length(reacts) + sum(sapply(reacts, function(x) x$rev))
+    n_r <- if (reversible) length(reacts) else
+           length(reacts) + sum(sapply(reacts, function(x) x$rev))
 
     if (sparse) N <- Matrix::Matrix(0, nrow = length(spec), ncol = n_r)
     else N <- matrix(0, nrow = length(spec), ncol = n_r)
@@ -546,7 +546,8 @@ as.graph <- function(reacts) {
     adj <- abs(N %*% t(N))
 
     if (requireNamespace("igraph", quietly = TRUE)) {
-        return(igraph::graph.adjacency(adj, mode = "max", weighted = TRUE, diag = FALSE))
+        return(igraph::graph.adjacency(
+            adj, mode = "max", weighted = TRUE, diag = FALSE))
     } else {
         warning("igraph is not installed. Returning adjacency matrix...")
         return(adj)
