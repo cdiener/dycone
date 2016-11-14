@@ -59,11 +59,11 @@ test_that("hypothesis generation works", {
     h <- hyp(mats[, 1:3], mats[, 4:6], eryth)
     expect_equal(nrow(h), n_r)
     expect_true(all(h$pval <= 1))
-    o <- c(pyr = -1, prpp = -1, '3pg' = -1, nadph = -1) 
-    h_opt <- hyp(mats[, 1:3], mats[, 4:6], eryth, type = "fva", 
-        v_min = 0, obj = o, full = T)
+    o <- c(pyr = -1, prpp = -1, '3pg' = -1, nadph = -1)
+    h_opt <- hyp(mats[, 1:3], mats[, 4:6], eryth, type = "fva",
+        v_min = 1e-16, obj = o, full = T)
     expect_equal(length(h_opt), 5)
-    expect_equal(dim(h_opt$fva), c(n_r, 4))
+    expect_equal(dim(h_opt$fva), c(n_r, 2))
     expect_equal(length(h_opt$lfc_va), n_r)
     expect_true("fva_log_fold" %in% names(h_opt$hyp))
 })
@@ -79,10 +79,10 @@ test_that("basis plotting works", {
     expect_match(out, "in-cluster distance", all = F)
     f <- tempfile("plot", fileext=".png")
     png(f)
-    out <- capture.output(plot_red(list(B), n_cl = 100, 
+    out <- capture.output(plot_red(list(B), n_cl = 100,
         r_names = as.character(1:10)))
     dev.off()
     expect_true(file.exists(f))
     expect_match(out, "Information", all = F)
     expect_match(out, "in-cluster", all = F)
-}) 
+})

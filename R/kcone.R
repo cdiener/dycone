@@ -606,8 +606,8 @@ bayes_mean_ci <- function(x, n = 256, level = 0.95) {
 #'      Also never sorted.}
 #'  \item{lfc_va}{Only if type=='fva'. The maximum log2-fold changes for
 #'      the fluxes obtained by flux variability analysis. Also never sorted.}
-#'  \item{fva}{Only if type=='fva'. The flux bounds and respective
-#'      objective values obtained from flux variability analysis.}
+#'  \item{fva}{Only if type=='fva'. The flux bounds obtained from flux
+#'      variability analysis.}
 #'  }
 #' @examples
 #' data(eryth)
@@ -636,11 +636,11 @@ hyp <- function(normal, disease, reacts, type = "bias", correction_method = "BH"
         S <- stoichiometry(reacts)
         if (!is.numeric(obj))
             stop("obj must be numeric.")
-        va <- fva(obj, S, 1, v_min = v_min, v_max = 1)
+        va <- fva(obj, S, 1, v_min, 1)
+        if (length(obj) > 1 || !is.null(names(obj))) va <- va[-nrow(va), ]
         # Deal with numerical inaccuracies
-        va$min[va$min < v_min] <- v_min
-        va$max[va$max < v_min] <- v_min
-        lfc_va <- log(va$max, 2) - log(va$min, 2)
+        va[va < v_min] <- v_min
+        lfc_va <- log(va[, 2], 2) - log(va[, 1], 2)
     } else if (!(type %in% c("raw", "bias")))
         stop("type must be either 'bias', 'fva' or 'raw' :(")
 

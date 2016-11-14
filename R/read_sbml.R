@@ -1,7 +1,7 @@
 #  read_sbml.R
-#  
+#
 #  Copyright 2016 Christian Diener <mail[at]cdiener.com>
-#  
+#
 #  MIT license. See LICENSE for more information.
 
 # grep string to annotate the namespace
@@ -33,12 +33,12 @@ clean_ns <- function(ns) {
     sbml_idx <- grep(RE_SBML, ns)
     fbc_idx <- grep(RE_FBC, ns)
     mml_idx <- grep(RE_MATHML, ns)
-    
-    if (length(sbml_idx) != 1) stop("No or several SBML namespaces found.")
-    else names(ns)[sbml_idx] <- "sbml"
-    if (length(fbc_idx) == 1) names(ns)[fbc_idx] <- "fbc"
-    if (length(mml_idx) == 1) names(ns)[mml_idx] <- "mathml"
-    
+
+    if (length(sbml_idx) < 1) stop("No SBML namespace found.")
+    else names(ns)[sbml_idx[1]] <- "sbml"
+    if (length(fbc_idx) >= 1) names(ns)[fbc_idx[1]] <- "fbc"
+    if (length(mml_idx) >= 1) names(ns)[mml_idx[1]] <- "mathml"
+
     return(ns)
 }
 
@@ -55,7 +55,7 @@ rbind_fill <- function(l, fill=NA) {
     m <- matrix(NA, ncol=length(nx), nrow=length(l))
     colnames(m) <- nx
     for(i in 1:length(l)) m[i, names(l[[i]])] <- l[[i]]
-    
+
     as.data.frame(m)
 }
 
@@ -69,17 +69,17 @@ rbind_fill <- function(l, fill=NA) {
 #' m_url <- "http://www.ebi.ac.uk/compneur-srv/biomodels-main/download?mid=MODEL1103210001"
 #' sbml_params(m_url)
 #'
-#' @importFrom xml2 read_xml read_html xml_find_one xml_find_all xml_ns 
-#'  xml_attr xml_attrs xml_name xml_text 
+#' @importFrom xml2 read_xml read_html xml_find_one xml_find_all xml_ns
+#'  xml_attr xml_attrs xml_name xml_text
 #' @export
 sbml_params <- function(sbml_file) {
     attrs <- c("id", "name", "value")
     doc <- get_xml(sbml_file)
     ns <- clean_ns(xml_ns(doc))
     p_list <- doc %>% xml_find_all("./sbml:model/sbml:listOfParameters/sbml:parameter", ns)
-    params <- sapply(p_list, function(p) sapply(attrs, function(a) 
+    params <- sapply(p_list, function(p) sapply(attrs, function(a)
         xml_attr(p, a)))
-    
+
     out <- as.data.frame(t(params), row.names = NULL)
     if (ncol(out) == 3) {
         names(out) <- attrs
@@ -104,34 +104,34 @@ sbml_species <- function(sbml_file) {
     doc <- get_xml(sbml_file)
     ns <- clean_ns(xml_ns(doc))
     v <- sbml_version(ns)
-    
+
     if(is.na(v[3])) {
-        attrs <- c("id", "name", "initialAmount", "initialConcentration", 
+        attrs <- c("id", "name", "initialAmount", "initialConcentration",
             "boundaryCondition", "charge")
     } else {
-        attrs <- c("id", "name", "initialAmount", "initialConcentration", 
+        attrs <- c("id", "name", "initialAmount", "initialConcentration",
             "boundaryCondition", "fbc:charge", "fbc:chemicalFormula")
     }
-    
+
     s_list <- doc %>% xml_find_all("./sbml:model/sbml:listOfSpecies/sbml:species", ns)
-    species <- sapply(s_list, function(s) sapply(attrs, function(a) 
+    species <- sapply(s_list, function(s) sapply(attrs, function(a)
         xml_attr(s, a, ns)))
-    
+
     out <- as.data.frame(t(species), row.names = NULL)
     names(out) <- attrs
     num_cols <- c(3, 4, 6)
-    
+
     for (i in num_cols) {
         out[, i] <- as.numeric(as.character(out[, i]))
     }
-    
+
     # Get RDF annotations
     rdf <- NA
     if ("rdf" %in% names(ns)) {
         rdf_list <- lapply(s_list, function(s) {
             rdf_links <- s %>% xml_find_all(".//rdf:Bag/rdf:li/@rdf:resource", ns) %>% xml_text()
             if (length(rdf_links) > 0) {
-                rdf <- sapply(rdf_links, function(r) { 
+                rdf <- sapply(rdf_links, function(r) {
                     spl <- strsplit(r, "/", fixed=TRUE)[[1]]
                     spl[(length(spl)-1):length(spl)]
                     })
@@ -140,7 +140,7 @@ sbml_species <- function(sbml_file) {
         })
         rdf <- rbind_fill(rdf_list)
     }
-    
+
     out$boundaryCondition <- ifelse(out$boundaryCondition == "true", TRUE, FALSE)
     out$boundaryCondition[is.na(out$boundaryCondition)] <- FALSE
     if (!is.null(ncol(rdf))) out <- cbind(out, rdf)
@@ -153,7 +153,7 @@ parse_reaction <- function(r_node, ns, v) {
     rev <- r_node %>% xml_attr("reversible")
     rev <- ifelse(rev == "true", TRUE, FALSE)
     if (is.na(rev) && v[1] < 3) rev <- TRUE
-    
+
     # Get the substrates and products
     subs <- r_node %>% xml_find_all("./sbml:listOfReactants/
         sbml:speciesReference", ns) %>% xml_attrs()
@@ -170,7 +170,7 @@ parse_reaction <- function(r_node, ns, v) {
     }
     names(S) <- NULL
     names(N_S) <- NULL
-    
+
     prods <- subs <- r_node %>% xml_find_all("./sbml:listOfProducts/
         sbml:speciesReference", ns) %>% xml_attrs()
     P <- sapply(prods, "[", "species")
@@ -186,7 +186,7 @@ parse_reaction <- function(r_node, ns, v) {
     }
     names(P) <- NULL
     names(N_P) <- NULL
-    
+
     # Get bounds
     if (!is.na(v[3])) {
         lower <- r_node %>% xml_attr("fbc:lowerFluxBound", ns)
@@ -201,28 +201,28 @@ parse_reaction <- function(r_node, ns, v) {
     }
     if (length(lower) == 0) lower <- NA else lower <- str_conv(lower)
     if (length(upper) == 0) upper <- NA else upper <- str_conv(upper)
-    
+
     # Get the notes
     notes <- r_node %>% xml_find_all("./sbml:notes", ns) %>% xml_text()
     if (length(notes) == 0) notes <- NA
-    
+
     # Get RDF annotations
     rdf <- NA
     if ("rdf" %in% names(ns)) {
         rdf_links <- r_node %>% xml_find_all(".//rdf:Bag/rdf:li/@rdf:resource", ns) %>% xml_text()
         if (length(rdf_links) > 0) {
-            rdf <- sapply(rdf_links, function(r) { 
+            rdf <- sapply(rdf_links, function(r) {
                 spl <- strsplit(r, "/", fixed=TRUE)[[1]]
                 spl[(length(spl)-1):length(spl)]
                 })
             rdf <- group(rdf)
         }
     }
-    
-    r <- list(abbreviation=id, name=name, S=S, N_S=N_S, P=P, N_P=N_P, rev=rev, 
+
+    r <- list(abbreviation=id, name=name, S=S, N_S=N_S, P=P, N_P=N_P, rev=rev,
         notes=notes, lower=lower, upper=upper)
     if (!all(is.na(rdf))) r <- c(r, rdf)
-    return(r) 
+    return(r)
 }
 
 #' Obtains the list of reactions from a SBML file.
@@ -231,7 +231,7 @@ parse_reaction <- function(r_node, ns, v) {
 #'  to an online resource.
 #' @param progress Whether a progress indication should be shown.
 #' @return A list with additional class "reactions" describing the reactions in
-#'  the model. RDF annotations, notes and flux bounds are saved along with the 
+#'  the model. RDF annotations, notes and flux bounds are saved along with the
 #'  reactions
 #' @examples
 #' # requires internet connection
@@ -243,9 +243,9 @@ sbml_reactions <- function(sbml_file, progress=TRUE) {
     doc <- get_xml(sbml_file)
     ns <- clean_ns(xml_ns(doc))
     v <- sbml_version(ns)
-    
+
     r_nodes <- doc %>% xml_find_all("./sbml:model/sbml:listOfReactions/sbml:reaction", ns)
-    
+
     if (progress) {
         n <- length(r_nodes)
         pb <- txtProgressBar(min=1, max=n, style=3)
@@ -255,14 +255,14 @@ sbml_reactions <- function(sbml_file, progress=TRUE) {
         })
         close(pb)
     } else reacts <- lapply(r_nodes, parse_reaction, ns=ns, v=v)
-    
+
     class(reacts) <- append(class(reacts), "reactions")
     return(reacts)
 }
 
 #' Main driver to parse an SBML model.
 #'
-#' This function wraps around \code{sbml_*} functions but also performs some 
+#' This function wraps around \code{sbml_*} functions but also performs some
 #' basic sanity checks and adjustments which are:
 #' \itemize{
 #' \item{Gives information about the used level and version and whether the FBC
@@ -273,7 +273,7 @@ sbml_reactions <- function(sbml_file, progress=TRUE) {
 #' \item{Maps lower and upper flux bounds to its respective global parameters.}
 #' }
 #'
-#' @seealso \code{\link{sbml_species}}, \code{\link{sbml_params}} and 
+#' @seealso \code{\link{sbml_species}}, \code{\link{sbml_params}} and
 #'  \code{\link{sbml_reactions}} to read only parts of an SBML model.
 #' @param sbml_file A SBML file. This can be a file on the disk or the location
 #'  to an online resource.
@@ -282,7 +282,7 @@ sbml_reactions <- function(sbml_file, progress=TRUE) {
 #'  \item{species}{The species (metabolites or molecules) in the model in a data
 #'  frame. Boundary metabolites are removed automatically.}
 #'  \item{params}{The global parameters defined for the model.}
-#'  \item{reactions}{The reactions in the model as an "reactions" object.} 
+#'  \item{reactions}{The reactions in the model as an "reactions" object.}
 #'  }
 #' @examples
 #' # requires internet connection
@@ -296,18 +296,18 @@ read_sbml <- function(sbml_file) {
     v <- sbml_version(ns)
     write(sprintf("Reading SBML level %d version %d %s FBC.", v[1], v[2],
         ifelse(is.na(v[3]), "without", "with")), file="")
-    
+
     specs <- sbml_species(doc)
     bc <- specs$boundaryCondition
     if (sum(bc) > 0) warning("Boundary species will be ignored!")
     specs <- specs[!specs$boundaryCondition, ]
-    
+
     reacts <- sbml_reactions(doc, progress=TRUE)
-    
+
     # Check for species sanity
     r_specs <- species(reacts)
     if (all(is.na(specs$id))) spec_list <- specs$name
-    else spec_list <- specs$id 
+    else spec_list <- specs$id
     not_in_rs <- which(!(spec_list %in% r_specs))
     not_in_slist <- which(!(r_specs %in% spec_list))
     print(not_in_slist)
@@ -317,7 +317,7 @@ read_sbml <- function(sbml_file) {
     if (length(not_in_slist) > 0) stop(
         paste("The following species used in reactions are undefined:",
         paste(r_specs[not_in_slist], collapse=", ")))
-    
+
     # Map flux bounds
     p <- sbml_params(doc)
     env <- environment()
@@ -342,6 +342,6 @@ read_sbml <- function(sbml_file) {
         })
         write(paste(" --", sum(fixed), "reactions mapped."), file="")
     } else write("No global parameters defined.", file="")
-    
+
     return(list(species=specs, reactions=reacts, params=p))
 }
