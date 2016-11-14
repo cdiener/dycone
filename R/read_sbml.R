@@ -239,6 +239,7 @@ parse_reaction <- function(r_node, ns, v) {
 #' sbml_reactions(m_url)
 #'
 #' @export
+#' @importFrom utils read.csv setTxtProgressBar txtProgressBar
 sbml_reactions <- function(sbml_file, progress=TRUE) {
     doc <- get_xml(sbml_file)
     ns <- clean_ns(xml_ns(doc))

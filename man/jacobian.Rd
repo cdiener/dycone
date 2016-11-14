@@ -12,8 +12,8 @@ jacobian(s_matrix, concs, deriv_func = deriv_ma)
 \item{concs}{The concentrations of the substrates. Must be a named vector with
 names being the metabolite names as used in \code{rownames(s_matrix)}.}
 
-\item{deriv_func}{The function calculating the derivative. Must be of the 
-form func(idx, subs, concs) where idx is the index of the differentiation 
+\item{deriv_func}{The function calculating the derivative. Must be of the
+form func(idx, subs, concs) where idx is the index of the differentiation
 variable, subs the stoichiometry of the substrates and concs the concentration
 of substrates. See \code{\link{mass_action}} for an example.}
 }

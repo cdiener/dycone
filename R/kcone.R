@@ -325,6 +325,10 @@ plot_basis <- function(b, n_cl = NA, ...) {
 #' rownames(S) <- c('A', 'B')
 #' V <- polytope_basis(S)
 #' plot_red(list(V)) # A single basis is fine as long as it is a list
+#'
+#' @importFrom stats sd prcomp predict kmeans
+#' @importFrom graphics plot polygon
+#' @importFrom grDevices adjustcolor
 plot_red <- function(basis_list, arrows = TRUE, col = NULL, n_cl = NULL, r_names=NULL) {
     if (!("list" %in% class(basis_list)))
         stop("basis_list must be a list!")
@@ -618,6 +622,9 @@ bayes_mean_ci <- function(x, n = 256, level = 0.95) {
 #' head(h)
 #'
 #' @importFrom limma makeContrasts lmFit contrasts.fit eBayes
+#' @importFrom utils combn
+#' @importFrom stats model.matrix sd p.adjust
+#' @importFrom stats rexp weighted.mean quantile
 #' @export
 hyp <- function(normal, disease, reacts, type = "bias", correction_method = "BH",
     cred_level = 0.95, sorted = TRUE, obj = NULL, v_min = 1e-16, alpha = 1,

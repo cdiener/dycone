@@ -20,6 +20,7 @@ Plots the reactions as a graph.
 \examples{
 data(eryth)
 plot(eryth)
+
 }
 \seealso{
 \code{\link{print.reactions}} for a nicely formatted representation.

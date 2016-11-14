@@ -19,7 +19,7 @@ Returns the derivative of the mass action kinetics for the reaction
  specified by \code{subtrates} differentiated by the \code{i}th variable.
 }
 \description{
-\code{deriv_ma} does not check whether the 
+\code{deriv_ma} does not check whether the
 ordering of substrates in the stoichiometry and concs is corrects, so please
 make sure that the indices in \code{substrates} and \code{concs} coincide.
 }
