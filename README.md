@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/cdiener/dycone.svg?branch=master)](https://travis-ci.org/cdiener/dycone)
 [![wercker status](https://app.wercker.com/status/b8b682f3278fd21b27afab12fb050db7/s "wercker status")](https://app.wercker.com/project/bykey/b8b682f3278fd21b27afab12fb050db7)
-[![codecov.io](http://codecov.io/github/cdiener/dycone/coverage.svg?branch=master)](http://codecov.io/github/cdiener/dycone?branch=master)
-[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.46922.svg)](http://dx.doi.org/10.5281/zenodo.46922)
+[![codecov](https://codecov.io/gh/cdiener/dycone/branch/master/graph/badge.svg)](https://codecov.io/gh/cdiener/dycone)
+[![DOI](https://zenodo.org/badge/doi/10.5281/zenodo.49987.svg)](http://dx.doi.org/10.5281/zenodo.49987)
 
 ![dycone](stuff/logo.png)
 
@@ -14,6 +14,15 @@ Dycone ("dynamic cone") allows you infer enzymatic regulation from
 metabolome mesurements. It employs formalisms based on flux and k-cone 
 analysis to connect metabolome data to distinct regulations of enzyme activity. 
 Most of the analysis methods can be applied to genome-scale data. 
+
+Attribution
+-----------
+
+If you use dycone in your academic work you may use the following paper for a citation
+
+> Diener C, Muñoz-Gonzalez F, Encarnación S, Resendis-Antonio O.     
+> The space of enzyme regulation in HeLa cells can be inferred from its intracellular metabolome.      
+> Sci Rep. 2016 Jun 23;6:28415. doi: 10.1038/srep28415. PubMed PMID: 27335086.
 
 Installation
 -----------
@@ -64,3 +73,8 @@ vignette("eryth")
 
 For an exhaustive example you can look at the Rmarkdown generated protocol at 
 https://github.com/cdiener/kcone-paper.
+
+Roadmap
+-------
+
+To see planned changes to dycone please consult the [project milestones](https://github.com/cdiener/dycone/milestones).
