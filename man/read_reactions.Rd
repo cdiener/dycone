@@ -9,7 +9,7 @@ read_reactions(react_file)
 \arguments{
 \item{react_file}{A csv file containing the reactions, where the first
 column denotes the reaction string and additional columns contain
-annotations. A single annotation can contain several values as a 
+annotations. A single annotation can contain several values as a
 comma separated string. The csv file should be saved with all entries
 quoted.}
 }

@@ -83,8 +83,8 @@ If full is FALSE only returns the generated hypothesis as a data
      Also never sorted.}
  \item{lfc_va}{Only if type=='fva'. The maximum log2-fold changes for
      the fluxes obtained by flux variability analysis. Also never sorted.}
- \item{fva}{Only if type=='fva'. The flux bounds and respective
-     objective values obtained from flux variability analysis.}
+ \item{fva}{Only if type=='fva'. The flux bounds obtained from flux
+     variability analysis.}
  }
 }
 \description{

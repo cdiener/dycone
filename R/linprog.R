@@ -1,6 +1,12 @@
 # linprog.R Copyright 2015 Christian Diener <ch.diener@gmail.com> MIT license.
 # See LICENSE for more information.
 
+#' @useDynLib dycone
+#' @importFrom Rcpp sourceCpp
+NULL
+
+gf <- function(vec) c(0, vec)
+
 # Helper function to convert various input formats for the objective reaction
 # Also performs a set of validity checks
 build_objective <- function(o, S) {
@@ -54,7 +60,7 @@ expand_constraints = function(v, n) {
 #'  \item{A unnamed vector containing the corresponding column in the
 #'      stochiometric matrix.}
 #'  \item{A named vector containing only the non-zero entries in the respective
-#'      column of the stochiometric matrix bein named by their respective
+#'      column of the stochiometric matrix being named by their respective
 #'      metabolite.}
 #'  }
 #' @param S The stochiometrix matrix to be used (must be irreversible).
@@ -69,27 +75,26 @@ expand_constraints = function(v, n) {
 #' rownames(S) <- c("A", "B")
 #' fba(c(B = -1), S)
 #'
+#' @importFrom Matrix Matrix
+#' @importMethodsFrom Matrix summary
 #' @export
 fba <- function(obj, S, v_min = 0, v_max = 1) {
-    v_min = expand_constraints(v_min, ncol(S))
-    v_max = expand_constraints(v_max, ncol(S))
+    v_min <- expand_constraints(v_min, ncol(S))
+    v_max <- expand_constraints(v_max, ncol(S))
 
-    S <- cbind(S, build_objective(obj, S))
-    a <- rep(0, ncol(S))
-    a[ncol(S)] <- 1
+    S <- Matrix(cbind(S, build_objective(obj, S)), sparse = TRUE)
+    sp <- summary(S)
 
-    const_matrix <- rbind(-diag(ncol(S)), diag(ncol(S))[-ncol(S),])
-    const_b <- c(-v_min, 0, v_max)
-    NC <-as.matrix(S)
-    b <- rep(0, nrow(S))
+    glpk_res <- glpk_fba(gf(sp[, 1]), gf(sp[, 2]), gf(sp[, 3]), nrow(S),
+                         ncol(S), gf(v_min), gf(v_max), ncol(S))
 
-    hp <- makeH(const_matrix, const_b, NC, b)
+    if (length(glpk_res) < ncol(S)) {
+        stop(paste0("GLPK failed with error code ", glpk_res, "."))
+    }
 
-    sol <- lpcdd(hp, a, minimize = FALSE)
-    if (sol$solution.type != "Optimal")
-        stop(sprintf("Error in optimization! (%s)", sol$solution.type))
+    names(glpk_res) <- colnames(S)
 
-    return(sol$primal.solution)
+    return(glpk_res)
 }
 
 #' Performs flux variance analysis for a given objective reaction. Thus, FVA
@@ -124,55 +129,22 @@ fba <- function(obj, S, v_min = 0, v_max = 1) {
 #'
 #' @export
 fva <- function(obj, S, alpha=1, v_min = 0, v_max = 1) {
-    v_min = expand_constraints(v_min, ncol(S))
-    v_max = expand_constraints(v_max, ncol(S))
+    v_min <- expand_constraints(v_min, ncol(S))
+    v_max <- expand_constraints(v_max, ncol(S))
 
-    S <- cbind(S, build_objective(obj, S))
-    a <- rep(0, ncol(S))
-    a[ncol(S)] <- 1
+    S <- Matrix(cbind(S, build_objective(obj, S)), sparse = TRUE)
+    sp <- summary(S)
 
-    const_matrix <- rbind(-diag(ncol(S)), diag(ncol(S))[-ncol(S),])
-    const_b <- c(-v_min, 0, v_max)
-    NC <- as.matrix(S)
-    b <- rep(0, nrow(S))
+    glpk_res <- glpk_fva(gf(sp[, 1]), gf(sp[, 2]), gf(sp[, 3]), nrow(S),
+                         ncol(S), gf(v_min), gf(v_max), ncol(S), alpha)
 
-    hp <- makeH(const_matrix, const_b, NC, b)
-
-    sol <- lpcdd(hp, a, minimize = FALSE)
-    if (sol$solution.type != "Optimal")
-        stop(sprintf("Error in optimization! (%s)", sol$solution.type))
-
-    opt_lim <- -alpha*sol$primal.solution[ncol(S)]
-    h_loc <- addHin(-c(rep(0, ncol(S) - 1), 1),  opt_lim, hp)
-
-    a <- rep(0, ncol(S))
-    if (requireNamespace("foreach", quietly = TRUE)) {
-        i <- 1:(ncol(S) - 1)
-        opt <- foreach::"%dopar%"(foreach::foreach(i = i, .combine = rbind), {
-            a_loc <- a
-            a_loc[i] <- 1
-            sol_min <- lpcdd(h_loc, a_loc, minimize = TRUE)
-            sol_max <- lpcdd(h_loc, a_loc, minimize = FALSE)
-            data.frame(min = sol_min$primal.solution[i],
-                max = sol_max$primal.solution[i],
-                opt_min = sol_min$primal.solution[ncol(S)],
-                opt_max = sol_max$primal.solution[ncol(S)])
-        })
-    } else {
-        opt <- lapply(11:(ncol(S) - 1), function(i) {
-            a_loc <- a
-            a_loc[i] <- 1
-            sol_min <- lpcdd(h_loc, a_loc, minimize = TRUE)
-            sol_max <- lpcdd(h_loc, a_loc, minimize = FALSE)
-            data.frame(min = sol_min$primal.solution[i],
-                max = sol_max$primal.solution[i],
-                opt_min = sol_min$primal.solution[ncol(S)],
-                opt_max = sol_max$primal.solution[ncol(S)])
-        })
-        opt <- do.call(rbind, opt)
+    if (length(glpk_res) == 1) {
+        stop(paste0("GLPK failed with error code ", glpk_res, "."))
     }
 
-    return(opt)
+    names(glpk_res) <- colnames(S)
+
+    return(glpk_res)
 }
 
 #' Maximizes a set of given fluxes within the k-cone using parsimonous FBA.
@@ -193,6 +165,8 @@ fva <- function(obj, S, alpha=1, v_min = 0, v_max = 1) {
 #'      metabolite.}
 #'  }
 #' @param S The stochiometrix matrix to be used (must be irreversible).
+#' @param alpha Fraction of optimum value. Objective must be at least
+#'  alpha * fba_solution.
 #' @param v_min Lower bounds for the reaction fluxes. Can be a single value or a
 #'  vector containing one value for each reaction.
 #' @param v_max Upper bounds for the reaction fluxes. Can be a single value or a
@@ -204,35 +178,23 @@ fva <- function(obj, S, alpha=1, v_min = 0, v_max = 1) {
 #' S <- matrix(c(1, 0, -2, 1), ncol = 2)
 #' rownames(S) <- c("A", "B")
 #' pfba(c(B = -1), S)
-pfba <- function(obj, S, v_min = 0, v_max = 1) {
-    v_min = expand_constraints(v_min, ncol(S))
-    v_max = expand_constraints(v_max, ncol(S))
+pfba <- function(obj, S, alpha = 1, v_min = 0, v_max = 1) {
+    v_min <- expand_constraints(v_min, ncol(S))
+    v_max <- expand_constraints(v_max, ncol(S))
 
-    S <- cbind(S, build_objective(obj, S))
-    a <- rep(0, ncol(S))
-    a[ncol(S)] <- 1
+    S <- Matrix(cbind(S, build_objective(obj, S)), sparse = TRUE)
+    sp <- summary(S)
 
-    const_matrix <- rbind(-diag(ncol(S)), diag(ncol(S))[-ncol(S),])
-    const_b <- c(-v_min, 0, v_max)
-    NC <- as.matrix(S)
-    b <- rep(0, nrow(S))
+    glpk_res <- glpk_pfba(gf(sp[, 1]), gf(sp[, 2]), gf(sp[, 3]), nrow(S),
+                         ncol(S), gf(v_min), gf(v_max), ncol(S), alpha)
 
-    hp <- makeH(const_matrix, const_b, NC, b)
+    if (length(glpk_res) < ncol(S)) {
+        stop(paste0("GLPK failed with error code ", glpk_res, "."))
+    }
 
-    sol <- lpcdd(hp, a, minimize = FALSE)
-    if (sol$solution.type != "Optimal")
-        stop(sprintf("Error in initial optimization! (%s)", sol$solution.type))
+    names(glpk_res) <- colnames(S)
 
-    keep_idx <- which(a != 0)
-    keep_val <- sol$primal.solution[keep_idx]
-    a <- diag(ncol(S))[keep_idx,]
-    pp <- addHeq(a, keep_val, hp)
-    sol <- lpcdd(pp, rep(1,ncol(S)), minimize = TRUE)
-
-    if (sol$solution.type != "Optimal")
-        stop(sprintf("Error in parsimonous optimization! (%s)", sol$solution.type))
-
-    return(sol$primal.solution)
+    return(glpk_res)
 }
 
 #' Finds all reaction indices using the given subtrates and products.

@@ -325,6 +325,10 @@ plot_basis <- function(b, n_cl = NA, ...) {
 #' rownames(S) <- c('A', 'B')
 #' V <- polytope_basis(S)
 #' plot_red(list(V)) # A single basis is fine as long as it is a list
+#'
+#' @importFrom stats sd prcomp predict kmeans
+#' @importFrom graphics plot polygon
+#' @importFrom grDevices adjustcolor
 plot_red <- function(basis_list, arrows = TRUE, col = NULL, n_cl = NULL, r_names=NULL) {
     if (!("list" %in% class(basis_list)))
         stop("basis_list must be a list!")
@@ -606,8 +610,8 @@ bayes_mean_ci <- function(x, n = 256, level = 0.95) {
 #'      Also never sorted.}
 #'  \item{lfc_va}{Only if type=='fva'. The maximum log2-fold changes for
 #'      the fluxes obtained by flux variability analysis. Also never sorted.}
-#'  \item{fva}{Only if type=='fva'. The flux bounds and respective
-#'      objective values obtained from flux variability analysis.}
+#'  \item{fva}{Only if type=='fva'. The flux bounds obtained from flux
+#'      variability analysis.}
 #'  }
 #' @examples
 #' data(eryth)
@@ -618,6 +622,9 @@ bayes_mean_ci <- function(x, n = 256, level = 0.95) {
 #' head(h)
 #'
 #' @importFrom limma makeContrasts lmFit contrasts.fit eBayes
+#' @importFrom utils combn
+#' @importFrom stats model.matrix sd p.adjust
+#' @importFrom stats rexp weighted.mean quantile
 #' @export
 hyp <- function(normal, disease, reacts, type = "bias", correction_method = "BH",
     cred_level = 0.95, sorted = TRUE, obj = NULL, v_min = 1e-16, alpha = 1,
@@ -636,11 +643,11 @@ hyp <- function(normal, disease, reacts, type = "bias", correction_method = "BH"
         S <- stoichiometry(reacts)
         if (!is.numeric(obj))
             stop("obj must be numeric.")
-        va <- fva(obj, S, 1, v_min = v_min, v_max = 1)
+        va <- fva(obj, S, 1, v_min, 1)
+        if (length(obj) > 1 || !is.null(names(obj))) va <- va[-nrow(va), ]
         # Deal with numerical inaccuracies
-        va$min[va$min < v_min] <- v_min
-        va$max[va$max < v_min] <- v_min
-        lfc_va <- log(va$max, 2) - log(va$min, 2)
+        va[va < v_min] <- v_min
+        lfc_va <- log(va[, 2], 2) - log(va[, 1], 2)
     } else if (!(type %in% c("raw", "bias")))
         stop("type must be either 'bias', 'fva' or 'raw' :(")
 

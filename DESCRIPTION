@@ -22,7 +22,9 @@ Imports:
     xml2,
     rvest,
     quadprog,
-    limma
+    limma,
+    Rcpp,
+    Matrix
 Suggests:
     testthat,
     covr,
@@ -30,8 +32,8 @@ Suggests:
     knitr,
     foreach,
     doParallel,
-    Matrix
 biocViews: Metabolomics, Systems Biology, Pathways, Bayesian,
     Multiple Comparison
 VignetteBuilder: knitr
 RoxygenNote: 5.0.1
+LinkingTo: Rcpp

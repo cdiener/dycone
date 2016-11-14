@@ -1,7 +1,7 @@
 #  model_utility.R
-#  
+#
 #  Copyright 2016 Christian Diener <mail[at]cdiener.com>
-#  
+#
 #  MIT license. See LICENSE for more information.
 
 # Helper functions in order to extract the model and construct basic data
@@ -9,13 +9,13 @@
 ### General helper functions
 str_conv <- function(str) {
     val <- tryCatch(as.numeric(str), warning = function(w) {
-        if (is.null(grep(",", str))) 
+        if (is.null(grep(",", str)))
             return(gsub("^\\s+|\\s+$", "", str))
         v <- gsub("^\\s+|\\s+$", "", strsplit(str, ",[[:space:]]*")[[1]])
         v <- tryCatch(as.numeric(v), warning = function(w) v)
         return(v)
     })
-    
+
     return(val)
 }
 
@@ -33,7 +33,7 @@ orderby <- function(x, y) {
 #'
 #' @export
 #' @keywords operator, caching
-#' @param ex The R expression to be cached. Use brackets for 
+#' @param ex The R expression to be cached. Use brackets for
 #'  multiline statements.
 #' @param filename The filename of the cache file.
 #' @return Nothing. Just caches all assigned variables in \code{filename}.
@@ -47,20 +47,20 @@ orderby <- function(x, y) {
         eval(match.call()$ex, envir = e)
         save(list = ls(e), file = filename, envir = e)
     }
-    
+
     load(filename, envir=parent.frame())
 }
 
 #' Calculates a mass-action reaction rate
 #'
-#' \code{mass_action} is mostly used inetrnally to get mass action rates for a 
-#' single column of the stochiometric matrix. It does not check whether the 
+#' \code{mass_action} is mostly used inetrnally to get mass action rates for a
+#' single column of the stochiometric matrix. It does not check whether the
 #' ordering of substrates in the stoichiometry and concs is corrects, so please
-#' make sure that the indices in \code{substrates} and \code{concs} coincide.  
+#' make sure that the indices in \code{substrates} and \code{concs} coincide.
 #'
 #' @seealso \code{\link{stoichiometry}} to generate the stochiometric
 #'  matrix from a reaction list. \code{\link{ma_terms}} for a wrapper that
-#'  calculates all mass-action terms for a stochiometric matrix and also checks 
+#'  calculates all mass-action terms for a stochiometric matrix and also checks
 #'  for correct ordering of the substrates.
 #'  \code{\link{ma_terms}} to calculate all mass-action terms at once.
 #' @export
@@ -73,20 +73,20 @@ orderby <- function(x, y) {
 #' S <- stoichiometry(eryth)
 #' ma1 <- mass_action(S[,1], runif(nrow(S)))
 mass_action <- function(substrates, concs) {
-    if (length(substrates) != length(concs)) 
+    if (length(substrates) != length(concs))
         stop("substrates and concs must have the same length!")
-    
+
     sc <- concs[substrates < 0]
     nc <- abs(substrates[substrates < 0])
-    if (length(sc) == 0) 
+    if (length(sc) == 0)
         return(1)
-    
+
     return(prod(sc^nc))
 }
 
 #' Calculates derivatives of mass-action kinetics.
 #'
-#' \code{deriv_ma} does not check whether the 
+#' \code{deriv_ma} does not check whether the
 #' ordering of substrates in the stoichiometry and concs is corrects, so please
 #' make sure that the indices in \code{substrates} and \code{concs} coincide.
 #'
@@ -103,21 +103,21 @@ mass_action <- function(substrates, concs) {
 #' S <- stoichiometry(eryth)
 #' dma1_dS3 <- deriv_ma(3, S[,1], runif(nrow(S)))
 deriv_ma <- function(i, substrates, concs) {
-    if (length(substrates) != length(concs)) 
+    if (length(substrates) != length(concs))
         stop("substrates and concs must have the same length!")
-    
+
     f <- abs(min(substrates[i], 0))
     substrates[i] <- 0
-    if (f == 0) 
+    if (f == 0)
         return(0)
-    
+
     sc <- concs[substrates < 0]
     nc <- abs(substrates[substrates < 0])
-    
+
     # if( length(sc) == 0 ) return( 0 )
-    
+
     pd <- prod(sc^nc) * f * concs[i]^(f - 1)
-    
+
     return(pd)
 }
 
@@ -129,8 +129,8 @@ deriv_ma <- function(i, substrates, concs) {
 #' @param s_matrix The stochiometric matrix of the model.
 #' @param concs The concentrations of the substrates. Must be a named vector with
 #'  names being the metabolite names as used in \code{rownames(s_matrix)}.
-#' @param deriv_func The function calculating the derivative. Must be of the 
-#'  form func(idx, subs, concs) where idx is the index of the differentiation 
+#' @param deriv_func The function calculating the derivative. Must be of the
+#'  form func(idx, subs, concs) where idx is the index of the differentiation
 #'  variable, subs the stoichiometry of the substrates and concs the concentration
 #'  of substrates. See \code{\link{mass_action}} for an example.
 #' @return The Jacobian matrix of dimension n_s x n_r where entry (i,j) denotes
@@ -142,15 +142,15 @@ deriv_ma <- function(i, substrates, concs) {
 #' names(concs) <- rownames(S)
 #' J <- jacobian(S, concs)
 jacobian <- function(s_matrix, concs, deriv_func = deriv_ma) {
-    if (is.null(names(concs))) 
+    if (is.null(names(concs)))
         stop("Concentration vector must have names!") else {
         concs <- concs[rownames(s_matrix)]
         prods <- apply(s_matrix, 2, mass_action, concs = concs)
     }
-    
-    J <- apply(s_matrix, 2, function(x) sapply(seq_along(x), deriv_func, 
+
+    J <- apply(s_matrix, 2, function(x) sapply(seq_along(x), deriv_func,
         substrates = x, concs = concs))
-    
+
     return(t(J))
 }
 
@@ -162,9 +162,9 @@ jacobian <- function(s_matrix, concs, deriv_func = deriv_ma) {
 #' @param s_matrix The stochiometric matrix.
 #' @param concs The concentrations of the substrates. Can be one of two
 #'    \itemize{
-#'    \item A named vector containing the concentratiions for all substrates, 
+#'    \item A named vector containing the concentratiions for all substrates,
 #'    where its names come from the same set as the rownames of S.
-#'    \item A data frame with one column names 'name' containing the 
+#'    \item A data frame with one column names 'name' containing the
 #'    names and all other columns containing multiple concentration entries.
 #'    }
 #' @return Either vector of length n_r containing the mass-action terms, if
@@ -178,9 +178,9 @@ jacobian <- function(s_matrix, concs, deriv_func = deriv_ma) {
 #' mats <- ma_terms(S, concs)
 ma_terms <- function(s_matrix, concs) {
     prods <- NULL
-    
+
     if (is.vector(concs)) {
-        if (is.null(names(concs))) 
+        if (is.null(names(concs)))
             stop("Concentration vector must have names!") else {
             concs <- concs[rownames(s_matrix)]
             prods <- apply(s_matrix, 2, mass_action, concs = concs)
@@ -190,11 +190,11 @@ ma_terms <- function(s_matrix, concs) {
             o <- orderby(rownames(s_matrix), concs$name)
             concs <- concs[o, ]
             name_idx <- which(names(concs) == "name")
-            prods <- apply(concs[, -name_idx], 2, function(co) apply(s_matrix, 
+            prods <- apply(concs[, -name_idx], 2, function(co) apply(s_matrix,
                 2, mass_action, concs = co))
         } else stop("Concentration data frame must have a column named 'name'!")
     }
-    
+
     return(prods)
 }
 
@@ -204,32 +204,32 @@ get_reaction_elems <- function(reaction_str) {
     reversible <- grepl("\\s*<.+\\s*", reaction_str)
     sides <- strsplit(reaction_str, "\\s*<?\\s?=?-?\\s?>\\s*")[[1]]
     sides <- strsplit(sides, "\\s*\\+\\s*")
-    
+
     sub_pattern <- "((\\d*\\.*\\d*)\\*|^\\s*)([^[:space:]]+)"
     subs <- unlist(regmatches(sides[[1]], regexec(sub_pattern, sides[[1]])))
-    if (is.null(subs)) 
+    if (is.null(subs))
         subs <- c(NA, NA, "1", NA)
     subs[subs == ""] <- "1"
     n_s <- length(subs)
-    
-    if (length(sides) == 1) 
+
+    if (length(sides) == 1)
         prods <- c(NA, NA, "1", NA) else {
         prods <- unlist(regmatches(sides[[2]], regexec(sub_pattern, sides[[2]])))
     }
     prods[prods == ""] <- "1"
     n_p <- length(prods)
-    
-    return(list(S = subs[seq(4, n_s, 4)], P = prods[seq(4, n_p, 4)], 
-        N_S = as.numeric(subs[seq(3, n_s, 4)]), 
+
+    return(list(S = subs[seq(4, n_s, 4)], P = prods[seq(4, n_p, 4)],
+        N_S = as.numeric(subs[seq(3, n_s, 4)]),
         N_P = as.numeric(prods[seq(3, n_p, 4)]), rev = reversible))
 }
 
 #' Reads a list of reactions with optional annotations from a file.
-#' 
+#'
 #' @export
 #' @param react_file A csv file containing the reactions, where the first
 #'  column denotes the reaction string and additional columns contain
-#'  annotations. A single annotation can contain several values as a 
+#'  annotations. A single annotation can contain several values as a
 #'  comma separated string. The csv file should be saved with all entries
 #'  quoted.
 #' @return An object of with the S3 class \code{reactions} denoting a list
@@ -239,31 +239,31 @@ get_reaction_elems <- function(reaction_str) {
 #' r <- read_reactions(textConnection(r_str))
 read_reactions <- function(react_file) {
     reacts <- read.csv(react_file, stringsAsFactors = FALSE)
-    
+
     has_arrows <- grepl("\\s*<?\\s?=?-?\\s?>\\s*", reacts[, 1])
     if (!all(has_arrows)) {
-        stop(sprintf("The following reactions are missing reacion arrows: %s", 
+        stop(sprintf("The following reactions are missing reacion arrows: %s",
             paste(which(!has_arrows), collapse = ", ")))
     }
-    
-    res <- apply(reacts, 1, function(x) c(get_reaction_elems(x[1]), lapply(x[-1], 
+
+    res <- apply(reacts, 1, function(x) c(get_reaction_elems(x[1]), lapply(x[-1],
         str_conv)))
-    
+
     class(res) <- append(class(res), "reactions")
-    
+
     return(res)
 }
 
 # Helper function to convert a reaction entry to a clean string version
 to_string <- function(r, name = TRUE) {
     id <- paste0(r$abbreviation, ": ")
-    left <- if (is.na(r$S[1])) 
+    left <- if (is.na(r$S[1]))
         "\u2205" else paste(r$N_S, r$S, sep = "*", collapse = " + ")
-    right <- if (is.na(r$P[1])) 
+    right <- if (is.na(r$P[1]))
         "\u2205" else paste(r$N_P, r$P, sep = "*", collapse = " + ")
-    join <- if (r$rev) 
+    join <- if (r$rev)
         "<=>" else "->"
-    out <- if (name) 
+    out <- if (name)
         paste(id, left, join, right) else paste(left, join, right)
     return(out)
 }
@@ -271,7 +271,7 @@ to_string <- function(r, name = TRUE) {
 # Formats reactions to a nice string representation
 format.reactions <- function(x) {
     r_str <- sapply(x, to_string)
-    
+
     return(paste(r_str, collapse = "\n"))
 }
 
@@ -287,7 +287,7 @@ format.reactions <- function(x) {
 #' data(eryth)
 #' print(eryth)
 print.reactions <- function(x, ...) {
-    write(sprintf("Model has %d reactions (%d reversible)", length(x), sum(sapply(x, 
+    write(sprintf("Model has %d reactions (%d reversible)", length(x), sum(sapply(x,
         function(a) a$rev))), file = "")
     write(format(x), file = "", ...)
 }
@@ -302,52 +302,52 @@ print.reactions <- function(x, ...) {
 #' data(eryth)
 #' print(species(eryth))
 species <- function(reacts) {
-    if (!("reactions" %in% class(reacts))) 
+    if (!("reactions" %in% class(reacts)))
         stop("Argument has wrong type!")
-    
+
     species <- unlist(lapply(reacts, function(x) c(x$S, x$P)))
     species <- species[!is.na(species)]
     return(unique(species))
 }
 
 #' Calculates the stochiometric matrix for a list of reactions.
-#' 
+#'
 #' @seealso \code{\link{read_reactions}} to read a reaction list from a file.
 #' @export
 #' @keywords stoichiometry
 #' @param reacts The reaction list to be used.
-#' @param reversible Whether the stochiometric matrix can include reversible 
+#' @param reversible Whether the stochiometric matrix can include reversible
 #'  reactions.
 #' @param const A vector of species names that are assumed to be invariant and
 #'  will be dropped from the stochiometric matrix. The default is not to drop
 #'  any species.
-#' @param sparse Whether the stoichiometric matrix should saved in a sparse 
+#' @param sparse Whether the stoichiometric matrix should saved in a sparse
 #'  format. Reguires the \code{Matrix} package to be installed.
 #' @return The stochiometric matrix with dimension n_s x n_r.
 #' @examples
 #' data(eryth)
 #' S <- stoichiometry(eryth)
-stoichiometry <- function(reacts, reversible = FALSE, const = NULL, 
+stoichiometry <- function(reacts, reversible = FALSE, const = NULL,
     sparse = FALSE) {
-    if (!("reactions" %in% class(reacts))) 
+    if (!("reactions" %in% class(reacts)))
         stop("Argument has wrong type!")
-    
+
     if (sparse && !requireNamespace("Matrix", quietly = TRUE))
         stop("sparse output requires the Matrix package!")
-    
+
     spec <- species(reacts)
-    n_r <- if (reversible) 
+    n_r <- if (reversible)
         length(reacts) else length(reacts) + sum(sapply(reacts, function(x) x$rev))
-    
+
     if (sparse) N <- Matrix::Matrix(0, nrow = length(spec), ncol = n_r)
     else N <- matrix(0, nrow = length(spec), ncol = n_r)
 
     rownames(N) <- spec
     i <- 1
     for (r in reacts) {
-        S <- if (is.na(r$S)[1]) 
+        S <- if (is.na(r$S)[1])
             NULL else r$S
-        P <- if (is.na(r$P[1])) 
+        P <- if (is.na(r$P[1]))
             NULL else r$P
         if (!is.na(r$S[1])) N[S, i] <- -r$N_S
         if (!is.na(r$P[1])) N[P, i] <- r$N_P
@@ -361,7 +361,7 @@ stoichiometry <- function(reacts, reversible = FALSE, const = NULL,
     eliminate <- rownames(N) %in% c("none", const)
     N <- N[!eliminate, ]
     colnames(N) <- NULL
-    
+
     return(N)
 }
 
@@ -373,7 +373,7 @@ stoichiometry <- function(reacts, reversible = FALSE, const = NULL,
 #' @param reversible Marks reversible reactions. FALSE denotes that
 #'  all reactions are irreversible. Otherwise a boolean vector of length
 #'  n_r defining the reversibility for each reaction.
-#' @param r_names If NA reaction names are generated as r1,...,rn. Can be a 
+#' @param r_names If NA reaction names are generated as r1,...,rn. Can be a
 #'  vector of length n_r denoting names for the reactions.
 #' @return A reaction list containing the reactions from S.
 #' @examples
@@ -381,42 +381,42 @@ stoichiometry <- function(reacts, reversible = FALSE, const = NULL,
 #' rownames(S) <- c('A', 'B')
 #' print(as.reactions(S))
 as.reactions <- function(s_matrix, reversible = FALSE, r_names = NA) {
-    if (class(rownames(s_matrix)) != "character") 
+    if (class(rownames(s_matrix)) != "character")
         stop("Not a valid stochiometric matrix (no rownames)!")
-    
-    if (length(r_names) == 1 && is.na(r_names)) 
+
+    if (length(r_names) == 1 && is.na(r_names))
         r_names <- paste0("r", 1:ncol(s_matrix))
-    
+
     species <- rownames(s_matrix)
     reacts <- vector("list", ncol(s_matrix))
     for (i in 1:ncol(s_matrix)) {
         reacts[[i]]$S <- species[s_matrix[, i] < 0]
-        if (length(reacts[[i]]$S) == 0) 
+        if (length(reacts[[i]]$S) == 0)
             reacts[[i]]$S <- NA
         reacts[[i]]$P <- species[s_matrix[, i] > 0]
-        if (length(reacts[[i]]$P) == 0) 
+        if (length(reacts[[i]]$P) == 0)
             reacts[[i]]$P <- NA
         reacts[[i]]$N_S <- -s_matrix[s_matrix[, i] < 0, i]
-        if (length(reacts[[i]]$N_S) == 0) 
+        if (length(reacts[[i]]$N_S) == 0)
             reacts[[i]]$N_S <- 1
         reacts[[i]]$N_P <- s_matrix[s_matrix[, i] > 0, i]
-        if (length(reacts[[i]]$N_P) == 0) 
+        if (length(reacts[[i]]$N_P) == 0)
             reacts[[i]]$N_P <- 1
-        
-        if (length(reversible) == 1) 
+
+        if (length(reversible) == 1)
             reacts[[i]]$rev <- reversible else reacts[[i]]$rev <- reversible[i]
-        
+
         reacts[[i]]$name <- reacts[[i]]$abbreviation <- r_names[i]
     }
-    
+
     class(reacts) <- append("reactions", class(reacts))
-    
+
     return(reacts)
 }
 
 #' Converts a given reaction list into an irreversible one, splitting up
 #' all reversible ones into two irreversible reactions.
-#' 
+#'
 #' @export
 #' @keywords reactions
 #' @param reacts The reaction list.
@@ -430,7 +430,7 @@ make_irreversible <- function(reacts) {
     for (i in 1:length(reacts)) {
         rv <- reacts[[i]]$rev
         reacts[[i]]$rev <- FALSE
-        
+
         r <- append(r, list(reacts[[i]]))
         if (rv) {
             br <- reacts[[i]]
@@ -441,14 +441,14 @@ make_irreversible <- function(reacts) {
             r <- append(r, list(br))
         }
     }
-    
+
     class(r) <- append(class(r), "reactions")
-    
+
     return(r)
 }
 
 #' Obtains properties from a reaction list
-#' 
+#'
 #' @export
 #' @param r The reaction list.
 #' @param field Name of the property to be obtained.
@@ -457,17 +457,17 @@ make_irreversible <- function(reacts) {
 #' data(eryth)
 #' print(rp(eryth, 'name'))
 rp <- function(r, field = "KEGG_enzyme") {
-    if (length(field) != 1) 
+    if (length(field) != 1)
         stop("field must be exactly one string!")
     prop <- lapply(1:length(r), function(i) {
         ri <- r[[i]]
-        if (all(is.na(ri[[field]]))) 
+        if (all(is.na(ri[[field]])))
             return(NULL)
         data.frame(r_idx = i, x = ri[[field]], stringsAsFactors = FALSE)
     })
     prop <- do.call(rbind, prop)
     names(prop)[2] <- field
-    
+
     return(prop)
 }
 
@@ -499,7 +499,7 @@ constant_flux <- function(reacts) {
 }
 
 #' Plots the reactions as a graph.
-#' 
+#'
 #' @seealso \code{\link{print.reactions}} for a nicely formatted representation.
 #' @export
 #' @keywords plot, reactions
@@ -509,14 +509,16 @@ constant_flux <- function(reacts) {
 #' @examples
 #' data(eryth)
 #' plot(eryth)
+#'
+#' @importFrom graphics image
 plot.reactions <- function(x, ...) {
     N <- stoichiometry(x, reversible = TRUE)
-    
+
     if (requireNamespace("igraph", quietly = TRUE)) {
         g <- igraph::graph.adjacency(N %*% t(N), weighted = TRUE, diag = FALSE)
-        igraph::plot.igraph(g, layout = igraph::layout.circle, vertex.size = 10, 
+        igraph::plot.igraph(g, layout = igraph::layout.circle, vertex.size = 10,
             edge.arrow.size = 0.5, ...)
-        
+
     } else {
         warning("igraph is not installed, Just showing the connectivity...")
         A <- N %*% t(N)
@@ -537,16 +539,16 @@ plot.reactions <- function(x, ...) {
 #' data(eryth)
 #' print(as.graph(eryth))
 as.graph <- function(reacts) {
-    if (!("reactions" %in% class(reacts))) 
+    if (!("reactions" %in% class(reacts)))
         stop("Argument has wrong type!")
-    
+
     N <- stoichiometry(reacts, reversible = TRUE)
     adj <- abs(N %*% t(N))
-    
+
     if (requireNamespace("igraph", quietly = TRUE)) {
         return(igraph::graph.adjacency(adj, mode = "max", weighted = TRUE, diag = FALSE))
     } else {
         warning("igraph is not installed. Returning adjacency matrix...")
         return(adj)
     }
-} 
+}

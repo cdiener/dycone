@@ -125,6 +125,7 @@ hmdb_parse <- function(nodes) {
 #' hmdb_concentration('HMDB00124') # Fructose-6-phosphate
 #'
 #' @export
+#' @importFrom xml2 xml_find_first xml_find_all
 hmdb_concentration <- function(hmids, add = NULL) {
     out <- NULL
     cat("\n")

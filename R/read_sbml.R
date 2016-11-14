@@ -34,7 +34,7 @@ clean_ns <- function(ns) {
     fbc_idx <- grep(RE_FBC, ns)
     mml_idx <- grep(RE_MATHML, ns)
 
-    if (length(sbml_idx) < 1) stop("No SBML namespaces found.")
+    if (length(sbml_idx) < 1) stop("No SBML namespace found.")
     else names(ns)[sbml_idx[1]] <- "sbml"
     if (length(fbc_idx) >= 1) names(ns)[fbc_idx[1]] <- "fbc"
     if (length(mml_idx) >= 1) names(ns)[mml_idx[1]] <- "mathml"
@@ -239,6 +239,7 @@ parse_reaction <- function(r_node, ns, v) {
 #' sbml_reactions(m_url)
 #'
 #' @export
+#' @importFrom utils read.csv setTxtProgressBar txtProgressBar
 sbml_reactions <- function(sbml_file, progress=TRUE) {
     doc <- get_xml(sbml_file)
     ns <- clean_ns(xml_ns(doc))

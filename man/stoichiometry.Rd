@@ -9,14 +9,14 @@ stoichiometry(reacts, reversible = FALSE, const = NULL, sparse = FALSE)
 \arguments{
 \item{reacts}{The reaction list to be used.}
 
-\item{reversible}{Whether the stochiometric matrix can include reversible 
+\item{reversible}{Whether the stochiometric matrix can include reversible
 reactions.}
 
 \item{const}{A vector of species names that are assumed to be invariant and
 will be dropped from the stochiometric matrix. The default is not to drop
 any species.}
 
-\item{sparse}{Whether the stoichiometric matrix should saved in a sparse 
+\item{sparse}{Whether the stoichiometric matrix should saved in a sparse
 format. Reguires the \code{Matrix} package to be installed.}
 }
 \value{

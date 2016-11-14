@@ -11,9 +11,9 @@ ma_terms(s_matrix, concs)
 
 \item{concs}{The concentrations of the substrates. Can be one of two
 \itemize{
-\item A named vector containing the concentratiions for all substrates, 
+\item A named vector containing the concentratiions for all substrates,
 where its names come from the same set as the rownames of S.
-\item A data frame with one column names 'name' containing the 
+\item A data frame with one column names 'name' containing the
 names and all other columns containing multiple concentration entries.
 }}
 }

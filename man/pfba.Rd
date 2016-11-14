@@ -7,7 +7,7 @@ Here, 'parsimonous' means that from all the possible maxima we will return
 the one minimizing the overall flux sum, thus, being the most 'economic' one
 for the organism.}
 \usage{
-pfba(obj, S, v_min = 0, v_max = 1)
+pfba(obj, S, alpha = 1, v_min = 0, v_max = 1)
 }
 \arguments{
 \item{obj}{The objective reaction, whose flux will be be maximized. Can
@@ -24,6 +24,9 @@ be any of the following three:
 }}
 
 \item{S}{The stochiometrix matrix to be used (must be irreversible).}
+
+\item{alpha}{Fraction of optimum value. Objective must be at least
+alpha * fba_solution.}
 
 \item{v_min}{Lower bounds for the reaction fluxes. Can be a single value or a
 vector containing one value for each reaction.}

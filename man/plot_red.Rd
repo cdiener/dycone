@@ -49,6 +49,7 @@ S <- matrix(c(1,0,0,1,-1,0, 0, -1), nrow=2)
 rownames(S) <- c('A', 'B')
 V <- polytope_basis(S)
 plot_red(list(V)) # A single basis is fine as long as it is a list
+
 }
 \seealso{
 \code{\link{plot_basis}} for heatmap of the basis.

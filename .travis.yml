@@ -1,5 +1,5 @@
 # .travis.yml for dycone
-    
+
 language: R
 
 sudo: false
@@ -12,6 +12,7 @@ addons:
             - r-packages-precise
         packages:
             - libgmp-dev
+            - libglpk-dev
 
 bioc_required: true
 bioc_packages:
@@ -22,5 +23,3 @@ r_packages:
 
 after_success:
     - Rscript -e 'covr::codecov()'
-
-
