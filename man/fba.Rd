@@ -18,6 +18,8 @@ be any of the following three:
 \item{A named vector containing only the non-zero entries in the respective
     column of the stochiometric matrix being named by their respective
     metabolite.}
+\item{A single integer indicating which column of the stoichiometric
+    contains the objective reaction.}
 }}
 
 \item{S}{The stochiometrix matrix to be used (must be irreversible).}

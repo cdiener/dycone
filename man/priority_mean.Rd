@@ -24,7 +24,7 @@ for which measuremnts can be found.
 }
 \examples{
 # requires internet connection
-concs <- hmdb_concentration('HMDB00124') # Fructose-6-phosphate
+concs <- hmdb_concentration('HMDB00124')
 priority_mean(concs) # has measurements for cytoplasm so returns those
 }
 \seealso{

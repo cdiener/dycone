@@ -6,6 +6,6 @@ build:
         code: |
             apt-get update
             apt-get install -y -t testing libglpk-dev 
-    - jimhester/r-dependencies
-    - jimhester/r-check
-    - jimhester/r-coverage
+    - inbobmk/r-dependencies
+    - inbobmk/r-check
+    - inbobmk/r-coverage

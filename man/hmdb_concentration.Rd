@@ -21,7 +21,7 @@ Scrapes measured metabolite concentration values for a given HMDB ID.
 }
 \examples{
 # requires internet connection
-hmdb_concentration('HMDB00124') # Fructose-6-phosphate
+hmdb_concentration('HMDB00124')
 
 }
 
