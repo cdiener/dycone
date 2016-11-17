@@ -5,7 +5,7 @@ build:
         name: Install glpk lib
         code: |
             apt-get update
-            apt-get install -y -t testing libglpk-dev 
+            apt-get install -y libglpk-dev 
     - jimhester/r-dependencies
     - inbobmk/r-check
     - inbobmk/r-coverage
