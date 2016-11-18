@@ -15,8 +15,8 @@ vignette: >
 Human blood cell example
 ========================
 
-In this example we will use dycone to analyze some perturbations in the 
-Red blood cell model of Resendis. First we will use dycone to get its 
+In this example we will use dycone to analyze some perturbations in the
+Red blood cell model of Resendis. First we will use dycone to get its
 stochiometric matrix and extract the steady state from the orginial SBML file.
 
 ```{r}
@@ -39,7 +39,7 @@ S = stoichiometry(eryth)
 Extracting the k-cone
 ---------------------
 
-Getting the consistent k-cone (all $k_i>0$) takes two steps in dycone. First, 
+Getting the consistent k-cone (all $k_i>0$) takes two steps in dycone. First,
 calculation of the general flux cone and, second, calculation of the specific
 flux cone. Let's calculate and look at the flux cone first...
 
@@ -48,14 +48,14 @@ V = polytope_basis(S)
 plot_basis(V)
 ```
 
-Some interesting structurs can be observed from the flux kone alone. For instance, 
+Some interesting structurs can be observed from the flux kone alone. For instance,
 basis vectors with only two reactions indicate a constant relation of the form
 $k_i/k_j = const.$.
 
 Perturbance experiment
 ----------------------
 
-Now, let's set up a small perturbation experiment in order to execute the 
+Now, let's set up a small perturbation experiment in order to execute the
 differential k-cone analysis. We will use a faster version of the eigendynamics
 as reference parameters and perturb the steady state value of pyruvate.
 
@@ -64,8 +64,8 @@ m = ma_terms(S, concs)
 K = kcone(V, m)
 k = 1e3*eigendynamics(K)
 
-# Now we generate several new steady states coming from a disturbed ethanol 
-# production 
+# Now we generate several new steady states coming from a disturbed ethanol
+# production
 
 scales = 10^c(-1,-2)
 d_concs = concs
@@ -77,7 +77,7 @@ for( i in 1:length(scales) ) {
 
 m_terms = apply(d_concs, 1, function(co) ma_terms(S, co))
 d_basis = lapply(1:3, function(i) kcone(V, m_terms[,i]))
-``` 
+```
 
 First we will have a look at the projection of the respective k-cones in a 2D space
 with colors from green to red indicating a diminishing ethanol production.
@@ -86,7 +86,7 @@ with colors from green to red indicating a diminishing ethanol production.
 plot_red(d_basis)
 ```
 
-This gives a visual representation but no detailed information which reactions 
+This gives a visual representation but no detailed information which reactions
 are the most likely to be perturbed in the transition from the high to low
 pyruvate state. This can be achieved by the `hyp` function. We will add noise
 samples to each condition to simulate an experimental measurement.
@@ -101,22 +101,23 @@ noise = function(x) {
 set.seed(42)
 
 exp_concs = cbind(noise(d_concs[1,]), noise)
-normal = replicate(4, ma_terms(S, noise(d_concs[1,])))
-disease = replicate(4, ma_terms(S, noise(d_concs[3,])))
+mats <- cbind(replicate(4, ma_terms(S, noise(d_concs[1,]))),
+              replicate(4, ma_terms(S, noise(d_concs[3,]))))
+samples <- rep(c("normal", "disease"), each = 4)
 
-h = hyp(normal, disease, reacts)
+h = hyp(reacts, samples, mats)
 print(h[h$pval<0.05,])
 ```
 
-We see that the most prominent change is an increased reaction rate for two reactions, 
+We see that the most prominent change is an increased reaction rate for two reactions,
 which result to be the two reactions consuming Pyruvate. However, there are also some other
 changes, however, their fold_changes are much smaller than 2, indicating only slight alterations
 due to the added noise. The mean log-fold change of the alterations in pyruvate
 production are close to the actual alteration (96-fold predicted vs 100-fold truth).
 
 As we can see the change in Pyruvate is explained by either up-regulating the pyruvate
-consumption or (less likely) a lower production of upstream substrates which might have to act together. 
-As we can see the reaction producing pyruvate is not in the list. This makes sense since it is a 
+consumption or (less likely) a lower production of upstream substrates which might have to act together.
+As we can see the reaction producing pyruvate is not in the list. This makes sense since it is a
 unidirectional reaction whose down-regulation would affect the steady state quite severely
-in the concentration of adp and pep, but not pyruvate, thus making it an unlikely target 
+in the concentration of adp and pep, but not pyruvate, thus making it an unlikely target
 when observing a lower pyruvate concentration alone.
