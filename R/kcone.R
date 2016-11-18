@@ -524,20 +524,9 @@ single_hyp <- function(k1, k2, reacts) {
         fac <- c(fac, logfold[i])
     }
 
-    res <- data.frame(idx = idx, name = id, reaction = r_s,
-                      type = kind, log2_fold = fac)
+    res <- data.frame(idx = idx, name = id, reaction = r_s, log2_fold = fac)
 
     return(res)
-}
-
-# Internal function to estimate credible intervals by bayes bootstrap
-bayes_mean_ci <- function(x, n = 256, level = 0.95) {
-    iv <- c(0.5 * (1 - level), 0.5 * (1 + level))
-    w <- matrix(rexp(length(x) * n), nrow = n)
-    w <- w / rowSums(w)
-    m <- apply(w, 1, weighted.mean, x = x)
-
-    return(quantile(m, iv))
 }
 
 #' Identifies hypothesis for differentially regulated reactions between a set of
@@ -557,22 +546,24 @@ bayes_mean_ci <- function(x, n = 256, level = 0.95) {
 #'  }
 #'
 #' @keywords hypothesis, k-cone, analysis
-#' @param normal A matrix or data frame containing the metabolic terms of the
-#'  normal condition in the columns.
-#' @param disease A matrix or data frame containing the metabolic terms of the
-#'  diseasse condition in the columns.
+#' @param ma_terms A matrix or data frame containing the metabolic in the
+#'  columns.
+#' @param samples A factor or character string with either "normal" and
+#'  "disease" entries or a single element named "ratio" if mass-action terms
+#'  and fluxes are disease/normal ratios. Only required for type "exact".
+#' @param fluxes Pre-compputed or measured fluxes with the same classification
+#'  as in \code{samples}.
 #' @param reacts The reaction list.
-#' @param type The type of analysis to be performed. Either 'bias',
+#' @param type The type of analysis to be performed. Either 'bias', 'exact',
 #'  'fva' or 'raw' for a pass-through option.
 #' @param sorted Whether the results should be sorted by p-value and mean log-fold
 #'  change.
-#' @param cred_level The confidence level for the bayes credible intervals.
+#' @param cred_level The confidence level for the confidence intervals.
 #'  Defaults to 95\%.
 #' @param obj Only needs to be set if type = 'fva'. Defines the
-#'  the objective reaction whose flux is maximized. Can be any of the acceptable
+#'  objective reaction whose flux is maximized. Can be any of the acceptable
 #'  formats for \code{\link{fba}}. The, probably, easiest import format is a
-#'  vector with entries named after metabolites in \code{reacts} and specifiying
-#'  their stoichiometry (negative entries for substrates and positive for products.)
+#'  single number denoting the index of the reaction that is the objective.
 #' @param v_min The smallest allowed flux for each reaction for all reactions.
 #'  Must be >=0. Can be of length 1 or \code{ncol(S)}. Set larger than zero to
 #'  enforce a non-zero flux through a set of reactions.
@@ -629,80 +620,94 @@ bayes_mean_ci <- function(x, n = 256, level = 0.95) {
 #' h <- hyp(normal, sick, eryth)
 #' head(h)
 #'
-#' @importFrom limma makeContrasts lmFit contrasts.fit eBayes
+#' @importFrom limma makeContrasts lmFit contrasts.fit eBayes topTable
 #' @importFrom utils combn
 #' @importFrom stats model.matrix sd p.adjust
 #' @importFrom stats rexp weighted.mean quantile
 #' @export
-hyp <- function(normal, disease, reacts, type = "bias",
+hyp <- function(reacts, samples, ma_terms, fluxes = NA, type = "bias",
                 correction_method = "BH", cred_level = 0.95, sorted = TRUE,
                 obj = NULL, v_min = 1e-16, alpha = 1, full = FALSE) {
     # Create reference data
-    normal <- as.matrix(normal)
-    disease <- as.matrix(disease)
+    ratio <- all(length(samples) == 1 & samples == "ratio")
+    if (!ratio) {
+        if (!all(samples %in% c("normal", "disease"))) stop(
+            "If samples is a vector it must only contain normal/disease")
+        normal <- samples == "normal"
+        disease <- samples == "disease"
+    }
+    if (!(type %in% c("raw", "bias", "exact", "fva")))
+        stop("type must be either 'bias', 'exact', 'fva' or 'raw' :(")
 
     if (type != "raw") {
-        normal <- 1 / normal
-        disease <- 1 / disease
+        ma_terms <- 1 / ma_terms
     }
-    M <- log(cbind(normal, disease), 2)
+    M <- log(ma_terms, 2)
+    if (type == "exact") M <- M * fluxes
 
     if (type == "fva") {
-        S <- stoichiometry(reacts)
-        if (!is.numeric(obj))
-            stop("obj must be numeric.")
+        S <- stoichiometry(reacts, sparse = TRUE)
         va <- fva(obj, S, 1, v_min, 1)
         if (length(obj) > 1 || !is.null(names(obj))) va <- va[-nrow(va), ]
         # Deal with numerical inaccuracies
         va[va < v_min] <- v_min
         lfc_va <- log(va[, 2], 2) - log(va[, 1], 2)
-    } else if (!(type %in% c("raw", "bias")))
-        stop("type must be either 'bias', 'fva' or 'raw' :(")
+    }
 
-    res <- single_hyp(normal[, 1], normal[, 1], reacts)
+    res <- single_hyp(M[, 1], M[, 1], reacts)
     res <- res[, -ncol(res)]
 
     # create internal controls
-    cref <- combn(1:ncol(normal), 2)
+    cref <- combn(which(normal), 2)
     lfc_n <- apply(cref, 2, function(idx) {
-        h <- single_hyp(normal[, idx[1]], normal[, idx[2]], reacts)
+        h <- single_hyp(M[, idx[1]], M[, idx[2]], reacts)
         return(h$log2_fold)
     })
 
     # Create differential analysis
-    ctreat <- expand.grid(1:ncol(normal), 1:ncol(disease))
+    ctreat <- expand.grid(which(normal), which(disease))
     lfc_d <- apply(ctreat, 1, function(idx) {
-        h <- single_hyp(normal[, idx[1]], disease[, idx[2]], reacts)
+        h <- single_hyp(M[, idx[1]], M[, idx[2]], reacts)
         return(h$log2_fold)
     })
 
     # Generate model fits
-    design <- model.matrix(
-        ~ 0 + factor(rep.int(1:2, times = c(ncol(normal), ncol(disease)))))
+    design <- model.matrix(~ 0 + factor(samples))
     colnames(design) <- c("normal", "disease")
     dfit <- lmFit(M, design)
     contrast.matrix <- makeContrasts(disease - normal, levels = design)
     cfit <- contrasts.fit(dfit, contrast.matrix)
     cfit <- eBayes(cfit)
 
-    bci <- apply(lfc_d, 1, bayes_mean_ci, level = cred_level)
-    rownames(bci) <- NULL
-
+    tt <- topTable(cfit, number = nrow(M), confint = TRUE, sort = "none")
     # Generate statistics
-    stats <- data.frame(sd_normal = apply(lfc_n, 1, sd), sd_disease =
-        apply(lfc_d, 1, sd), mean_log_fold = cfit$coefficients[, 1],
-        ci_low = bci[1, ], ci_high = bci[2, ], pval = cfit$p.value[, 1])
-    nd <- is.na(stats$mean_log_fold)
-    stats$mean_log_fold[nd] <- 0
-    stats$pval[nd] <- 1
-    if (type == "fva") stats$fva_log_fold <- lfc_va
+    if (type == "exact") {
+        vlfc <- rowMeans(log(fluxes[, disease], 2) - log(fluxes[, normal], 2))
+    } else {
+        vlfc <- -tt$logFC
+    }
+    stats <- data.frame(
+        sd_normal = apply(lfc_n, 1, sd), sd_disease =
+        apply(lfc_d, 1, sd), k_lfc = tt$logFC, v_lfc = vlfc,
+        ci_low = tt$CI.L, ci_high = tt$CI.R, pval = tt$P.Value,
+        corr_pval = tt$adj.P.Val)
+
+    nd <- is.na(stats$k_lfc)
+    stats$k_lfc[nd] <- 0
+    stats$pval[nd] <- stats$corr_pval[nd] <- 1
+    if (type == "fva") {
+        stats$fva_log_fold <- lfc_va
+        stats$necessary <- abs(lfc_va) < abs(stats$k_lfc)
+    }
     res <- cbind(res, stats)
-    reg <- sapply(res$mean_log_fold, function(x) if (x == 0)
-        "same" else if (x > 0) "up" else "down")
-    res$type <- factor(reg)
-    res$corr_pval <- p.adjust(res$pval, method = correction_method)
+    if (type == "exact") {
+        reg <- sapply(res$k_lfc, function(x) if (x == 0)
+            "same" else if (x > 0) "up" else "down")
+        res$type <- factor(reg)
+    }
+
     if (sorted)
-        res <- res[order(res$corr_pval, -abs(res$mean_log_fold)), ]
+        res <- res[order(res$corr_pval, -abs(res$k_lfc)), ]
 
     if (full) {
         lfc_n <- data.frame(normal = lfc_n)

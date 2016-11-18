@@ -5,36 +5,39 @@
 \title{Identifies hypothesis for differentially regulated reactions between a set of
 normal and disease conditions.}
 \usage{
-hyp(normal, disease, reacts, type = "bias", correction_method = "BH",
-  cred_level = 0.95, sorted = TRUE, obj = NULL, v_min = 1e-16,
-  alpha = 1, full = FALSE)
+hyp(reacts, samples, ma_terms, fluxes = NA, type = "bias",
+  correction_method = "BH", cred_level = 0.95, sorted = TRUE,
+  obj = NULL, v_min = 1e-16, alpha = 1, full = FALSE)
 }
 \arguments{
-\item{normal}{A matrix or data frame containing the metabolic terms of the
-normal condition in the columns.}
-
-\item{disease}{A matrix or data frame containing the metabolic terms of the
-diseasse condition in the columns.}
-
 \item{reacts}{The reaction list.}
 
-\item{type}{The type of analysis to be performed. Either 'bias',
+\item{samples}{A factor or character string with either "normal" and
+"disease" entries or a single element named "ratio" if mass-action terms
+and fluxes are disease/normal ratios. Only required for type "exact".}
+
+\item{ma_terms}{A matrix or data frame containing the metabolic in the
+columns.}
+
+\item{fluxes}{Pre-compputed or measured fluxes with the same classification
+as in \code{samples}.}
+
+\item{type}{The type of analysis to be performed. Either 'bias', 'exact',
 'fva' or 'raw' for a pass-through option.}
 
 \item{correction_method}{A correction method for the multiple test p-values.
 Takes the same arguments as the method argument in p.adjust.}
 
-\item{cred_level}{The confidence level for the bayes credible intervals.
+\item{cred_level}{The confidence level for the confidence intervals.
 Defaults to 95\%.}
 
 \item{sorted}{Whether the results should be sorted by p-value and mean log-fold
 change.}
 
 \item{obj}{Only needs to be set if type = 'fva'. Defines the
-the objective reaction whose flux is maximized. Can be any of the acceptable
+objective reaction whose flux is maximized. Can be any of the acceptable
 formats for \code{\link{fba}}. The, probably, easiest import format is a
-vector with entries named after metabolites in \code{reacts} and specifiying
-their stoichiometry (negative entries for substrates and positive for products.)}
+single number denoting the index of the reaction that is the objective.}
 
 \item{v_min}{The smallest allowed flux for each reaction for all reactions.
 Must be >=0. Can be of length 1 or \code{ncol(S)}. Set larger than zero to
