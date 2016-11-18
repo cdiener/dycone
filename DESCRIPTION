@@ -20,7 +20,6 @@ Imports:
     magrittr,
     RCurl,
     xml2,
-    rvest,
     quadprog,
     limma,
     Rcpp,

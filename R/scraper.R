@@ -78,12 +78,12 @@ parse_conc <- function(val) {
 #' # requires internet connection
 #' find_hmdb("pyruvate")
 #'
-#' @importFrom rvest html_nodes html_text
 #' @importFrom RCurl curlEscape
 #' @export
 find_hmdb <- function(search_term) {
     hmids <- read_html(sprintf(HMDB_SEARCH, curlEscape(search_term))) %>%
-        html_nodes(".result-link .btn-card") %>% html_text()
+        xml_find_all("//div[@class='result-link']/a[@class='btn-card']") %>%
+        xml_text()
 
     return(hmids)
 }
