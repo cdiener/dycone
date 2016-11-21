@@ -429,8 +429,6 @@ scaling <- function(x, y = 0:1) {
     return(sqrt(s))
 }
 
-# return( data.frame(id1=1:ncol(b1), id2=closest[1,], d=closest[2,]) ) }
-
 #' Evaluates whether a given point lies within a given k-cone. Assumes a
 #' pointed cone (all reactions irreversible).
 #'
@@ -615,9 +613,9 @@ single_hyp <- function(k1, k2, reacts) {
 #' @examples
 #' data(eryth)
 #' n <- length(make_irreversible(eryth))
-#' normal <- matrix(runif(3*n), ncol=3)
-#' sick <- matrix(runif(3*n), ncol=3)
-#' h <- hyp(normal, sick, eryth)
+#' ma_terms <- matrix(runif(6 * n), ncol=6)
+#' samples <- rep(c("normal", "disease"), each = 3)
+#' h <- hyp(eryth, samples, ma_terms)
 #' head(h)
 #'
 #' @importFrom limma makeContrasts lmFit contrasts.fit eBayes topTable
@@ -692,9 +690,6 @@ hyp <- function(reacts, samples, ma_terms, fluxes = NA, type = "bias",
         ci_low = tt$CI.L, ci_high = tt$CI.R, pval = tt$P.Value,
         corr_pval = tt$adj.P.Val)
 
-    nd <- is.na(stats$k_lfc)
-    stats$k_lfc[nd] <- 0
-    stats$pval[nd] <- stats$corr_pval[nd] <- 1
     if (type == "fva") {
         stats$fva_log_fold <- lfc_va
         stats$necessary <- abs(lfc_va) < abs(stats$k_lfc)

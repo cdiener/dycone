@@ -107,9 +107,9 @@ If full is FALSE only returns the generated hypothesis as a data
 \examples{
 data(eryth)
 n <- length(make_irreversible(eryth))
-normal <- matrix(runif(3*n), ncol=3)
-sick <- matrix(runif(3*n), ncol=3)
-h <- hyp(normal, sick, eryth)
+ma_terms <- matrix(runif(6 * n), ncol=6)
+samples <- rep(c("normal", "disease"), each = 3)
+h <- hyp(eryth, samples, ma_terms)
 head(h)
 
 }
