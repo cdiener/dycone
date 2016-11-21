@@ -258,12 +258,12 @@ read_reactions <- function(react_file) {
 }
 
 # Helper function to convert a reaction entry to a clean string version
-to_string <- function(r, name = TRUE) {
+to_string <- function(r, name = FALSE) {
     id <- paste0(r$abbreviation, ": ")
     left <- if (is.na(r$S[1]))
-        "\u2205" else paste(r$N_S, r$S, sep = "*", collapse = " + ")
+        " " else paste(r$N_S, r$S, sep = "*", collapse = " + ")
     right <- if (is.na(r$P[1]))
-        "\u2205" else paste(r$N_P, r$P, sep = "*", collapse = " + ")
+        " " else paste(r$N_P, r$P, sep = "*", collapse = " + ")
     join <- if (r$rev)
         "<=>" else "->"
     out <- if (name)
@@ -273,7 +273,7 @@ to_string <- function(r, name = TRUE) {
 
 # Formats reactions to a nice string representation
 format.reactions <- function(x) {
-    r_str <- sapply(x, to_string)
+    r_str <- sapply(x, to_string, name = TRUE)
 
     return(paste(r_str, collapse = "\n"))
 }
