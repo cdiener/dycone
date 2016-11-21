@@ -677,7 +677,8 @@ hyp <- function(reacts, samples, ma_terms, fluxes = NA, type = "bias",
     cfit <- contrasts.fit(dfit, contrast.matrix)
     cfit <- eBayes(cfit)
 
-    tt <- topTable(cfit, number = nrow(M), confint = TRUE, sort = "none")
+    tt <- topTable(cfit, number = nrow(M), confint = TRUE,
+                   sort.by = "none", adjust.method = correction_method)
     # Generate statistics
     if (type == "exact") {
         vlfc <- rowMeans(log(fluxes[, disease], 2) - log(fluxes[, normal], 2))
