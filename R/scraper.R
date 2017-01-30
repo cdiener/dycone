@@ -92,7 +92,7 @@ find_hmdb <- function(search_term) {
 #'
 #' @param nodes A list of XML nodes.
 #' @return The parsed data set as a data frame.
-hmdb_parse <- function(nodes) {
+hmdb_parse_concentration <- function(nodes) {
     tags <- c("biofluid", "concentration_value", "concentration_units",
               "subject_age", "subject_sex", "subject_condition",
               "references/reference/pubmed_id")
@@ -112,6 +112,29 @@ hmdb_parse <- function(nodes) {
     out$concentration_value <- sapply(out$concentration_value, parse_conc)
 
     return(out)
+}
+
+#' Parses the XML entry for a single HMDB id
+#'
+#' @param hmdb_id The id for the entry
+#' @returns The entry as a data frame
+hmdb_parse_xml <- function(id) {
+    hm_xml <- read_xml(sprintf(HMDB_XML, id))
+
+    entry <- hm_xml %>%
+        xml_find_all("./normal_concentrations/concentration") %>%
+        hmdb_parse_concentration()
+
+    kegg_id <- hm_xml %>% xml_find_first("./kegg_id") %>%
+        xml_text()
+    name <- hm_xml %>% xml_find_first("./name") %>% xml_text()
+    if (!is.null(entry)) {
+        entry <- cbind(kegg_id, id, name, entry, row.names = NULL)
+        names(entry)[c(1:3, ncol(entry))] <- c("keggid",
+            "hmdbid", "hmdb_name", "pmid")
+    }
+
+    return(entry)
 }
 
 #' Scrapes measured metabolite concentration values for a given HMDB ID.
@@ -137,27 +160,14 @@ hmdb_concentration <- function(hmids, add = NULL) {
         name <- NULL
         for (id in ids) {
             cat(sprintf("\rScraping %d/%d...", i, length(hmids)))
-            hm_xml <- read_xml(sprintf(HMDB_XML, id))
-
-            hm_entries <- rbind(hm_entries, hm_xml %>%
-                xml_find_all("./normal_concentrations/concentration") %>%
-                hmdb_parse())
-
-            kegg_id <- c(kegg_id, hm_xml %>% xml_find_first("./kegg_id") %>%
-                xml_text())
-            name <- c(name, hm_xml %>% xml_find_first("./name") %>% xml_text())
+            entry <- hmdb_parse_xml(id)
+            if (is.data.frame(add) && !is.null(entry))
+                entry <- cbind(entry, add[i, ], row.names = NULL)
+            hm_entries <- rbind(hm_entries, entry)
         }
-        cat("\n")
-
-        if (!is.null(hm_entries)) {
-            hm_entries <- cbind(kegg_id, ids, name, hm_entries)
-            names(hm_entries)[c(1:3, ncol(hm_entries))] <- c("keggid", "hmdbid",
-                "hmdb_name", "pmid")
-            if (is.data.frame(add))
-                hm_entries <- cbind(hm_entries, add[i, ])
-            out <- rbind(out, hm_entries)
-        }
+        out <- rbind(out, hm_entries)
     }
+    cat("\n")
 
     return(out)
 }
