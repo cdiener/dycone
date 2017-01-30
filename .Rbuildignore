@@ -10,3 +10,4 @@
 ^wercker.yml$
 ^.wercker$
 ^_.*
+Dockerfile
