@@ -116,8 +116,8 @@ hmdb_parse_concentration <- function(nodes) {
 
 #' Parses the XML entry for a single HMDB id
 #'
-#' @param hmdb_id The id for the entry
-#' @returns The entry as a data frame
+#' @param id The id for the entry
+#' @return The entry as a data frame
 hmdb_parse_xml <- function(id) {
     hm_xml <- read_xml(sprintf(HMDB_XML, id))
 
