@@ -490,9 +490,8 @@ eigendynamics <- function(basis, n = 1) {
 #' of kinetic constansts.
 #'
 #' @seealso \code{\link{hyp}} for a complete differential analysis.
-#' @export
-#' @param k1 A vector containing kinetic constants >=0.
-#' @param k2 A vector containing kinetic constants >=0.
+#' @param k1 A vector containing logs of kinetic constants >=0.
+#' @param k2 A vector containing logs of kinetic constants >=0.
 #' @param reacts A reaction lists.
 #' @return A data frame containig the reaction indices, reactions, kind of regulation
 #'  and log2-fold changes of k2 relative to k1. Log-fold changes where either of the
@@ -505,7 +504,7 @@ eigendynamics <- function(basis, n = 1) {
 #' single_hyp(k1, k2, eryth)
 single_hyp <- function(k1, k2, reacts) {
     reacts <- make_irreversible(reacts)
-    logfold <- log(k2, 2) - log(k1, 2)
+    logfold <- k2 - k1
 
     if (any(!is.finite(logfold)))
         warning("Non-finite log-fold changes have been set to zero.")
@@ -670,7 +669,8 @@ hyp <- function(reacts, samples, ma_terms, fluxes = NA, type = "bias",
     })
 
     # Generate model fits
-    design <- model.matrix(~ 0 + factor(samples))
+    design <- model.matrix(~ 0 + factor(samples,
+                           levels = c("normal", "disease")))
     colnames(design) <- c("normal", "disease")
     dfit <- lmFit(M, design)
     contrast.matrix <- makeContrasts(disease - normal, levels = design)
