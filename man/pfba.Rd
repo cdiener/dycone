@@ -51,4 +51,3 @@ S <- matrix(c(1, 0, -2, 1), ncol = 2)
 rownames(S) <- c("A", "B")
 pfba(c(B = -1), S)
 }
-

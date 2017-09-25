@@ -25,4 +25,3 @@ which(constant_flux(eryth))
 \code{\link{r_order}} to get the reaction order.
 }
 \keyword{reactions}
-

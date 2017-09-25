@@ -20,4 +20,3 @@ Contains the reactions of the human red blood cell (erythrocite) metabolic
 model together with some randomly sampled rates k.
 }
 \keyword{datasets}
-

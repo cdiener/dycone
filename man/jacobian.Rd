@@ -36,4 +36,3 @@ J <- jacobian(S, concs)
 }
 \keyword{jacobian,}
 \keyword{stoichiometry}
-

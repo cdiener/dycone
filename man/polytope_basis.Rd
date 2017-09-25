@@ -32,4 +32,3 @@ V <- polytope_basis(S)
 }
 \keyword{basis}
 \keyword{k-cone,}
-

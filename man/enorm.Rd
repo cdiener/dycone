@@ -19,4 +19,3 @@ Calculates the euclidean norm of a vector
 x <- rnorm(10)
 enorm(x)
 }
-

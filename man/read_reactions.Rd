@@ -24,4 +24,3 @@ Reads a list of reactions with optional annotations from a file.
 r_str <- "reaction,abbreviation,numbers\\nA -> B,blub,\\"1,2,3\\"\\nB <=>, bla, 3"
 r <- read_reactions(textConnection(r_str))
 }
-

@@ -26,4 +26,3 @@ m_url <- "http://www.ebi.ac.uk/compneur-srv/biomodels-main/download?mid=MODEL110
 sbml_reactions(m_url)
 
 }
-

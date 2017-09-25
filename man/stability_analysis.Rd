@@ -35,4 +35,3 @@ stab <- stability_analysis(K, S, concs)
  calculate the k-cone.
 }
 \keyword{stability}
-

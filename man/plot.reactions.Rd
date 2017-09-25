@@ -27,4 +27,3 @@ plot(eryth)
 }
 \keyword{plot,}
 \keyword{reactions}
-

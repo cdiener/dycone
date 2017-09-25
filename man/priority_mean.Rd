@@ -31,4 +31,3 @@ priority_mean(concs) # has measurements for cytoplasm so returns those
 \code{\link{hmdb_concentration}} to parse the concentrations used
  in this function.
 }
-

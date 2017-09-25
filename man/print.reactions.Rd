@@ -25,4 +25,3 @@ print(eryth)
 \code{\link{as.reactions}} to convert a stochiometric matrix
  to a reaction list.
 }
-

@@ -50,4 +50,3 @@ rownames(S) <- c("A", "B")
 fva(c(B = -1), S=S)
 
 }
-

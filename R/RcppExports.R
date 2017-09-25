@@ -2,14 +2,18 @@
 # Generator token: 10BE3573-1514-4C36-9D1C-5A225CD40393
 
 glpk_fba <- function(ridx, cidx, vals, nrows, ncols, lbs, ubs, objidx) {
-    .Call('dycone_glpk_fba', PACKAGE = 'dycone', ridx, cidx, vals, nrows, ncols, lbs, ubs, objidx)
+    .Call('_dycone_glpk_fba', PACKAGE = 'dycone', ridx, cidx, vals, nrows, ncols, lbs, ubs, objidx)
 }
 
 glpk_fva <- function(ridx, cidx, vals, nrows, ncols, lbs, ubs, objidx, objf) {
-    .Call('dycone_glpk_fva', PACKAGE = 'dycone', ridx, cidx, vals, nrows, ncols, lbs, ubs, objidx, objf)
+    .Call('_dycone_glpk_fva', PACKAGE = 'dycone', ridx, cidx, vals, nrows, ncols, lbs, ubs, objidx, objf)
+}
+
+glpk_min_perturb <- function(ridx, cidx, vals, nrows, ncols, type, row_bounds, lbs, ubs, ma_terms, tradeoff, perms) {
+    .Call('_dycone_glpk_min_perturb', PACKAGE = 'dycone', ridx, cidx, vals, nrows, ncols, type, row_bounds, lbs, ubs, ma_terms, tradeoff, perms)
 }
 
 glpk_pfba <- function(ridx, cidx, vals, nrows, ncols, lbs, ubs, objidx, objf) {
-    .Call('dycone_glpk_pfba', PACKAGE = 'dycone', ridx, cidx, vals, nrows, ncols, lbs, ubs, objidx, objf)
+    .Call('_dycone_glpk_pfba', PACKAGE = 'dycone', ridx, cidx, vals, nrows, ncols, lbs, ubs, objidx, objf)
 }
 

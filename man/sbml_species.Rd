@@ -22,4 +22,3 @@ m_url <- "http://www.ebi.ac.uk/compneur-srv/biomodels-main/download?mid=MODEL110
 sbml_species(m_url)
 
 }
-

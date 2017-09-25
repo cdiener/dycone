@@ -116,4 +116,3 @@ head(h)
 \keyword{analysis}
 \keyword{hypothesis,}
 \keyword{k-cone,}
-

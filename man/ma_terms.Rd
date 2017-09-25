@@ -37,4 +37,3 @@ mats <- ma_terms(S, concs)
 }
 \keyword{kinetics,}
 \keyword{mass-action}
-

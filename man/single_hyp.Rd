@@ -8,9 +8,9 @@ of kinetic constansts.}
 single_hyp(k1, k2, reacts)
 }
 \arguments{
-\item{k1}{A vector containing kinetic constants >=0.}
+\item{k1}{A vector containing logs of kinetic constants >=0.}
 
-\item{k2}{A vector containing kinetic constants >=0.}
+\item{k2}{A vector containing logs of kinetic constants >=0.}
 
 \item{reacts}{A reaction lists.}
 }
@@ -33,4 +33,3 @@ single_hyp(k1, k2, eryth)
 \seealso{
 \code{\link{hyp}} for a complete differential analysis.
 }
-

@@ -15,4 +15,3 @@ The numeric concentration value.
 \description{
 Parses concentration values from HMDB.
 }
-

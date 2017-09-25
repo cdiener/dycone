@@ -56,4 +56,3 @@ plot_red(list(V)) # A single basis is fine as long as it is a list
 }
 \keyword{basis,}
 \keyword{plot}
-

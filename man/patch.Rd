@@ -39,4 +39,3 @@ be patched by group means.
 x <- data.frame(id = 1:3, normal = c(NA, 1, 2), disease = c(2, NA, 3))
 patch(x, 1, 2, 3)
 }
-

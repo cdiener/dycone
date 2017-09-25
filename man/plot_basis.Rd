@@ -31,4 +31,3 @@ plot_basis(V)
 }
 \keyword{basis,}
 \keyword{plot}
-

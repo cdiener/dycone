@@ -29,4 +29,3 @@ print(as.reactions(S))
 }
 \keyword{reactions}
 \keyword{stoichiometry,}
-

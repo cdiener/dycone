@@ -24,4 +24,3 @@ print(as.stability(c(0+2i, 0-3i)))
  basis.
 }
 \keyword{stability}
-

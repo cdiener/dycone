@@ -31,4 +31,3 @@ K <- kcone_null(S, runif(ncol(S)))
 }
 \keyword{basis,}
 \keyword{k-cone}
-

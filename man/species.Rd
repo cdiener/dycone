@@ -21,4 +21,3 @@ print(species(eryth))
 }
 \keyword{stoichiometry}
 \keyword{susbtrates,}
-

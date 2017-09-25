@@ -34,4 +34,3 @@ co <- constrain_by_Keq(x)
 }
 \keyword{basis,}
 \keyword{k-cone}
-

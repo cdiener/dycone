@@ -31,4 +31,3 @@ dma1_dS3 <- deriv_ma(3, S[,1], runif(nrow(S)))
 \seealso{
 \code{\link{jacobian}} to calculate the Jacobian matrix.
 }
-

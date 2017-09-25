@@ -43,4 +43,3 @@ rownames(S) <- c("A", "B")
 fba(c(B = -1), S)
 
 }
-

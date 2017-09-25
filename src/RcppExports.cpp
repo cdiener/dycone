@@ -7,7 +7,7 @@ using namespace Rcpp;
 
 // glpk_fba
 NumericVector glpk_fba(IntegerVector ridx, IntegerVector cidx, NumericVector vals, int nrows, int ncols, NumericVector lbs, NumericVector ubs, int objidx);
-RcppExport SEXP dycone_glpk_fba(SEXP ridxSEXP, SEXP cidxSEXP, SEXP valsSEXP, SEXP nrowsSEXP, SEXP ncolsSEXP, SEXP lbsSEXP, SEXP ubsSEXP, SEXP objidxSEXP) {
+RcppExport SEXP _dycone_glpk_fba(SEXP ridxSEXP, SEXP cidxSEXP, SEXP valsSEXP, SEXP nrowsSEXP, SEXP ncolsSEXP, SEXP lbsSEXP, SEXP ubsSEXP, SEXP objidxSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -25,7 +25,7 @@ END_RCPP
 }
 // glpk_fva
 NumericVector glpk_fva(IntegerVector ridx, IntegerVector cidx, NumericVector vals, int nrows, int ncols, NumericVector lbs, NumericVector ubs, int objidx, double objf);
-RcppExport SEXP dycone_glpk_fva(SEXP ridxSEXP, SEXP cidxSEXP, SEXP valsSEXP, SEXP nrowsSEXP, SEXP ncolsSEXP, SEXP lbsSEXP, SEXP ubsSEXP, SEXP objidxSEXP, SEXP objfSEXP) {
+RcppExport SEXP _dycone_glpk_fva(SEXP ridxSEXP, SEXP cidxSEXP, SEXP valsSEXP, SEXP nrowsSEXP, SEXP ncolsSEXP, SEXP lbsSEXP, SEXP ubsSEXP, SEXP objidxSEXP, SEXP objfSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -42,9 +42,31 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// glpk_min_perturb
+SEXP glpk_min_perturb(IntegerVector ridx, IntegerVector cidx, NumericVector vals, int nrows, int ncols, StringVector type, NumericVector row_bounds, NumericVector lbs, NumericVector ubs, NumericMatrix ma_terms, double tradeoff, NumericMatrix perms);
+RcppExport SEXP _dycone_glpk_min_perturb(SEXP ridxSEXP, SEXP cidxSEXP, SEXP valsSEXP, SEXP nrowsSEXP, SEXP ncolsSEXP, SEXP typeSEXP, SEXP row_boundsSEXP, SEXP lbsSEXP, SEXP ubsSEXP, SEXP ma_termsSEXP, SEXP tradeoffSEXP, SEXP permsSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< IntegerVector >::type ridx(ridxSEXP);
+    Rcpp::traits::input_parameter< IntegerVector >::type cidx(cidxSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type vals(valsSEXP);
+    Rcpp::traits::input_parameter< int >::type nrows(nrowsSEXP);
+    Rcpp::traits::input_parameter< int >::type ncols(ncolsSEXP);
+    Rcpp::traits::input_parameter< StringVector >::type type(typeSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type row_bounds(row_boundsSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type lbs(lbsSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type ubs(ubsSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type ma_terms(ma_termsSEXP);
+    Rcpp::traits::input_parameter< double >::type tradeoff(tradeoffSEXP);
+    Rcpp::traits::input_parameter< NumericMatrix >::type perms(permsSEXP);
+    rcpp_result_gen = Rcpp::wrap(glpk_min_perturb(ridx, cidx, vals, nrows, ncols, type, row_bounds, lbs, ubs, ma_terms, tradeoff, perms));
+    return rcpp_result_gen;
+END_RCPP
+}
 // glpk_pfba
 NumericVector glpk_pfba(IntegerVector ridx, IntegerVector cidx, NumericVector vals, int nrows, int ncols, NumericVector lbs, NumericVector ubs, int objidx, double objf);
-RcppExport SEXP dycone_glpk_pfba(SEXP ridxSEXP, SEXP cidxSEXP, SEXP valsSEXP, SEXP nrowsSEXP, SEXP ncolsSEXP, SEXP lbsSEXP, SEXP ubsSEXP, SEXP objidxSEXP, SEXP objfSEXP) {
+RcppExport SEXP _dycone_glpk_pfba(SEXP ridxSEXP, SEXP cidxSEXP, SEXP valsSEXP, SEXP nrowsSEXP, SEXP ncolsSEXP, SEXP lbsSEXP, SEXP ubsSEXP, SEXP objidxSEXP, SEXP objfSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -60,4 +82,17 @@ BEGIN_RCPP
     rcpp_result_gen = Rcpp::wrap(glpk_pfba(ridx, cidx, vals, nrows, ncols, lbs, ubs, objidx, objf));
     return rcpp_result_gen;
 END_RCPP
+}
+
+static const R_CallMethodDef CallEntries[] = {
+    {"_dycone_glpk_fba", (DL_FUNC) &_dycone_glpk_fba, 8},
+    {"_dycone_glpk_fva", (DL_FUNC) &_dycone_glpk_fva, 9},
+    {"_dycone_glpk_min_perturb", (DL_FUNC) &_dycone_glpk_min_perturb, 12},
+    {"_dycone_glpk_pfba", (DL_FUNC) &_dycone_glpk_pfba, 9},
+    {NULL, NULL, 0}
+};
+
+RcppExport void R_init_dycone(DllInfo *dll) {
+    R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
+    R_useDynamicSymbols(dll, FALSE);
 }

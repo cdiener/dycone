@@ -41,4 +41,3 @@ read_sbml(m_url)
 \code{\link{sbml_species}}, \code{\link{sbml_params}} and
  \code{\link{sbml_reactions}} to read only parts of an SBML model.
 }
-

@@ -23,4 +23,3 @@ data(eryth)
 print(make_irreversible(eryth))
 }
 \keyword{reactions}
-

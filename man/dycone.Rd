@@ -8,4 +8,3 @@
 \description{
 dycone: Differential k-cone analysis for metabolome data.
 }
-

@@ -28,4 +28,3 @@ V <- polytope_basis(S)
 ed <- eigendynamics(V) # gets the eigenpathways
 }
 \keyword{basis}
-

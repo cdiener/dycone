@@ -34,4 +34,3 @@ rownames(S) <- c('A', 'B')
 inside(runif(ncol(S)), S, rep(1,ncol(S))) # probably not true
 }
 \keyword{basis}
-

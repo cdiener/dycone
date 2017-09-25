@@ -22,4 +22,3 @@ comma sperated arguments.
 \examples{
 grep_id('A, B', 'B, D')
 }
-

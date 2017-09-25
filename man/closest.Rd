@@ -30,4 +30,3 @@ closest(runif(ncol(S)), S, mats)
 \seealso{
 \code{\link{fba}} for optimization within the k-cone.
 }
-

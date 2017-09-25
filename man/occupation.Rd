@@ -30,4 +30,3 @@ occ <- occupation(V)
 \code{\link{polytope_basis}} to get a k-cone.
 }
 \keyword{basis}
-

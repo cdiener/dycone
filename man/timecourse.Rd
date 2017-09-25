@@ -35,4 +35,3 @@ timecourse(x0, t, k, S)
 }
 \keyword{ODE,}
 \keyword{simulation}
-

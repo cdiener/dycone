@@ -33,4 +33,3 @@ S <- stoichiometry(eryth)
 \code{\link{read_reactions}} to read a reaction list from a file.
 }
 \keyword{stoichiometry}
-

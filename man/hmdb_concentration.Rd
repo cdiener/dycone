@@ -24,4 +24,3 @@ Scrapes measured metabolite concentration values for a given HMDB ID.
 hmdb_concentration('HMDB00124')
 
 }
-

@@ -24,4 +24,3 @@ print(as.graph(eryth))
 }
 \keyword{graph}
 \keyword{reactions,}
-

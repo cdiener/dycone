@@ -33,4 +33,3 @@ ma1 <- mass_action(S[,1], runif(nrow(S)))
  for correct ordering of the substrates.
  \code{\link{ma_terms}} to calculate all mass-action terms at once.
 }
-

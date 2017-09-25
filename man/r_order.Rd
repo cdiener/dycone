@@ -19,4 +19,3 @@ Returns the number of different substrates a reaction has
 data(eryth)
 print(r_order(eryth))
 }
-

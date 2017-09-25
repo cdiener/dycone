@@ -21,4 +21,3 @@ Finds IDs of compounds from HMDB corresponding to a given search term.
 find_hmdb("pyruvate")
 
 }
-
