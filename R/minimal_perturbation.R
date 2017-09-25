@@ -160,8 +160,7 @@ minimal_perturbation <- function(ma_terms, samples, reacts,
     flux_stats <- cbind(data.frame(id = ids, reaction = rstr), flux_stats)
     k_stats <- topTable(k_fit, number = nrow(ks), confint = TRUE,
                            sort.by = "none", adjust.method = "fdr")
-    k_stats <- cbind(data.frame(id = ids, reaction = rstr)[complete, ],
-                     k_stats)
+    k_stats <- cbind(data.frame(id = ids, reaction = rstr), k_stats)
 
     return(list(fluxes = flux_stats, k = k_stats,
                 raw = fluxes, obj_value = sol$obj_value))

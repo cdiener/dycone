@@ -13,10 +13,10 @@ const double ztol = 1.0e-9;
 
 void update_problem(glp_prob* lp, NumericVector cond_terms,
                     NumericVector norm_terms, int neq, double tradeoff) {
-    int size = cond_terms.size() * 2;
-    for(int i=1; i <= size; i += 2) {
+    int size = cond_terms.size();
+    for(int i=1; i <= size; i++) {
         NumericVector vals = NumericVector::create(cond_terms[i-1],
-                                                  norm_terms[i-1]);
+                                                   norm_terms[i-1]);
         double obj_coef = tradeoff;
         if(is_true(any(is_na(vals)))) {
             vals[0] = 1.0;
@@ -24,14 +24,14 @@ void update_problem(glp_prob* lp, NumericVector cond_terms,
             obj_coef = 1.0 - tradeoff;
         }
 
-        int idx[4] = {0, i, i + size/2, i + size};
+        int idx[4] = {0, i, i + size, i + 2*size};
         double coefs[4] = {0.0, 1.0/vals[0], -1.0/vals[1], 1.0};
-        glp_set_mat_row(lp, i + neq, 3, idx, coefs);
-        glp_set_row_bnds(lp, i, GLP_LO, 0.0, 0.0);
+        glp_set_mat_row(lp, 2*i - 1 + neq, 3, idx, coefs);
+        glp_set_row_bnds(lp, 2*i - 1 + neq, GLP_LO, 0.0, 0.0);
         coefs[3] = -1.0;
-        glp_set_mat_row(lp, i + 1 + neq, 3, idx, coefs);
-        glp_set_row_bnds(lp, i, GLP_UP, 0.0, 0.0);
-        glp_set_obj_coef(lp, size + size/2, obj_coef);
+        glp_set_mat_row(lp, 2*i + neq, 3, idx, coefs);
+        glp_set_row_bnds(lp, 2*i + neq, GLP_UP, 0.0, 0.0);
+        glp_set_obj_coef(lp, 2*size + i, obj_coef);
     }
 }
 
@@ -90,21 +90,20 @@ SEXP glpk_min_perturb(IntegerVector ridx, IntegerVector cidx,
     Rcout<<"Running permutations";
     for(int p = 0; p < perms.nrow(); p++) {
         Rcout<<".";
-        update_problem(lp, ma_terms(_, perms(p, 0)), ma_terms(_, perms(p, 1)),
-                       nrows, tradeoff);
+        update_problem(lp, ma_terms(_, perms(p, 0) - 1),
+                       ma_terms(_, perms(p, 1) - 1), nrows, tradeoff);
 
+        glp_adv_basis(lp, 0);
         int res = glp_simplex(lp, &params);
         if (res != 0) return wrap(res);
         res = glp_get_status(lp);
         if (res != GLP_OPT) return wrap(res);
 
-        NumericVector fluxes(ncols);
-
         for(int i=1; i <= n_vars; i++) {
-            cond_fluxes(i, p) = glp_get_col_prim(lp, i);
-            norm_fluxes(i, p) = glp_get_col_prim(lp, i + n_vars);
+            cond_fluxes(i - 1, p) = glp_get_col_prim(lp, i);
+            norm_fluxes(i - 1, p) = glp_get_col_prim(lp, i + n_vars);
         }
-        obj_vals[p-1] = glp_get_obj_val(lp);
+        obj_vals[p] = glp_get_obj_val(lp);
     }
     Rcout<<std::endl;
 
