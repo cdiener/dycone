@@ -24,11 +24,7 @@ Helper function to get the differential regulation between two approximations
 of kinetic constansts.
 }
 \examples{
-data(eryth)
-n <- length(make_irreversible(eryth))
-k1 <- runif(n)
-k2 <- runif(n)
-single_hyp(k1, k2, eryth)
+ NULL
 }
 \seealso{
 \code{\link{hyp}} for a complete differential analysis.

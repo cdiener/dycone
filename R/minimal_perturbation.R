@@ -2,6 +2,9 @@
 #
 # MIT license. See LICENSE for more information.
 
+# to make R CMD CHECK happy :/
+utils::globalVariables(c("disease", "normal"))
+
 #' Assemble the LP problem for minimal perturbation.
 #'
 #' @param ma_terms A matrix or data frame containing the metabolic terms in the
@@ -10,14 +13,19 @@
 #'  "disease" entries.
 #' @param S The stoichiometric matrix or a list containing one matrix for each
 #'  sample.
-#' @param bounds The bounds for the fluxes. Either a single value for the max
-#'  bound or a list each containing a vector specifying the bounds for the
-#'  specific sample.
-#' @param tradeoff Double in [0, 1] specifiying the equlibrium between
-#'  minimizing differences in k changes versus flux changes.
-#' @param growth Constraints fro growth rate. If not NA must be a named vector
-#'  with entries "idx", "min", "max" denoting the index of the biomass reaction
-#'  and its minimum and maximum flux respectively.
+#' @param v_min The lower bounds for the fluxes. Either a single value for the
+#'  min bounds for all reactions or a matrix/data.frame with two columns and as
+#'  many rows as irreversible reactions where the columns contain the lower
+#'  bounds for each factor level in `samples`.
+#' @param v_max The upper bounds for the fluxes. Either a single value for the
+#'  max bounds for all reactions or a matrix/data.frame with two columns and as
+#'  many rows as irreversible reactions where the columns contain the upper
+#'  bounds for each factor level in `samples`.
+#' @param min_obj Constraints for growth rate. If a vector with two elements
+#'  the first will be interpreted as the index of the objective reaction and
+#'  the second value as its lower bound. If only a single value will constrain
+#'  the absolute sum of fluxes (sum |v_i|) and take the value as the lower
+#'  bound.
 #' @return A list with the following components:
 #'  \describe{
 #'  \item{coefficients}{The coefficients for the equalities/inequalities in
@@ -45,9 +53,9 @@ minimal_perturbation_lp <- function(ma_terms, samples, S, v_min = 0,
         }
         S <- new_S
     }
-    n_var <- ncol(S[[1]])
+    n_vars <- ncol(S[[1]])
     coefficients <- bdiag(S)
-    coefficients <- cbind(coefficients, Matrix(0, ncol = n_var,
+    coefficients <- cbind(coefficients, Matrix(0, ncol = 2 * n_vars,
                           nrow = nrow(coefficients)))
     type <- rep("equal", nrow(coefficients))
     row_bounds <- rep(0, nrow(coefficients))
@@ -67,9 +75,9 @@ minimal_perturbation_lp <- function(ma_terms, samples, S, v_min = 0,
         v_min[idx] <- min_obj[2]
         v_max[idx] <- pmax(v_max[idx], min_obj[2])
     } else {
-        coefs <- matrix(0, nrow = 2, ncol = 3 * n_var)
+        coefs <- matrix(0, nrow = 2, ncol = 4 * n_vars)
         for (i in 1:2) {
-            coefs[i, ((i - 1) * n_var + 1):(i * n_var)] <- 1
+            coefs[i, ((i - 1) * n_vars + 1):(i * n_vars)] <- 1
         }
         coefficients <- rbind(coefficients, coefs)
         type <- append(type, rep("larger", 2))
@@ -91,14 +99,24 @@ minimal_perturbation_lp <- function(ma_terms, samples, S, v_min = 0,
 #' @param samples A factor or character string with either "normal" and
 #'  "disease" entries.
 #' @param reacts The reactions for the respective model.
-#' @param bounds The bounds for the fluxes. Either a single value for the max
-#'  bound or a list each containing a vector specifying the bounds for the
-#'  specific sample.
+#' @param permutations The maximum number of permutations. If this number is
+#'  smaller than all possible permutation will check all permutations,
+#'  otherwise will sample that many permutations *with replacements*.
+#' @param v_min The lower bounds for the fluxes. Either a single value for the
+#'  min bounds for all reactions or a matrix/data.frame with two columns and as
+#'  many rows as irreversible reactions where the columns contain the lower
+#'  bounds for each factor level in `samples`.
+#' @param v_max The upper bounds for the fluxes. Either a single value for the
+#'  max bounds for all reactions or a matrix/data.frame with two columns and as
+#'  many rows as irreversible reactions where the columns contain the upper
+#'  bounds for each factor level in `samples`.
 #' @param tradeoff Double in [0, 1] specifiying the equlibrium between
 #'  minimizing differences in k changes versus flux changes.
-#' @param growth Constraints fro growth rate. If not NA must be a named vector
-#'  with entries "idx", "min", "max" denoting the index of the biomass reaction
-#'  and its minimum and maximum flux respectively.
+#' @param min_obj Constraints for growth rate. If a vector with two elements
+#'  the first will be interpreted as the index of the objective reaction and
+#'  the second value as its lower bound. If only a single value will constrain
+#'  the absolute sum of fluxes (sum |v_i|) and take the value as the lower
+#'  bound.
 #' @return A list with the following components:
 #'  \describe{
 #'  \item{fluxes}{The alterations in fluxes.}

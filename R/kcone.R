@@ -497,11 +497,7 @@ eigendynamics <- function(basis, n = 1) {
 #'  and log2-fold changes of k2 relative to k1. Log-fold changes where either of the
 #'  constants is 0 are evaluated to 0.
 #' @examples
-#' data(eryth)
-#' n <- length(make_irreversible(eryth))
-#' k1 <- runif(n)
-#' k2 <- runif(n)
-#' single_hyp(k1, k2, eryth)
+#'  NULL
 single_hyp <- function(k1, k2, reacts) {
     reacts <- make_irreversible(reacts)
     logfold <- k2 - k1

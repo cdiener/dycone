@@ -10,28 +10,44 @@ using namespace Rcpp;
 
 const double ztol = 1.0e-9;
 
-
+/*
+ * Update the terms for |k^i_d - k^i_n| using the current metabolic terms.
+ */
 void update_problem(glp_prob* lp, NumericVector cond_terms,
                     NumericVector norm_terms, int neq, double tradeoff) {
     int size = cond_terms.size();
     for(int i=1; i <= size; i++) {
         NumericVector vals = NumericVector::create(cond_terms[i-1],
                                                    norm_terms[i-1]);
-        double obj_coef = tradeoff;
-        if(is_true(any(is_na(vals)))) {
-            vals[0] = 1.0;
-            vals[1] = 1.0;
-            obj_coef = 1.0 - tradeoff;
-        }
 
+        if (is_false(any(is_na(vals)))) {
+            int idx[4] = {0, i, i + size, i + 3*size};
+            double coefs[4] = {0.0, 1.0/vals[0], -1.0/vals[1], 1.0};
+            glp_set_mat_row(lp, 2*i - 1 + neq, 3, idx, coefs);
+            glp_set_row_bnds(lp, 2*i - 1 + neq, GLP_LO, 0.0, 0.0);
+            coefs[3] = -1.0;
+            glp_set_mat_row(lp, 2*i + neq, 3, idx, coefs);
+            glp_set_row_bnds(lp, 2*i + neq, GLP_UP, 0.0, 0.0);
+            glp_set_obj_coef(lp, 3*size + i, tradeoff);
+        }
+    }
+}
+
+/*
+ * Add the terms for |v^i_d - v^i_n|.
+ */
+void add_flux_diffs(glp_prob* lp, int neq, double weight) {
+    int size = glp_get_num_cols(lp) / 4;
+
+    for(int i=1; i <= size; i++) {
         int idx[4] = {0, i, i + size, i + 2*size};
-        double coefs[4] = {0.0, 1.0/vals[0], -1.0/vals[1], 1.0};
+        double coefs[4] = {0.0, 1.0, -1.0, 1.0};
         glp_set_mat_row(lp, 2*i - 1 + neq, 3, idx, coefs);
         glp_set_row_bnds(lp, 2*i - 1 + neq, GLP_LO, 0.0, 0.0);
         coefs[3] = -1.0;
         glp_set_mat_row(lp, 2*i + neq, 3, idx, coefs);
         glp_set_row_bnds(lp, 2*i + neq, GLP_UP, 0.0, 0.0);
-        glp_set_obj_coef(lp, 2*size + i, obj_coef);
+        glp_set_obj_coef(lp, 2*size + i, weight);
     }
 }
 
@@ -47,7 +63,7 @@ SEXP glpk_min_perturb(IntegerVector ridx, IntegerVector cidx,
     glp_term_out(GLP_OFF);
     glp_prob* lp = glp_create_prob();
     glp_set_prob_name(lp, "minimal perturbation");
-    glp_add_rows(lp, nrows + 2*n_vars);
+    glp_add_rows(lp, nrows + 4*n_vars);
     glp_add_cols(lp, ncols);
 
     double bnd;
@@ -87,6 +103,8 @@ SEXP glpk_min_perturb(IntegerVector ridx, IntegerVector cidx,
     NumericMatrix cond_fluxes(n_vars, perms.nrow());
     NumericMatrix norm_fluxes(n_vars, perms.nrow());
     NumericVector obj_vals(perms.nrow());
+    add_flux_diffs(lp, nrows, 1.0 - tradeoff);
+    nrows += 2 * n_vars;
     Rcout<<"Running permutations";
     for(int p = 0; p < perms.nrow(); p++) {
         Rcout<<".";
