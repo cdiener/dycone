@@ -23,7 +23,7 @@ KEGG_REST <- "http://rest.kegg.jp/link/hsa/ec:%s"
 #' @return The mean
 #' @examples
 #' # requires internet connection
-#' concs <- hmdb_concentration('HMDB00124')
+#' concs <- hmdb_concentration('HMDB0000124')
 #' priority_mean(concs) # has measurements for cytoplasm so returns those
 priority_mean <- function(d, biospecimen = c("cellular Cytoplasm", "blood")) {
     if (is.null(d))
@@ -119,8 +119,8 @@ hmdb_parse_concentration <- function(nodes) {
 #' @param id The id for the entry
 #' @return The entry as a data frame
 hmdb_parse_xml <- function(id) {
+    print(sprintf(HMDB_XML, id))
     hm_xml <- read_xml(sprintf(HMDB_XML, id))
-
     entry <- hm_xml %>%
         xml_find_all("./normal_concentrations/concentration") %>%
         hmdb_parse_concentration()
@@ -146,7 +146,7 @@ hmdb_parse_xml <- function(id) {
 #'  found.
 #' @examples
 #' # requires internet connection
-#' # hmdb_concentration('HMDB00124')
+#' hmdb_concentration('HMDB0000124')
 #'
 #' @export
 #' @importFrom xml2 xml_find_first xml_find_all
