@@ -5,7 +5,8 @@
 \title{Gets the polytope basis for a reaction system. The basis will be normalized
 such that each vertex has a length of one.}
 \usage{
-polytope_basis(s_matrix, m_terms = rep(1, ncol(s_matrix)), zero_eq = NA)
+polytope_basis(s_matrix, m_terms = rep(1, ncol(s_matrix)),
+  zero_eq = NA)
 }
 \arguments{
 \item{s_matrix}{The stochiometric matrix.}

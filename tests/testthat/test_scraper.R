@@ -8,6 +8,7 @@ test_that("HMDB scraping works", {
     capture.output(concs <- hmdb_concentration(ids[1]))
     expect_true("Pyruvic acid" %in% concs$hmdb_name)
     expect_true(nrow(concs) > 1)
+    print(concs)
     expect_true(priority_mean(concs) > 0)
     expect_true(is.na(grep_id("a", "bcd")))
     expect_equal(grep_id("a, b", c("bcd", "ak")), c(a = 2, b = 1))

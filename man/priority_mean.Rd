@@ -5,12 +5,12 @@
 \title{Extracts mean concentrations from HMDB results using a selection of biofluids
 in a distinct order.}
 \usage{
-priority_mean(d, biofluids = c("cellular cytoplasm", "blood"))
+priority_mean(d, biospecimen = c("Cellular Cytoplasm", "Blood"))
 }
 \arguments{
 \item{d}{A data frame as returned by hmdb_concentration}
 
-\item{biofluids}{Vector of valid biofluids to be checked in the order
+\item{biospecimen}{Vector of valid biospecimen to be checked in the order
 they appear.}
 }
 \value{

@@ -4,7 +4,8 @@
 \alias{stoichiometry}
 \title{Calculates the stochiometric matrix for a list of reactions.}
 \usage{
-stoichiometry(reacts, reversible = FALSE, const = NULL, sparse = FALSE)
+stoichiometry(reacts, reversible = FALSE, const = NULL,
+  sparse = FALSE)
 }
 \arguments{
 \item{reacts}{The reaction list to be used.}

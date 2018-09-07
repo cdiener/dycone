@@ -18,21 +18,21 @@ KEGG_REST <- "http://rest.kegg.jp/link/hsa/ec:%s"
 #' @seealso \code{\link{hmdb_concentration}} to parse the concentrations used
 #'  in this function.
 #' @param d A data frame as returned by hmdb_concentration
-#' @param biofluids Vector of valid biofluids to be checked in the order
+#' @param biospecimen Vector of valid biospecimen to be checked in the order
 #'  they appear.
 #' @return The mean
 #' @examples
 #' # requires internet connection
 #' concs <- hmdb_concentration('HMDB00124')
 #' priority_mean(concs) # has measurements for cytoplasm so returns those
-priority_mean <- function(d, biofluids = c("cellular cytoplasm", "blood")) {
+priority_mean <- function(d, biospecimen = c("cellular Cytoplasm", "blood")) {
     if (is.null(d))
         return(NA)
 
     m <- NULL
 
-    for (bf in biofluids) {
-        m <- d$concentration_value[d$biofluid == bf]
+    for (bf in biospecimen) {
+        m <- d$concentration_value[d$biospecimen == bf]
         if (length(m) > 0 && !all(is.na(m)))
             break
     }
@@ -93,7 +93,7 @@ find_hmdb <- function(search_term) {
 #' @param nodes A list of XML nodes.
 #' @return The parsed data set as a data frame.
 hmdb_parse_concentration <- function(nodes) {
-    tags <- c("biofluid", "concentration_value", "concentration_units",
+    tags <- c("biospecimen", "concentration_value", "concentration_units",
               "subject_age", "subject_sex", "subject_condition",
               "references/reference/pubmed_id")
 
