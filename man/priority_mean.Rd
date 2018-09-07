@@ -5,7 +5,7 @@
 \title{Extracts mean concentrations from HMDB results using a selection of biofluids
 in a distinct order.}
 \usage{
-priority_mean(d, biospecimen = c("Cellular Cytoplasm", "Blood"))
+priority_mean(d, biospecimen = c("cellular Cytoplasm", "blood"))
 }
 \arguments{
 \item{d}{A data frame as returned by hmdb_concentration}

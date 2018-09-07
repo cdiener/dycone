@@ -146,7 +146,7 @@ hmdb_parse_xml <- function(id) {
 #'  found.
 #' @examples
 #' # requires internet connection
-#' hmdb_concentration('HMDB00124')
+#' # hmdb_concentration('HMDB00124')
 #'
 #' @export
 #' @importFrom xml2 xml_find_first xml_find_all

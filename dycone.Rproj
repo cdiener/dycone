@@ -5,6 +5,7 @@ SaveWorkspace: No
 AlwaysSaveHistory: Default
 
 EnableCodeIndexing: Yes
+Encoding: UTF-8
 
 AutoAppendNewline: Yes
 StripTrailingWhitespace: Yes
